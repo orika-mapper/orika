@@ -52,7 +52,7 @@ public class ObjectFactoryGenerator {
     public ObjectFactoryGenerator(MapperFactory mapperFactory, ConstructorResolverStrategy constructorResolverStrategy,
     		CompilerStrategy compilerStrategy) {
         this.mapperFactory = mapperFactory;
-        this.nameSuffix = Integer.toHexString(System.identityHashCode(compilerStrategy));
+        this.nameSuffix = String.valueOf(System.nanoTime());
         this.constructorResolverStrategy = constructorResolverStrategy;
     }
     
