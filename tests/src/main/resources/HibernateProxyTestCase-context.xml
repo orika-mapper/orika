@@ -16,6 +16,10 @@
       <list>
         <value>ma.glasnost.orika.test.unenhance.Author</value>
         <value>ma.glasnost.orika.test.unenhance.Book</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance.AbstractEntity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance.MyEntity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance.Sub1Entity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance.Sub2Entity</value>
       </list>
     </property>
     <property name="hibernateProperties">

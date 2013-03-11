@@ -95,18 +95,7 @@ public class MapperFacadeImpl implements MapperFacade {
                 if (sourceType.isAssignableFrom(sourceObject.getClass())) {
                     sourceType = (Type<S>) TypeFactory.valueOf(sourceObject.getClass());
                 }
-                Type<?> sourceObjectType = TypeFactory.resolveTypeOf(sourceObject, sourceType);
-                /*
-                 * In the case where there is an existing mapper registered for
-                 * either the source object type or the source type, we should
-                 * use that type, rather than applying unenhancement which could
-                 * result in another type which would not use that mapper
-                 */
-                if (mapperFactory.existsRegisteredMapper(sourceType, destinationType, false)) {
-                    resolvedType = sourceType;
-                } else if (mapperFactory.existsRegisteredMapper(sourceObjectType, destinationType, false)) {
-                    resolvedType = sourceObjectType;
-                } else if (ClassUtil.isConcrete(sourceType)) {
+                if (ClassUtil.isConcrete(sourceType)) {
                     resolvedType = unenhanceStrategy.unenhanceType(sourceObject, sourceType);
                 } else {
                     resolvedType = unenhanceStrategy.unenhanceType(sourceObject, TypeFactory.resolveTypeOf(sourceObject, sourceType));
