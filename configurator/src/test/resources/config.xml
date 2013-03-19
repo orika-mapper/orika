@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dozer.sourceforge.net http://dozer.sourceforge.net/schema/beanmapping.xsd">
+	<configuration>
+		<custom-converters>
+			<converter type="ru.lic.bank.core.ws.mapper.FullNameToString">
+				<class-a>ru.lic.bank.core.domain.FullName</class-a>
+				<class-b>java.lang.String</class-b>
+			</converter>
+		</custom-converters>
+	</configuration>
+
+	<mapping>
+		<class-a>ma.glasnost.orika.test.loader.A</class-a>
+		<class-b>ma.glasnost.orika.test.loader.B</class-b>
+		<field>
+			<a>a1</a>
+			<b>b1</b>
+		</field>
+		<field>
+			<a>a2</a>
+			<b>b2</b>
+		</field>
+	</mapping>
+
+</mappings>
