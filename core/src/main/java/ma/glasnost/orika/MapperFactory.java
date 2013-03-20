@@ -25,6 +25,7 @@ import ma.glasnost.orika.metadata.ClassMap;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Type;
+import ma.glasnost.orika.unenhance.UnenhanceStrategy;
 
 /**
  * MapperFactory is used to both configure, register, and generate the
@@ -367,4 +368,11 @@ public interface MapperFactory {
      */
     public <A, B> ClassMapBuilder<A, B> classMap(Class<A> aType, Class<B> bType);
     
+    /**
+	 * Returns the {@link UnenhanceStrategy} associated with this MapperFactory,
+	 * provided when this MapperFactory was constructed.
+	 * 
+	 * @return the {@link UnenhanceStrategy} associated with this MapperFactory.
+	 */
+    public UnenhanceStrategy getUnenhanceStrategy();
 }

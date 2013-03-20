@@ -129,19 +129,17 @@ public class MapperFacadeImpl implements MapperFacade {
     public <S, D> MappingStrategy resolveMappingStrategy(final S sourceObject, final java.lang.reflect.Type initialSourceType,
             final java.lang.reflect.Type initialDestinationType, boolean mapInPlace, final MappingContext context) {
         
-        MappingStrategyKey key = new MappingStrategyKey(sourceObject.getClass(), initialSourceType, initialDestinationType, mapInPlace);
+        @SuppressWarnings("unchecked")
+        Type<S> sourceType = (Type<S>) (initialSourceType != null ? TypeFactory.valueOf(initialSourceType)
+                : TypeFactory.typeOf(sourceObject));
+        Type<D> destinationType = TypeFactory.valueOf(initialDestinationType);
+        final Type<S> resolvedSourceType = normalizeSourceType(sourceObject, sourceType, destinationType);
+        MappingStrategyKey key = new MappingStrategyKey(sourceObject.getClass(), resolvedSourceType, initialDestinationType, mapInPlace);
         MappingStrategy strategy = strategyCache.get(key);
         
         if (strategy == null) {
-            
-            @SuppressWarnings("unchecked")
-            Type<S> sourceType = (Type<S>) (initialSourceType != null ? TypeFactory.valueOf(initialSourceType)
-                    : TypeFactory.typeOf(sourceObject));
-            Type<D> destinationType = TypeFactory.valueOf(initialDestinationType);
-            
             MappingStrategyRecorder strategyRecorder = new MappingStrategyRecorder(key, unenhanceStrategy);
             
-            final Type<S> resolvedSourceType = normalizeSourceType(sourceObject, sourceType, destinationType);
             final S resolvedSourceObject;
             
             if (mapInPlace) {

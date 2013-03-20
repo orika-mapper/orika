@@ -1212,5 +1212,7 @@ public class DefaultMapperFactory implements MapperFactory {
      * @see ma.glasnost.orika.MapperFactory#getCodeGenerationStrategy()
      */
     
-    
+    public UnenhanceStrategy getUnenhanceStrategy() {
+		return unenhanceStrategy;
+	}
 }

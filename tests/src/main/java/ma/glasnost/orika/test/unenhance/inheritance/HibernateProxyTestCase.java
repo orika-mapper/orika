@@ -46,7 +46,8 @@ public class HibernateProxyTestCase {
 	@Autowired
 	private SessionFactory sessionFactory;
 
-	private Serializable sub2Id;
+	private Serializable sub21Id;
+	private Serializable sub22Id;
 
 	protected Session getSession() {
 		return sessionFactory.getCurrentSession();
@@ -59,11 +60,17 @@ public class HibernateProxyTestCase {
 		sub1.setSub1Property(1);
 		getSession().save(sub1);
 
-		Sub2Entity sub2 = new Sub2Entity();
-		sub2.setMyProperty("my property on sub2");
-		sub2.setSub2Property(2);
-		sub2.setReferences(sub1);
-		sub2Id = getSession().save(sub2);
+		Sub2Entity sub21 = new Sub2Entity();
+		sub21.setMyProperty("my property on sub2");
+		sub21.setSub2Property(2);
+		sub21.setReferences(sub1);
+		sub21Id = getSession().save(sub21);
+
+		Sub2Entity sub22 = new Sub2Entity();
+		sub22.setMyProperty("my property on sub2-2");
+		sub22.setSub2Property(3);
+		sub22.setReferences(sub21);
+		sub22Id = getSession().save(sub22);
 
 		getSession().flush();
 		getSession().clear();
@@ -89,7 +96,7 @@ public class HibernateProxyTestCase {
 		MapperFacade mapper = buildMapper();
 
 		Sub2Entity sub2 = (Sub2Entity) getSession().get(Sub2Entity.class,
-				sub2Id);
+				sub21Id);
 		sub2.setReferences((MyEntity) ((HibernateProxy) sub2.getReferences())
 				.getHibernateLazyInitializer().getImplementation());
 		Sub2EntityDTO sub2Dto = mapper.map(sub2, Sub2EntityDTO.class);
@@ -110,7 +117,7 @@ public class HibernateProxyTestCase {
 		MapperFacade mapper = buildMapper();
 
 		Sub2Entity sub2 = (Sub2Entity) getSession().get(Sub2Entity.class,
-				sub2Id);
+				sub21Id);
 		Sub2EntityDTO sub2Dto = mapper.map(sub2, Sub2EntityDTO.class);
 
 		Assert.assertEquals(sub2.getMyProperty(), sub2Dto.getMyProperty());
@@ -122,5 +129,20 @@ public class HibernateProxyTestCase {
 				.getClass());
 		Assert.assertEquals(1,
 				((Sub1EntityDTO) sub2Dto.getReferences()).getSub1Property());
+	}
+
+	@Test
+	public void testMappingCaching() {
+		MapperFacade mapper = buildMapper();
+
+		Sub2Entity sub22 = (Sub2Entity) getSession().get(Sub2Entity.class,
+				sub22Id);
+		Sub2Entity sub21 = (Sub2Entity) getSession().get(Sub2Entity.class,
+				sub21Id);
+		Sub2EntityDTO sub21Dto = mapper.map(sub21, Sub2EntityDTO.class);
+		Sub2EntityDTO sub22Dto = mapper.map(sub22, Sub2EntityDTO.class);
+		
+		Assert.assertEquals(Sub1EntityDTO.class, sub21Dto.getReferences().getClass());
+		Assert.assertEquals(Sub2EntityDTO.class, sub22Dto.getReferences().getClass());
 	}
 }
