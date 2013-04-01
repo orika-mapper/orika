@@ -48,9 +48,14 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
 	
 	public static class Factory extends ClassMapBuilderFactory {
 
-		/* (non-Javadoc)
-		 * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
-		 */
+        @Override
+        protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
+            return false;
+        }
+
+        /* (non-Javadoc)
+                 * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
+                 */
 		@Override
 		protected <A, B> ClassMapBuilder<A, B> newClassMapBuilder(
 				Type<A> aType, Type<B> bType,
@@ -440,8 +445,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * Configure this ClassMapBuilder to use an existing mapping (for parent classes)
      * defined from <code>aParentClass</code> to <code>bParentClass</code>.
      * 
-     * @param aParentClass the source type of the parent mapping
-     * @param bParentClass the destination type of the parent mapping
+     * @param aParentType the source type of the parent mapping
+     * @param bParentType the destination type of the parent mapping
      * @return this ClassMapBuilder
      */
     public <X, Y> ClassMapBuilder<A, B> use(Type<?> aParentType, Type<?> bParentType) {
