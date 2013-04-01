@@ -48,11 +48,6 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
 	
 	public static class Factory extends ClassMapBuilderFactory {
 
-        @Override
-        protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
-            return false;
-        }
-
         /* (non-Javadoc)
                  * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
                  */

@@ -54,7 +54,9 @@ public abstract class ClassMapBuilderFactory {
      * @param <B>
      * @return
      */
-    abstract protected <A, B> boolean applied(Type<A> aType, Type<B> bType);
+    protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
+        return false;
+    }
 
     public void setChainClassMapBuilderFactory(ClassMapBuilderFactory classMapBuilderFactory) {
         chainClassMapBuilderFactory = classMapBuilderFactory;
