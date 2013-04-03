@@ -38,6 +38,11 @@ public class ClassMapBuilderForMaps<A, B> extends ClassMapBuilder<A,B> {
 	
 	public static class Factory extends ClassMapBuilderFactory {
 
+        @Override
+        protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
+            return (aType.isMap() && !bType.isMap()) || (bType.isMap() && !aType.isMap());
+        }
+
 		/* (non-Javadoc)
 		 * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
 		 */
@@ -142,7 +147,7 @@ public class ClassMapBuilderForMaps<A, B> extends ClassMapBuilder<A,B> {
     /**
      * Resolves a property for the particular type, based on the provided property expression
      * 
-     * @param type the type to resolve
+     * @param rawType the type to resolve
      * @param expr the property expression to resolve
      * @return
      */

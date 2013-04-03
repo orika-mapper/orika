@@ -32,6 +32,7 @@ import ma.glasnost.orika.property.PropertyResolverStrategy;
  */
 public abstract class ClassMapBuilderFactory {
     
+    protected ClassMapBuilderFactory chainClassMapBuilderFactory;
     protected MapperFactory mapperFactory;
     protected PropertyResolverStrategy propertyResolver;
     protected DefaultFieldMapper[] defaults;
@@ -43,6 +44,35 @@ public abstract class ClassMapBuilderFactory {
      */
     public synchronized void setMapperFactory(MapperFactory mapperFactory) {
         this.mapperFactory = mapperFactory;
+    }
+
+    /**
+     * Return true if this implementation of factory is suitable for received types
+     * @param aType
+     * @param bType
+     * @return
+     */
+    protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
+        return false;
+    }
+
+    public void setChainClassMapBuilderFactory(ClassMapBuilderFactory classMapBuilderFactory) {
+        chainClassMapBuilderFactory = classMapBuilderFactory;
+    }
+
+    /**
+     * Choice suitable ClassMapBuilderFactory for types from factories chain
+     * @param aType
+     * @param bType
+     * @param <A>
+     * @param <B>
+     * @return
+     */
+    public <A, B> ClassMapBuilderFactory choiceClassMapBuilderFactory(Type<A> aType, Type<B> bType) {
+        if (applied(aType, bType))
+            return this;
+        return chainClassMapBuilderFactory == null ? null :
+            chainClassMapBuilderFactory.choiceClassMapBuilderFactory(aType, bType);
     }
     
     /**

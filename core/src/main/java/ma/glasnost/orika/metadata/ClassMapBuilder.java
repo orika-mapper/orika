@@ -440,8 +440,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * Configure this ClassMapBuilder to use an existing mapping (for parent classes)
      * defined from <code>aParentClass</code> to <code>bParentClass</code>.
      * 
-     * @param aParentClass the source type of the parent mapping
-     * @param bParentClass the destination type of the parent mapping
+     * @param aParentType the source type of the parent mapping
+     * @param bParentType the destination type of the parent mapping
      * @return this ClassMapBuilder
      */
     public <X, Y> ClassMapBuilder<A, B> use(Type<?> aParentType, Type<?> bParentType) {

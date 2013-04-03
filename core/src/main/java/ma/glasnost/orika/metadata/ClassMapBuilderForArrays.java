@@ -33,6 +33,10 @@ public class ClassMapBuilderForArrays<A, B> extends ClassMapBuilderForLists<A,B>
     
 	
 	public static class Factory extends ClassMapBuilderFactory {
+        @Override
+        protected <A, B> boolean applied(Type<A> aType, Type<B> bType) {
+            return (aType.isArray() && !bType.isArray()) || (bType.isArray() && !aType.isArray());
+        }
 
 		/* (non-Javadoc)
 		 * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
