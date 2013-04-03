@@ -7,29 +7,28 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
-import java.util.EnumMap;
 import java.util.Iterator;
 
 /**
  * @author  ikozar
  * date     13.02.13
  */
-public abstract class DefaultParser<E extends Enum<E>> implements IParser {
+public abstract class DefaultParser<E extends Enum> implements IParser {
     protected static Logger log;
 
     protected IParser parent;           // Loader for parent level
     protected Class<E> enumNodeNames;   // enum contains levels node names
-    protected E lastParsedNode;
+    protected Enum lastParsedNode;
     protected String lastParsedChars;
     protected XMLEvent lastEvent;
     protected Iterator lastAttIterator; // attribute of last node
-    protected EnumMap<E, String> enumMap;
+    protected EnumMap<String> enumMap;
     protected MapperFactory factory;
 
     public DefaultParser(Class<E> clazz, MapperFactory factory) {
         log = LoggerFactory.getLogger(this.getClass());
         enumNodeNames = clazz;
-        enumMap = new EnumMap<E, String>(enumNodeNames);
+        enumMap = new EnumMap<String>(enumNodeNames);
         this.factory = factory;
     }
 
@@ -38,13 +37,13 @@ public abstract class DefaultParser<E extends Enum<E>> implements IParser {
      * @param localPart
      * @return
      */
-    protected E findLocalPart(String localPart)
+    protected Enum findLocalPart(String localPart)
     {
         for (Enum enumVal : enumNodeNames.getEnumConstants())
         {
             if (((IElement) enumVal).getLocalPart().equals(localPart))
             {
-                return (E) enumVal;
+                return enumVal;
             }
         }
         log.error("Undefined element - " + localPart);
