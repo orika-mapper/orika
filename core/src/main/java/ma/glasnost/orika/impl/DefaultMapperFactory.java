@@ -102,7 +102,9 @@ public class DefaultMapperFactory implements MapperFactory {
     private final PropertyResolverStrategy propertyResolverStrategy;
     private final Map<java.lang.reflect.Type, Type<?>> concreteTypeRegistry;
     private final ClassMapBuilderFactory classMapBuilderFactory;
-    private ClassMapBuilderFactory chainClassMapBuilderFactory;
+    private final ClassMapBuilderForMaps.Factory classMapBuilderForMapsFactory;
+    private final ClassMapBuilderForLists.Factory classMapBuilderForListsFactory;
+    private final ClassMapBuilderForArrays.Factory classMapBuilderForArraysFactory;
     private final Map<MapperKey, Set<ClassMap<Object, Object>>> usedMapperMetadataRegistry;
     
     private final boolean useAutoMapping;
@@ -142,10 +144,16 @@ public class DefaultMapperFactory implements MapperFactory {
         this.classMapBuilderFactory = builder.classMapBuilderFactory;
         this.classMapBuilderFactory.setPropertyResolver(this.propertyResolverStrategy);
         this.classMapBuilderFactory.setMapperFactory(this);
-        addClassMapBuilderFactory(new ClassMapBuilderForArrays.Factory());
-        addClassMapBuilderFactory(new ClassMapBuilderForLists.Factory());
-        addClassMapBuilderFactory(new ClassMapBuilderForMaps.Factory());
-
+        this.classMapBuilderForMapsFactory = new ClassMapBuilderForMaps.Factory();
+        this.classMapBuilderForMapsFactory.setPropertyResolver(this.propertyResolverStrategy);
+        this.classMapBuilderForMapsFactory.setMapperFactory(this);
+        this.classMapBuilderForListsFactory = new ClassMapBuilderForLists.Factory();
+        this.classMapBuilderForListsFactory.setPropertyResolver(this.propertyResolverStrategy);
+        this.classMapBuilderForListsFactory.setMapperFactory(this);
+        this.classMapBuilderForArraysFactory = new ClassMapBuilderForArrays.Factory();
+        this.classMapBuilderForArraysFactory.setPropertyResolver(this.propertyResolverStrategy);
+        this.classMapBuilderForArraysFactory.setMapperFactory(this);
+        
         this.mapperGenerator = new MapperGenerator(this, builder.compilerStrategy);
         this.objectFactoryGenerator = new ObjectFactoryGenerator(this, builder.constructorResolverStrategy, builder.compilerStrategy);
         this.useAutoMapping = builder.useAutoMapping;
@@ -171,27 +179,20 @@ public class DefaultMapperFactory implements MapperFactory {
         this.registerConcreteType(Map.Entry.class, MapEntry.class);
     }
 
-    protected void addClassMapBuilderFactory(ClassMapBuilderFactory factory) {
-        factory.setChainClassMapBuilderFactory(chainClassMapBuilderFactory);
-        chainClassMapBuilderFactory = factory;
-        factory.setPropertyResolver(this.propertyResolverStrategy);
-        factory.setMapperFactory(this);
-    }
-
     /**
      * MapperFactoryBuilder provides an extensible Builder definition usable for
      * providing your own Builder class for subclasses of DefaultMapperFactory.<br>
      * <br>
-     *
+     * 
      * See the defined {@link Builder} below for example of how to subclass.
-     *
+     * 
      * @author matt.deboer@gmail.com
-     *
+     * 
      * @param <F>
      * @param <B>
      */
     public static abstract class MapperFactoryBuilder<F extends DefaultMapperFactory, B extends MapperFactoryBuilder<F, B>> {
-
+        
         /**
          * The UnenhanceStrategy configured for the MapperFactory
          */
@@ -478,7 +479,7 @@ public class DefaultMapperFactory implements MapperFactory {
      * process.
      * 
      * @param unenhanceStrategy
-     * @param superTypeStrategy
+     * @param overrideDefaultUnenhanceBehavior
      *            true if the passed UnenhanceStrategy should take full
      *            responsibility for un-enhancement; false if the default
      *            behavior should be applied as a fail-safe after consulting the
@@ -1127,10 +1128,12 @@ public class DefaultMapperFactory implements MapperFactory {
     }
     
     public <A, B> ClassMapBuilder<A, B> classMap(Type<A> aType, Type<B> bType) {
-        ClassMapBuilderFactory classMapBuilderFactory =
-            chainClassMapBuilderFactory.choiceClassMapBuilderFactory(aType, bType);
-        if (classMapBuilderFactory != null) {
-            return classMapBuilderFactory.map(aType, bType);
+        if ((aType.isMap() && !bType.isMap()) || (bType.isMap() && !aType.isMap())) {
+            return this.classMapBuilderForMapsFactory.map(aType, bType);
+        } else if ((aType.isList() && !bType.isList()) || (bType.isList() && !aType.isList())) {
+            return this.classMapBuilderForListsFactory.map(aType, bType);
+        } else if ((aType.isArray() && !bType.isArray()) || (bType.isArray() && !aType.isArray())) {
+            return this.classMapBuilderForArraysFactory.map(aType, bType);
         } else {
             return getClassMapBuilderFactory().map(aType, bType);
         }
