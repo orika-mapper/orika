@@ -31,6 +31,7 @@ import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.XMLEventAllocator;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URL;
 import java.util.Stack;
 
 /**
@@ -48,10 +49,12 @@ public class ConfigurationLoader {
 
     public void load(MapperFactory factory, String resourceName) {
         this.factory = factory;
-        String filename = getClass().getClassLoader().getResource(resourceName).getFile();
+        URL url = getClass().getClassLoader().getResource(resourceName);
+        String filename = url.getFile();
+        log.debug(resourceName + ", " + url.getPath());
         try {
             XMLInputFactory xmlif = XMLInputFactory.newInstance();
-            System.out.println("FACTORY: " + xmlif);
+            log.debug("FACTORY: " + xmlif);
             xmlif.setEventAllocator(new XMLEventAllocatorImpl());
             allocator = xmlif.getEventAllocator();
             XMLStreamReader xmlr = xmlif.createXMLStreamReader(filename,
@@ -64,9 +67,10 @@ public class ConfigurationLoader {
 
             while(xmlr.hasNext()) {
                 eventType = xmlr.next();
+                log.debug(">>>> eventType " + eventType);
                 XMLEvent event = allocator.allocate(xmlr);
                 if (eventType == XMLStreamConstants.END_DOCUMENT) {
-                    System.out.println(">>>> END_DOCUMENT ");
+                    log.debug(">>>> END_CONFIGURE");
                     break;
                 }
 

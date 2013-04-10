@@ -10,6 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>xml-configurator</artifactId>
+    <name>Orika - configurator</name>
 
     <description>Fast Java bean mapper</description>
     <url>http://code.google.com/p/orika</url>
@@ -30,8 +31,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.12.4</version>
                 <configuration>
-                    <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
-                    <outputDirectory>${basedir}/target/surefire-reports</outputDirectory>
                     <systemPropertyVariables>
                         <!-- Prevent accidental usage of EclipseJdt compiler strategy
                             (outside of the EclipseJdt-specific tests  -->
