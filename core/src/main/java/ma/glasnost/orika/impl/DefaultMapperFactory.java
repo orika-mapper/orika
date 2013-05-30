@@ -795,7 +795,14 @@ public class DefaultMapperFactory implements MapperFactory {
             }
             result = null;
         } else {
-            result = (ObjectFactory<T>) localCache.get(sourceType);
+        	Type<?> checkSourceType = sourceType;
+        	do {
+        		result = (ObjectFactory<T>) localCache.get(checkSourceType);
+       			checkSourceType = checkSourceType.getSuperType();
+        	} while (result == null && !TypeFactory.TYPE_OF_OBJECT.equals(checkSourceType));
+        	if (result == null) {
+        		result = (ObjectFactory<T>) localCache.get(TypeFactory.TYPE_OF_OBJECT);
+        	}
         }
         
         if (result == null) {
