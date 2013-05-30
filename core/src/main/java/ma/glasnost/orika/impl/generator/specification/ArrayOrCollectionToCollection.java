@@ -27,12 +27,11 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
         MultiOccurrenceVariableRef s = MultiOccurrenceVariableRef.from(source);
         MultiOccurrenceVariableRef d = MultiOccurrenceVariableRef.from(destination);
         
-        final Class<?> dc = destination.getOwner().rawType();
-        
         final Class<?> destinationElementClass = d.elementType().getRawType();
         
         if (destinationElementClass == null) {
-            throw new MappingException("cannot determine runtime type of destination collection " + dc.getName() + "." + d.name());
+        	final String dc = destination.getOwner() == null ? "null" : destination.getOwner().rawType().getName();
+            throw new MappingException("cannot determine runtime type of destination collection " + dc + "." + d.name());
         }
         
         // Start check if source property ! = null
