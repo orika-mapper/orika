@@ -40,7 +40,7 @@ public final class Type<T> implements ParameterizedType, Comparable<Type<?>> {
     private Type<?> componentType;
     private final TypeKey key;
     private final int hashCode;
-    private final AtomicInteger nextUniqueIndex = new AtomicInteger();
+    private static final AtomicInteger nextUniqueIndex = new AtomicInteger();
     private final int uniqueIndex;
 
     /**
