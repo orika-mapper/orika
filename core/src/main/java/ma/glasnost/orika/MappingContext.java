@@ -40,7 +40,7 @@ public class MappingContext {
     
     private final Map<Type<?>, Type<?>> mapping;
     private final Map<java.lang.reflect.Type, Map<Object, Object>> classCache;
-    private final OpenIntObjectHashMap typeCache;
+    private OpenIntObjectHashMap typeCache;
     private List<Map<MapperKey, ClassMap<?, ?>>> mappersSeen;
     private Map<Object, Object> properties;
     private Map<Object, Object> globalProperties;
@@ -249,6 +249,7 @@ public class MappingContext {
      */
     public void reset() {
         classCache.clear();
+        typeCache = new OpenIntObjectHashMap();
         mapping.clear();
         if (properties != null) {
             properties.clear();
