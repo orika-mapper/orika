@@ -423,11 +423,16 @@ public final class Type<T> implements ParameterizedType, Comparable<Type<?>> {
     public int compareTo(Type<?> other) {
         if (this.equals(other)) {
             return 0;
-        } else if (this.isAssignableFrom(other)) {
-            return -1;
-        } else {
-            return 1;
         }
+    	String thisChain = buildClassInheritanceChain(this).toString();
+    	String otherChain = buildClassInheritanceChain(other).toString();
+    	return thisChain.compareTo(otherChain);
     }
 
+	private StringBuilder buildClassInheritanceChain(Type<?> type) {
+		if (type.equals(TypeFactory.TYPE_OF_OBJECT))
+			return new StringBuilder("/java.lang.Object");
+		return buildClassInheritanceChain(type.getSuperType()).append('/')
+				.append(type.getName());
+	}
 }
