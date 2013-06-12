@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>orika-parent</artifactId>
+        <groupId>ma.glasnost.orika</groupId>
+        <version>1.4.2-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>xml-configurator</artifactId>
+
+    <description>Fast Java bean mapper</description>
+    <url>http://code.google.com/p/orika</url>
+    <scm>
+        <url>https://orika.googlecode.com/svn/trunk</url>
+        <developerConnection>scm:svn:https://orika.googlecode.com/svn/trunk/orika-core</developerConnection>
+        <connection>scm:svn:https://orika.googlecode.com/svn/trunk/orika-core</connection>
+    </scm>
+    <organization>
+        <name>Glasnost</name>
+        <url>http://www.glasnost.ma</url>
+    </organization>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
+                    <outputDirectory>${basedir}/target/surefire-reports</outputDirectory>
+                    <systemPropertyVariables>
+                        <!-- Prevent accidental usage of EclipseJdt compiler strategy
+                            (outside of the EclipseJdt-specific tests  -->
+                        <ma.glasnost.orika.test.MappingUtil.noDebug>true</ma.glasnost.orika.test.MappingUtil.noDebug>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+<!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+-->
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.stream</groupId>
+            <artifactId>sjsxp</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.9</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+</project>

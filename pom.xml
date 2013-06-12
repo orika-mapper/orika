@@ -350,6 +350,8 @@
         <module>eclipse-tools</module>
         <module>core</module>
         <module>tests</module>
+        <module>configurator</module>
+        <!--<module>tuple</module>-->
     </modules>
 
     <profiles>
