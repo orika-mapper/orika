@@ -18,64 +18,45 @@
 package ma.glasnost.orika.util;
 
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
-
 /**
- * A sorted set implementation based on a Comparator (or type's natural ordering) where the
- * comparison function is allowed to return ordering equivalence (0)
- * which doesn't necessarily imply logical equivalence.
+ * A sorted set implementation based on a Comparator (or type's natural
+ * ordering) where the comparison function is allowed to return ordering
+ * equivalence (0) which doesn't necessarily imply logical equivalence.
  * <p>
- * This allows for the ordering of a set of items where some are less or greater than
- * others, while others are simply not comparable in an ordering sense (in which case, 0 is
- * returned from their comparison).
+ * This allows for the ordering of a set of items where some are less or greater
+ * than others, while others are simply not comparable in an ordering sense (in
+ * which case, 0 is returned from their comparison).
  * <p>
  * This class is thread-safe, with the same caveats for ConcurrentSkipListMap.
  * 
  * @author matt.deboer@gmail.com
- * @param <V> the element type
+ * @param <V>
+ *            the element type
  */
 public class SortedSet<V> extends SortedCollection<V> implements Set<V> {
-    
-    /**
-     * @param ordering
-     */
-    public SortedSet(Ordering<V> ordering) {
-        super(ordering);
-    }
-    
-    /**
-     * @param c the collection to initialize this sorted set
-     * @param ordering the ordering used to sort this set
-     */
-    public SortedSet(Collection<? extends V> c, Ordering<V> ordering) {
-        super(c, ordering);
-    }
-    
-    public synchronized boolean add(V value) {
-        double index = 0;
-        double nextIndex = 0;
-        boolean insert = false;
-        V current = null;
-        
-        for (Entry<Double, V> item: sortedItems.entrySet()) {
-            current = item.getValue();
-            int comparison = ordering.order(current, value);
-            if (current.equals(value)) {
-                return false;
-            } else if (comparison > 0) {
-                insert = true;
-                nextIndex = item.getKey();
-                break;
-            } else {
-                index = item.getKey();
-            }
-        }
-        
-        if (!insert) {
-            nextIndex = index + 2.0;
-        } 
-        return insertBetween(index, nextIndex, value, false);
-    }
+
+	/**
+	 * @param ordering
+	 */
+	public SortedSet(Ordering<V> ordering) {
+		super(ordering);
+	}
+
+	/**
+	 * @param c
+	 *            the collection to initialize this sorted set
+	 * @param ordering
+	 *            the ordering used to sort this set
+	 */
+	public SortedSet(Collection<? extends V> c, Ordering<V> ordering) {
+		super(c, ordering);
+	}
+
+	protected Collection<V> filter(List<V> items) {
+		return new LinkedHashSet<V>(items);
+	}
 }

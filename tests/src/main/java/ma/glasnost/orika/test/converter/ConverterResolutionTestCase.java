@@ -18,10 +18,15 @@
 
 package ma.glasnost.orika.test.converter;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import junit.framework.Assert;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.converter.builtin.BuiltinConverters;
+import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.test.MappingUtil;
@@ -106,4 +111,13 @@ public class ConverterResolutionTestCase {
         }
     }
     
+    @Test
+	public void testResolveOverriddenConverter() {
+		PassThroughConverter cc = new PassThroughConverter(Date.class, Calendar.class);
+
+		MapperFactory factory = MappingUtil.getMapperFactory();
+		factory.getConverterFactory().registerConverter(cc);
+		BuiltinConverters.register(factory.getConverterFactory());
+		Assert.assertSame(cc, factory.getConverterFactory().getConverter(TypeFactory.valueOf(Date.class), TypeFactory.valueOf(Date.class)));
+	}
 }

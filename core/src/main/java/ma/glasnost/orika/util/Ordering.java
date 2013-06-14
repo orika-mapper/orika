@@ -29,33 +29,33 @@ import ma.glasnost.orika.metadata.Type;
  */
 public abstract class Ordering<T> {
     
+	public enum OrderingRelation {
+		EQUAL, BEFORE, AFTER, UNDEFINED
+	}
+	
     /**
-     * Returns -1 if object1 should be ordered before object2; Returns 1 if
-     * object2 should be ordered before object1; Returns 0 if there is no
-     * ordering implied between the objects (they are either equal, or
-     * unrelated).
+     * Returns if object1 should be ordered before or after object2; The
+     * ordering between object1 and object 2 can also be undefined.
      * 
      * 
      * @param object1
      * @param object2
-     * @return -1 if object1 should be ordered before object2; 1 if object2
-     *         should be ordered before object1; 0 if there is no ordering
-     *         implied between the objects
+     * @return if object1 should be ordered before or after object2;
      */
-    public abstract int order(T object1, T object2);
+    public abstract OrderingRelation order(T object1, T object2);
     
-    private static final int compare(Type<?> aType1, Type<?> bType1, Type<?> aType2, Type<?> bType2, boolean isBidirectional) {
+    private static final OrderingRelation compare(Type<?> aType1, Type<?> bType1, Type<?> aType2, Type<?> bType2, boolean isBidirectional) {
         
         if ((aType1.equals(aType2) && bType1.equals(bType2)) || (aType1.equals(bType2) && aType2.equals(bType1))) {
-            return 0;
+            return OrderingRelation.EQUAL;
         } else if ((aType1.isAssignableFrom(aType2) && bType1.isAssignableFrom(bType2))
                 || (isBidirectional && aType1.isAssignableFrom(bType2) && bType1.isAssignableFrom(aType2))) {
-            return 1;
+            return OrderingRelation.BEFORE;
         } else if ((aType2.isAssignableFrom(aType1) && bType2.isAssignableFrom(bType1))
                 || (isBidirectional && aType2.isAssignableFrom(bType1) && bType2.isAssignableFrom(aType1))) {
-            return -1;
+            return OrderingRelation.AFTER;
         } else {
-            return 0;
+            return OrderingRelation.UNDEFINED;
         }
     }
     
@@ -63,7 +63,7 @@ public abstract class Ordering<T> {
      * 
      */
     public static final Ordering<MapperKey> MAPPER_KEY = new Ordering<MapperKey>() {
-        public int order(MapperKey mapper1, MapperKey mapper2) {
+        public OrderingRelation order(MapperKey mapper1, MapperKey mapper2) {
             return Ordering.compare(mapper1.getAType(), mapper1.getBType(), mapper2.getAType(), mapper2.getBType(), true);
         }
     };
@@ -72,7 +72,7 @@ public abstract class Ordering<T> {
      * 
      */
     public static final Ordering<Mapper<Object, Object>> MAPPER = new Ordering<Mapper<Object, Object>>() {
-        public int order(Mapper<Object, Object> mapper1, Mapper<Object, Object> mapper2) {
+        public OrderingRelation order(Mapper<Object, Object> mapper1, Mapper<Object, Object> mapper2) {
             return Ordering.compare(mapper1.getAType(), mapper1.getBType(), mapper2.getAType(), mapper2.getBType(), true);
         }
     };
@@ -81,7 +81,7 @@ public abstract class Ordering<T> {
      * 
      */
     public static final Ordering<Converter<Object, Object>> CONVERTER = new Ordering<Converter<Object, Object>>() {
-        public int order(Converter<Object, Object> mapper1, Converter<Object, Object> mapper2) {
+        public OrderingRelation order(Converter<Object, Object> mapper1, Converter<Object, Object> mapper2) {
             return Ordering.compare(mapper1.getAType(), mapper1.getBType(), mapper2.getAType(), mapper2.getBType(), false);
         }
     };

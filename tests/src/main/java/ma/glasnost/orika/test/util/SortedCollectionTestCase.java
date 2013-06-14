@@ -17,7 +17,9 @@
  */
 package ma.glasnost.orika.test.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -25,7 +27,9 @@ import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.util.Ordering;
 import ma.glasnost.orika.util.SortedCollection;
+import ma.glasnost.orika.util.TopologicalSorter;
 
+import org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression;
 import org.junit.Test;
 
 /**
@@ -112,6 +116,31 @@ public class SortedCollectionTestCase {
     
     public static class D5 extends D4 {
         
+    }
+    
+    @Test
+    public void simpleOrdering() {
+		Ordering<Integer> testOrdering = new Ordering<Integer>() {
+			@Override
+			public OrderingRelation order(Integer object1, Integer object2) {
+				int val1 = object1;
+				int val2 = object2;
+				if (val1 == val2)
+					return OrderingRelation.EQUAL;
+				
+				switch (val1) {
+				case 0:
+					return val2 == 1 || val2 == 2 ? OrderingRelation.AFTER : OrderingRelation.UNDEFINED;
+				case 1:
+					return val2 == 2 || val2 == 3 ? OrderingRelation.AFTER : OrderingRelation.UNDEFINED;
+				case 2:
+					return val2 == 3 ? OrderingRelation.AFTER : OrderingRelation.UNDEFINED;
+				}
+				return OrderingRelation.UNDEFINED;
+			}
+		};
+		List<Integer> sorted = TopologicalSorter.sort(Arrays.asList(3, 1, 0, 2), testOrdering);
+		Assert.assertEquals(Arrays.asList(0, 1, 2, 3), sorted);
     }
     
     @Test
