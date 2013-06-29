@@ -58,7 +58,7 @@ public class ConstructorMappingTestCase {
     public void testSimpleCase() throws Throwable {
     	
         final SimpleDateFormat df = new SimpleDateFormat(DATE_PATTERN);
-        MapperFactory factory = MappingUtil.getMapperFactory();
+        MapperFactory factory = MappingUtil.getMapperFactory(true);
         
         factory.registerClassMap(factory.classMap(PersonVO.class, Person.class)
                 //.constructorA()

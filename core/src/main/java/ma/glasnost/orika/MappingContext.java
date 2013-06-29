@@ -18,7 +18,6 @@
 
 package ma.glasnost.orika;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -168,7 +167,6 @@ public class MappingContext {
             }
             localCache.put(source, destination);
             
-            // Quick fix for Issue 68
             for (Type<Object> t : (Type<Object>[])destinationType.getInterfaces()) {
                 cacheMappedObject(source, t, destination);
             }
@@ -195,37 +193,6 @@ public class MappingContext {
         }
         Map<Object, Object> localCache = (Map<Object, Object>) typeCache.get(destinationType.getUniqueIndex());
         return (D) (localCache == null ? null : localCache.get(source));
-    }
-    
-    /**
-     * Registers a ClassMap marking it as mapped within the current context;
-     * 
-     * @param classMap
-     */
-    public void registerMapperGeneration(ClassMap<?, ?> classMap) {
-        if (mappersSeen == null) {
-            mappersSeen = new ArrayList<Map<MapperKey, ClassMap<?, ?>>>();
-        }
-        Map<MapperKey, ClassMap<?, ?>> list = mappersSeen.isEmpty() ? null : this.mappersSeen.get(depth - 1);
-        if (list == null) {
-            list = new HashMap<MapperKey, ClassMap<?, ?>>();
-        }
-        list.put(classMap.getMapperKey(), classMap);
-    }
-    
-    /**
-     * Looks up a ClassMap among the mappers generated with this mapping context
-     * 
-     * @param mapperKey
-     * @return the ClassMap for which a Mapper was generated in this context, if any
-     */
-    public ClassMap<?, ?> getMapperGeneration(MapperKey mapperKey) {
-        ClassMap<?, ?> result = null;
-        Map<MapperKey, ClassMap<?, ?>> map = (mappersSeen == null || mappersSeen.isEmpty()) ? null : this.mappersSeen.get(depth - 1);
-        if (map != null) {
-            result = map.get(mapperKey);
-        }
-        return result;
     }
     
     /**

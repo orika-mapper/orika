@@ -21,9 +21,7 @@ public class EnumToEnum extends AbstractSpecification {
     
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
-        if (code.isDebugEnabled()) {
-            code.debug("converting enum " + source.typeName() + " to enum " + destination.typeName());
-        }
+        code.mapWithDescription(fieldMap, "converting enum " + source.typeName() + " to enum " + destination.typeName());
         
         String assignEnum = destination.assign("Enum.valueOf(%s.class, %s.name())", destination.typeName(), source);
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", destination.assignIfPossible("null")): "";

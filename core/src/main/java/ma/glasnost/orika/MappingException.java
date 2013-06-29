@@ -45,30 +45,33 @@ public class MappingException extends RuntimeException {
 
 	public String getLocalizedMessage() {
 		
-		StringBuilder message = new StringBuilder();
-		if (sourceClass != null) {
-			message.append("\nsourceClass = " + sourceClass);
-		}
-		if (sourceType != null) {
-			message.append("\nsourceType = " + sourceType);
-		}
-		if (sourceProperty != null) {
-			message.append("\nsourceProperty = " + sourceProperty);
-		}
-		if (destinationType != null) {
-			message.append("\ndestinationType = " + destinationType);
-		}
-		if (destinationProperty != null) {
-			message.append("\ndestinationProperty = " + destinationProperty);
-		}
+		StringBuilder message = new StringBuilder(describeInputs());
 		if (message.length() > 0) {
 			message.insert(0, "While attempting the folling mapping:");
 			message.append("\nError occurred: ");
 		}
-		
 		message.append(super.getLocalizedMessage());
-		
 		return message.toString();
+	}
+	
+	public String describeInputs() {
+	    StringBuilder message = new StringBuilder();
+        if (sourceClass != null) {
+            message.append("\nsourceClass = " + sourceClass);
+        }
+        if (sourceType != null) {
+            message.append("\nsourceType = " + sourceType);
+        }
+        if (sourceProperty != null) {
+            message.append("\nsourceProperty = " + sourceProperty);
+        }
+        if (destinationType != null) {
+            message.append("\ndestinationType = " + destinationType);
+        }
+        if (destinationProperty != null) {
+            message.append("\ndestinationProperty = " + destinationProperty);
+        }
+        return message.toString();
 	}
 	
 	public Property getSourceProperty() {

@@ -19,21 +19,19 @@ public class ApplyRegisteredMapper extends ObjectToObject {
     
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
-        if (code.isDebugEnabled()) {
-            Mapper<Object, Object> mapper = mapperFactory.lookupMapper(
-                    new MapperKey(source.type(), destination.type()));
-            Type<?> sourceType;
-            Type<?> destType;
-            if (mapper.getAType().isAssignableFrom(source.type())) {
-                sourceType = mapper.getAType();
-                destType = mapper.getBType();
-            } else {
-                sourceType = mapper.getBType();
-                destType = mapper.getAType();
-            }
-            code.debug("mapping using registered Mapper<" + sourceType + "," +
-                    destType + ">");
+        Mapper<Object, Object> mapper = mapperFactory.lookupMapper(
+                new MapperKey(source.type(), destination.type()));
+        Type<?> sourceType;
+        Type<?> destType;
+        if (mapper.getAType().isAssignableFrom(source.type())) {
+            sourceType = mapper.getAType();
+            destType = mapper.getBType();
+        } else {
+            sourceType = mapper.getBType();
+            destType = mapper.getAType();
         }
+        code.mapWithDescription(fieldMap, "mapping using registered Mapper<" + sourceType + "," +
+                destType + ">");
         
         return super.generateMappingCode(fieldMap, source, destination, code);
     }

@@ -1002,6 +1002,8 @@ public class DefaultMapperFactory implements MapperFactory {
                 for (final ClassMap<?, ?> classMap : classMapRegistry.values()) {
                     buildObjectFactories(classMap, context);
                     initializeUsedMappers(classMap);
+                    
+                    classMap.assertExpectationsMet();
                 }
                 
             } finally {

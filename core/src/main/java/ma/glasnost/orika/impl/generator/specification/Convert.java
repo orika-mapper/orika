@@ -61,15 +61,11 @@ public class Convert extends AbstractSpecification {
         String statement;
         boolean canHandleNulls;
         if (source.getConverter() instanceof CopyByReferenceConverter) {
-            if (code.isDebugEnabled()) {
-                code.debug("copying " + source.type() + " by reference");
-            }
+            code.mapWithDescription(fieldMap, "copying " + source.type() + " by reference");
             statement = destination.assignIfPossible(source);
             canHandleNulls = true;
         } else {
-            if (code.isDebugEnabled()) {
-                code.debug("converting using " + source.getConverter());
-            }
+            code.mapWithDescription(fieldMap, "converting using " + source.getConverter());
             statement = destination.assignIfPossible("%s.convert(%s, %s)", code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
             canHandleNulls = false;
         }

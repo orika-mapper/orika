@@ -47,13 +47,9 @@ public class ConvertArrayOrCollectionToArray extends AbstractSpecification {
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (destination.elementType().isPrimitive()) {
-            if (code.isDebugEnabled()) {
-                code.debug("converting to primitive array using " + source.getConverter());
-            }
+            code.mapWithDescription(fieldMap, "converting to primitive array using " + source.getConverter());
         } else {
-            if (code.isDebugEnabled()) {
-                code.debug("converting to array using " + source.getConverter());
-            }
+            code.mapWithDescription(fieldMap, "converting to array using " + source.getConverter());
         }
         
         String assureInstanceExists = format("if((%s)) { \n %s; \n}", destination.isNull(),

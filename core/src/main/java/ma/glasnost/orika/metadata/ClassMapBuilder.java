@@ -21,11 +21,12 @@ package ma.glasnost.orika.metadata;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import ma.glasnost.orika.DefaultFieldMapper;
 import ma.glasnost.orika.MappedTypePair;
@@ -41,31 +42,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ClassMapBuilder provides a fluent API which can be used to define 
- * a mapping from one class to another.
- *
+ * ClassMapBuilder provides a fluent API which can be used to define a mapping
+ * from one class to another.
+ * 
  * @param <A>
  * @param <B>
  */
 public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     
-	
-	public static class Factory extends ClassMapBuilderFactory {
-
-		/* (non-Javadoc)
-		 * @see ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder(ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type, ma.glasnost.orika.property.PropertyResolverStrategy, ma.glasnost.orika.DefaultFieldMapper[])
-		 */
-		@Override
-		protected <A, B> ClassMapBuilder<A, B> newClassMapBuilder(
-				Type<A> aType, Type<B> bType,
-				MapperFactory mapperFactory,
-				PropertyResolverStrategy propertyResolver,
-				DefaultFieldMapper[] defaults) {
-			
-			return new ClassMapBuilder<A,B>(aType, bType, mapperFactory, propertyResolver, defaults);
-		}
-	}
-	
+    /**
+     * Factory generates instances of ClassMapBuilderFactory
+     */
+    public static class Factory extends ClassMapBuilderFactory {
+        
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * ma.glasnost.orika.metadata.ClassMapBuilderFactory#newClassMapBuilder
+         * (ma.glasnost.orika.metadata.Type, ma.glasnost.orika.metadata.Type,
+         * ma.glasnost.orika.property.PropertyResolverStrategy,
+         * ma.glasnost.orika.DefaultFieldMapper[])
+         */
+        @Override
+        protected <A, B> ClassMapBuilder<A, B> newClassMapBuilder(Type<A> aType, Type<B> bType, MapperFactory mapperFactory,
+                PropertyResolverStrategy propertyResolver, DefaultFieldMapper[] defaults) {
+            
+            return new ClassMapBuilder<A, B>(aType, bType, mapperFactory, propertyResolver, defaults);
+        }
+    }
+    
     private final Map<String, Property> aProperties;
     private final Map<String, Property> bProperties;
     private final Set<String> propertiesCacheA;
@@ -83,15 +89,16 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     private final DefaultFieldMapper[] defaults;
     private Boolean sourcesMappedOnNull;
     private Boolean destinationsMappedOnNull;
+    private Set<Expectation> expectations;
     
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassMapBuilder.class);
     
+    
     /**
-     * Note: this static member variable exists to support the deprecated static map methods;
-     * it can be removed as soon as they are removed
+     * Note: this static member variable exists to support the deprecated static
+     * map methods; it can be removed as soon as they are removed
      */
     private static volatile WeakReference<PropertyResolverStrategy> defaultPropertyResolver;
-    
     
     /**
      * @param aType
@@ -99,38 +106,42 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param propertyResolver
      * @param defaults
      */
-    protected ClassMapBuilder(Type<A> aType, Type<B> bType, MapperFactory mapperFactory, PropertyResolverStrategy propertyResolver, DefaultFieldMapper... defaults) {
-	    
-    	if (aType == null) {
-	        throw new MappingException("[aType] is required");
-	    }
-	    
-	    if (bType == null) {
-	        throw new MappingException("[bType] is required");
-	    }
-	    
-	    this.mapperFactory = mapperFactory;
-	    this.propertyResolver = propertyResolver;
-	    this.defaults = defaults;
-	    
-	    aProperties = propertyResolver.getProperties(aType);
-	    bProperties = propertyResolver.getProperties(bType);
-	    propertiesCacheA = new LinkedHashSet<String>();
-	    propertiesCacheB = new LinkedHashSet<String>();
-	    
-	    this.aType = aType;
-	    this.bType = bType;
-	    this.fieldsMapping = new LinkedHashSet<FieldMap>();
-	    this.usedMappers = new LinkedHashSet<MapperKey>();
-	    
-	}
-     
+    protected ClassMapBuilder(Type<A> aType, Type<B> bType, MapperFactory mapperFactory, PropertyResolverStrategy propertyResolver,
+            DefaultFieldMapper... defaults) {
+        
+        if (aType == null) {
+            throw new MappingException("[aType] is required");
+        }
+        
+        if (bType == null) {
+            throw new MappingException("[bType] is required");
+        }
+        
+        this.mapperFactory = mapperFactory;
+        this.propertyResolver = propertyResolver;
+        this.defaults = defaults;
+        
+        aProperties = propertyResolver.getProperties(aType);
+        bProperties = propertyResolver.getProperties(bType);
+        propertiesCacheA = new LinkedHashSet<String>();
+        propertiesCacheB = new LinkedHashSet<String>();
+        this.expectations = new HashSet<Expectation>();
+        
+        this.aType = aType;
+        this.bType = bType;
+        this.fieldsMapping = new LinkedHashSet<FieldMap>();
+        this.usedMappers = new LinkedHashSet<MapperKey>();
+        
+    }
+    
     /**
-     * Gets all of the property expressions for a given type, including all nested properties.
-     * If the type of a property is not immutable and has any nested properties, it will not
-     * be included. (Note that the 'class' property is explicitly excluded.)
+     * Gets all of the property expressions for a given type, including all
+     * nested properties. If the type of a property is not immutable and has any
+     * nested properties, it will not be included. (Note that the 'class'
+     * property is explicitly excluded.)
      * 
-     * @param type the type for which to gather properties
+     * @param type
+     *            the type for which to gather properties
      * @return the map of nested properties keyed by expression name
      */
     protected Map<String, Property> getPropertyExpressions(Type<?> type) {
@@ -141,10 +152,11 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
         LinkedHashMap<String, Property> toProcess = new LinkedHashMap<String, Property>(propertyResolver.getProperties(type));
         
         if (type.isMap() || type.isList() || type.isArray()) {
-            Property selfReferenceProperty =
-                    new Property.Builder()
-                        .name("").getter("").setter(" = %s").type(TypeFactory.valueOf(type))
-                        .build((PropertyResolver) propertyResolver);
+            Property selfReferenceProperty = new Property.Builder().name("")
+                    .getter("")
+                    .setter(" = %s")
+                    .type(TypeFactory.valueOf(type))
+                    .build((PropertyResolver) propertyResolver);
             toProcess.put("", selfReferenceProperty);
         }
         
@@ -158,23 +170,26 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
                     Map<String, Property> props = propertyResolver.getProperties(propertyType);
                     if (propertyType.isMap()) {
                         Map<String, Property> valueProperties = getPropertyExpressions(propertyType.getNestedType(1));
-                        for (Entry<String, Property> prop: valueProperties.entrySet()) {
+                        for (Entry<String, Property> prop : valueProperties.entrySet()) {
                             Property elementProp = new NestedElementProperty(entry.getValue(), prop.getValue(), propertyResolver);
-                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getKey() + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
+                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getKey()
+                                    + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
                             toProcess.put(key, elementProp);
                         }
                     } else if (propertyType.isList()) {
                         Map<String, Property> valueProperties = getPropertyExpressions(propertyType.getNestedType(0));
-                        for (Entry<String, Property> prop: valueProperties.entrySet()) {
+                        for (Entry<String, Property> prop : valueProperties.entrySet()) {
                             Property elementProp = new NestedElementProperty(owningProperty, prop.getValue(), propertyResolver);
-                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getValue().getExpression() + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
+                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getValue().getExpression()
+                                    + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
                             toProcess.put(key, elementProp);
                         }
                     } else if (propertyType.isArray()) {
                         Map<String, Property> valueProperties = getPropertyExpressions(propertyType.getComponentType());
-                        for (Entry<String, Property> prop: valueProperties.entrySet()) {
+                        for (Entry<String, Property> prop : valueProperties.entrySet()) {
                             Property elementProp = new NestedElementProperty(entry.getValue(), prop.getValue(), propertyResolver);
-                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getKey() + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
+                            String key = entry.getKey() + PropertyResolver.ELEMENT_PROPERT_PREFIX + prop.getKey()
+                                    + PropertyResolver.ELEMENT_PROPERT_SUFFIX;
                             toProcess.put(key, elementProp);
                         }
                     } else if (!props.isEmpty()) {
@@ -199,26 +214,29 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * @param aType
      * @param bType
-     * @deprecated Use of this method instantiates a new PropertyResolverStrategy instance
-     * each time; instead, {@link ma.glasnost.orika.MapperFactory#classMap(Type, Type)} should
-     * be used which will leverage the PropertyResolverStrategy instance associated with the factory.
+     * @deprecated Use of this method instantiates a new
+     *             PropertyResolverStrategy instance each time; instead,
+     *             {@link ma.glasnost.orika.MapperFactory#classMap(Type, Type)}
+     *             should be used which will leverage the
+     *             PropertyResolverStrategy instance associated with the
+     *             factory.
      */
     @Deprecated
-	private ClassMapBuilder(Type<A> aType, Type<B> bType) {
+    private ClassMapBuilder(Type<A> aType, Type<B> bType) {
         
-    	this(aType, bType, null, getDefaultPropertyResolver());
+        this(aType, bType, null, getDefaultPropertyResolver());
     }
     
     private static PropertyResolverStrategy getDefaultPropertyResolver() {
-    	if (defaultPropertyResolver == null || defaultPropertyResolver.get() == null) {
-        	synchronized(ClassMapBuilder.class) {
-        		if (defaultPropertyResolver == null || defaultPropertyResolver.get() == null) {
-        			defaultPropertyResolver = new WeakReference<PropertyResolverStrategy>(
-        					UtilityResolver.getDefaultPropertyResolverStrategy());
-        		}
-        	}
+        if (defaultPropertyResolver == null || defaultPropertyResolver.get() == null) {
+            synchronized (ClassMapBuilder.class) {
+                if (defaultPropertyResolver == null || defaultPropertyResolver.get() == null) {
+                    defaultPropertyResolver = new WeakReference<PropertyResolverStrategy>(
+                            UtilityResolver.getDefaultPropertyResolverStrategy());
+                }
+            }
         }
-    	return defaultPropertyResolver.get();
+        return defaultPropertyResolver.get();
     }
     
     /**
@@ -228,19 +246,20 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      *            property name in type A
      * @param fieldNameB
      *            property name in type B
-     * @return
+     * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> field(String fieldNameA, String fieldNameB) {
         return fieldMap(fieldNameA, fieldNameB).add();
     }
     
-    
     /**
      * Map a field in one direction only (from fieldNameA to fieldNameB)
      * 
-     * @param fieldNameA the (source) fieldName from type A
-     * @param fieldNameB the (destination) fieldName from type B
-     * @return
+     * @param fieldNameA
+     *            the (source) fieldName from type A
+     * @param fieldNameB
+     *            the (destination) fieldName from type B
+     * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> fieldAToB(String fieldNameA, String fieldNameB) {
         return fieldMap(fieldNameA, fieldNameB).aToB().add();
@@ -249,69 +268,78 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * Map a field in one direction only (from fieldNameB to fieldNameA)
      * 
-     * @param fieldNameB the (source) fieldName from type B
-     * @param fieldNameA the (destination) fieldName from type A
-     * @return
+     * @param fieldNameB
+     *            the (source) fieldName from type B
+     * @param fieldNameA
+     *            the (destination) fieldName from type A
+     * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> fieldBToA(String fieldNameB, String fieldNameA) {
         return fieldMap(fieldNameA, fieldNameB).bToA().add();
     }
     
     /**
-     * Create a fieldMap for the particular field (same property name used in both types)
+     * Create a fieldMap for the particular field (same property name used in
+     * both types)
      * 
      * @param a
-     * @return
+     * @return this ClassMapBuilder
      */
     public FieldMapBuilder<A, B> fieldMap(String a) {
         return fieldMap(a, a);
     }
     
     /**
-     * Create a fieldMap for the particular field (same property name used in both types)
+     * Create a fieldMap for the particular field (same property name used in
+     * both types)
      * 
      * @param a
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
     public FieldMapBuilder<A, B> fieldMap(String a, boolean byDefault) {
         return fieldMap(a, a, byDefault);
     }
     
-    
     /**
-     * Create a fieldMap for the particular field mapping 
+     * Create a fieldMap for the particular field mapping
      * 
-     * @param fieldNameA the name of the field in type A
-     * @param fieldNameB the name of the field in type B
-     * @return
+     * @param fieldNameA
+     *            the name of the field in type A
+     * @param fieldNameB
+     *            the name of the field in type B
+     * @return this ClassMapBuilder
      */
     public FieldMapBuilder<A, B> fieldMap(String fieldNameA, String fieldNameB) {
-    	return fieldMap(fieldNameA, fieldNameB, false); 
+        return fieldMap(fieldNameA, fieldNameB, false);
     }
     
     /**
-     * Create a fieldMap for the particular field mapping 
+     * Create a fieldMap for the particular field mapping
      * 
-     * @param fieldNameA the name of the field in type A
-     * @param fieldNameB the name of the field in type B
-     * @param byDefault whether the field mapping has been provided by default
-     * @return
+     * @param fieldNameA
+     *            the name of the field in type A
+     * @param fieldNameB
+     *            the name of the field in type B
+     * @param byDefault
+     *            whether the field mapping has been provided by default
+     * @return this ClassMapBuilder
      */
     public FieldMapBuilder<A, B> fieldMap(String fieldNameA, String fieldNameB, boolean byDefault) {
-    
-    	try {
-	    	final FieldMapBuilder<A, B> fieldMapBuilder = new FieldMapBuilder<A, B>(this, fieldNameA, fieldNameB, byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
-	        
-	        return fieldMapBuilder;
-	    } catch (MappingException e) {
-	    	/*
-	    	 * Add more information to the message to help with debugging
-	    	 */
-	    	String msg = getClass().getSimpleName() + ".map(" + aType + ", " + bType + ")" +
-	    			".field('" + fieldNameA + "', '" + fieldNameB + "'): Error: " + e.getLocalizedMessage();
-	    	throw new MappingException(msg, e);
-	    }
+        
+        try {
+            final FieldMapBuilder<A, B> fieldMapBuilder = new FieldMapBuilder<A, B>(this, fieldNameA, fieldNameB, byDefault,
+                    sourcesMappedOnNull, destinationsMappedOnNull);
+            
+            return fieldMapBuilder;
+        } catch (MappingException e) {
+            /*
+             * Add more information to the message to help with debugging
+             */
+            String msg = getClass().getSimpleName() + ".map(" + aType + ", " + bType + ")" + ".field('" + fieldNameA + "', '" + fieldNameB
+                    + "'): Error: " + e.getLocalizedMessage();
+            throw new MappingException(msg, e);
+        }
     }
     
     /**
@@ -320,22 +348,23 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(Property fieldA, Property fieldB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, fieldA, fieldB, byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(Property fieldA, Property fieldB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, fieldA, fieldB, byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
     }
     
     /**
      * 
      * 
-     * @param fieldA
+     * @param fieldNameA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(String fieldNameA, Property fieldB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, resolvePropertyForA(fieldNameA), fieldB, byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(String fieldNameA, Property fieldB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, resolvePropertyForA(fieldNameA), fieldB, byDefault, sourcesMappedOnNull,
+                destinationsMappedOnNull);
     }
     
     /**
@@ -344,10 +373,11 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldNameB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(Property fieldA, String fieldNameB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, fieldA, resolvePropertyForB(fieldNameB), byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(Property fieldA, String fieldNameB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, fieldA, resolvePropertyForB(fieldNameB), byDefault, sourcesMappedOnNull,
+                destinationsMappedOnNull);
     }
     
     /**
@@ -356,22 +386,24 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(Property.Builder fieldA, Property.Builder fieldB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, fieldA.build((PropertyResolver)propertyResolver), fieldB.build((PropertyResolver)propertyResolver), byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(Property.Builder fieldA, Property.Builder fieldB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, fieldA.build((PropertyResolver) propertyResolver),
+                fieldB.build((PropertyResolver) propertyResolver), byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
     }
     
     /**
      * 
      * 
-     * @param fieldA
+     * @param fieldNameA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(String fieldNameA, Property.Builder fieldB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, resolvePropertyForA(fieldNameA), fieldB.build((PropertyResolver)propertyResolver), byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(String fieldNameA, Property.Builder fieldB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, resolvePropertyForA(fieldNameA), fieldB.build((PropertyResolver) propertyResolver),
+                byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
     }
     
     /**
@@ -380,10 +412,11 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldNameB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public FieldMapBuilder<A,B> fieldMap(Property.Builder fieldA, String fieldNameB, boolean byDefault) {
-        return new FieldMapBuilder<A,B>(this, fieldA.build((PropertyResolver)propertyResolver), resolvePropertyForB(fieldNameB), byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
+    public FieldMapBuilder<A, B> fieldMap(Property.Builder fieldA, String fieldNameB, boolean byDefault) {
+        return new FieldMapBuilder<A, B>(this, fieldA.build((PropertyResolver) propertyResolver), resolvePropertyForB(fieldNameB),
+                byDefault, sourcesMappedOnNull, destinationsMappedOnNull);
     }
     
     /**
@@ -392,21 +425,21 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(Property fieldA, Property fieldB) {
+    public ClassMapBuilder<A, B> field(Property fieldA, Property fieldB) {
         return fieldMap(fieldA, fieldB, false).add();
     }
     
     /**
      * 
      * 
-     * @param fieldA
+     * @param fieldNameA
      * @param fieldB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(String fieldNameA, Property fieldB) {
+    public ClassMapBuilder<A, B> field(String fieldNameA, Property fieldB) {
         return fieldMap(fieldNameA, fieldB, false).add();
     }
     
@@ -416,9 +449,9 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldNameB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(Property fieldA, String fieldNameB) {
+    public ClassMapBuilder<A, B> field(Property fieldA, String fieldNameB) {
         return fieldMap(fieldA, fieldNameB, false).add();
     }
     
@@ -430,8 +463,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param byDefault
      * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(Property.Builder fieldA, Property.Builder fieldB) {
-        return fieldMap(fieldA, fieldB, false).add(); 
+    public ClassMapBuilder<A, B> field(Property.Builder fieldA, Property.Builder fieldB) {
+        return fieldMap(fieldA, fieldB, false).add();
     }
     
     /**
@@ -442,8 +475,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param byDefault
      * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(String fieldNameA, Property.Builder fieldB) {
-        return fieldMap(fieldNameA, fieldB, false).add(); 
+    public ClassMapBuilder<A, B> field(String fieldNameA, Property.Builder fieldB) {
+        return fieldMap(fieldNameA, fieldB, false).add();
     }
     
     /**
@@ -452,18 +485,18 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @param fieldA
      * @param fieldNameB
      * @param byDefault
-     * @return
+     * @return this ClassMapBuilder
      */
-    public ClassMapBuilder<A,B> field(Property.Builder fieldA, String fieldNameB) {
-        return fieldMap(fieldA, fieldNameB, false).add(); 
+    public ClassMapBuilder<A, B> field(Property.Builder fieldA, String fieldNameB) {
+        return fieldMap(fieldA, fieldNameB, false).add();
     }
-    
     
     /**
      * Exclude the specified field from mapping
      * 
-     * @param fieldName the name of the field/property to exclude
-     * @return
+     * @param fieldName
+     *            the name of the field/property to exclude
+     * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> exclude(String fieldName) {
         return fieldMap(fieldName).exclude().add();
@@ -473,7 +506,7 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * Set the custom mapper to use for this mapping.
      * 
      * @param legacyCustomizedMapper
-     * @return
+     * @return this ClassMapBuilder
      * @deprecated use {@link #customize(Mapper)} instead
      */
     @Deprecated
@@ -486,7 +519,7 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * Set the custom mapper to use for this mapping.
      * 
      * @param customizedMapper
-     * @return
+     * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> customize(Mapper<A, B> customizedMapper) {
         this.customizedMapper = customizedMapper;
@@ -494,11 +527,14 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * Configure this ClassMapBuilder to use an existing mapping (for parent classes)
-     * defined from <code>aParentClass</code> to <code>bParentClass</code>.
+     * Configure this ClassMapBuilder to use an existing mapping (for parent
+     * classes) defined from <code>aParentClass</code> to
+     * <code>bParentClass</code>.
      * 
-     * @param aParentClass the source class of the parent mapping
-     * @param bParentClass the destination class of the parent mapping
+     * @param aParentClass
+     *            the source class of the parent mapping
+     * @param bParentClass
+     *            the destination class of the parent mapping
      * @return this ClassMapBuilder
      */
     public <X, Y> ClassMapBuilder<A, B> use(Class<?> aParentClass, Class<?> bParentClass) {
@@ -512,11 +548,14 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * Configure this ClassMapBuilder to use an existing mapping (for parent classes)
-     * defined from <code>aParentClass</code> to <code>bParentClass</code>.
+     * Configure this ClassMapBuilder to use an existing mapping (for parent
+     * classes) defined from <code>aParentClass</code> to
+     * <code>bParentClass</code>.
      * 
-     * @param aParentType the source type of the parent mapping
-     * @param bParentType the destination type of the parent mapping
+     * @param aParentType
+     *            the source type of the parent mapping
+     * @param bParentType
+     *            the destination type of the parent mapping
      * @return this ClassMapBuilder
      */
     public <X, Y> ClassMapBuilder<A, B> use(Type<?> aParentType, Type<?> bParentType) {
@@ -536,30 +575,34 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     
     /**
      * Configures this class-map builder to employ the default property mapping
-     * behavior to any properties that have not already been mapped or excluded; 
-     * if any DefaultFieldMapper instances are passed, they will be used (instead of
-     * those configured on the builder) to attempt a property name match if a direct 
-     * match is not found.
+     * behavior to any properties that have not already been mapped or excluded;
+     * if any DefaultFieldMapper instances are passed, they will be used
+     * (instead of those configured on the builder) to attempt a property name
+     * match if a direct match is not found.
      * 
-     * @param withDefaults zero or more DefaultFieldMapper instances to apply during the default mapping;
-     * if none are supplied, the configured DefaultFieldMappers for the builder (if any) should be used.
+     * @param withDefaults
+     *            zero or more DefaultFieldMapper instances to apply during the
+     *            default mapping; if none are supplied, the configured
+     *            DefaultFieldMappers for the builder (if any) should be used.
      * @return this ClassMapBuilder instance
      */
     public ClassMapBuilder<A, B> byDefault(DefaultFieldMapper... withDefaults) {
-    	return byDefault(MappingDirection.BIDIRECTIONAL, withDefaults);
+        return byDefault(MappingDirection.BIDIRECTIONAL, withDefaults);
     }
-    
     
     /**
      * Configures this class-map builder to employ the default property mapping
-     * behavior to any properties that have not already been mapped or excluded; 
-     * if any DefaultFieldMapper instances are passed, they will be used (instead of
-     * those configured on the builder) to attempt a property name match if a direct 
-     * match is not found.
+     * behavior to any properties that have not already been mapped or excluded;
+     * if any DefaultFieldMapper instances are passed, they will be used
+     * (instead of those configured on the builder) to attempt a property name
+     * match if a direct match is not found.
      * 
-     * @param direction the mapping direction to be applied
-     * @param withDefaults zero or more DefaultFieldMapper instances to apply during the default mapping;
-     * if none are supplied, the configured DefaultFieldMappers for the builder (if any) should be used.
+     * @param direction
+     *            the mapping direction to be applied
+     * @param withDefaults
+     *            zero or more DefaultFieldMapper instances to apply during the
+     *            default mapping; if none are supplied, the configured
+     *            DefaultFieldMappers for the builder (if any) should be used.
      * @return this ClassMapBuilder instance
      */
     public ClassMapBuilder<A, B> byDefault(MappingDirection direction, DefaultFieldMapper... withDefaults) {
@@ -576,9 +619,9 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
                 if (getPropertiesForTypeB().contains(propertyName)) {
                     if (!getMappedPropertiesForTypeB().contains(propertyName)) {
                         /*
-                         * Don't include the default mapping of Class to Class; this
-                         * property is resolved for all types, but can't be mapped 
-                         * in either direction.
+                         * Don't include the default mapping of Class to Class;
+                         * this property is resolved for all types, but can't be
+                         * mapped in either direction.
                          */
                         if (!propertyName.equals("class")) {
                             fieldMap(propertyName, true).direction(direction).add();
@@ -601,7 +644,6 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
         return this;
     }
     
-    
     /**
      * @deprecated use {@link #byDefault(DefaultFieldMapper...)} instead
      * 
@@ -609,7 +651,7 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      *            first hint
      * @param mappingHints
      *            remaining hints
-     * @return
+     * @return this ClassMapBuilder
      */
     @Deprecated
     public final ClassMapBuilder<A, B> byDefault(ma.glasnost.orika.MappingHint hint0, ma.glasnost.orika.MappingHint... mappingHints) {
@@ -625,7 +667,7 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @deprecated use {@link #byDefault(DefaultFieldMapper...)} instead
      * 
      * @param mappingHints
-     * @return
+     * @return this ClassMapBuilder
      */
     @Deprecated
     public final ClassMapBuilder<A, B> byDefault(ma.glasnost.orika.MappingHint[] mappingHints) {
@@ -635,9 +677,9 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
                 if (bProperties.containsKey(propertyName)) {
                     if (!propertiesCacheB.contains(propertyName)) {
                         /*
-                         * Don't include the default mapping of Class to Class; this
-                         * property is resolved for all types, but can't be mapped 
-                         * in either direction.
+                         * Don't include the default mapping of Class to Class;
+                         * this property is resolved for all types, but can't be
+                         * mapped in either direction.
                          */
                         if (!propertyName.equals("class")) {
                             fieldMap(propertyName).add();
@@ -668,18 +710,20 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @return a ClassMap as configured by this ClassMapBuilder
      */
     public ClassMap<A, B> toClassMap() {
-    	
-    	if(LOGGER.isDebugEnabled()) {
-        	LOGGER.debug("ClassMap created:\n\t" + describeClassMap());
+        
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ClassMap created:\n\t" + describeClassMap());
         }
-    	
-        return new ClassMap<A, B>(aType, bType, fieldsMapping, customizedMapper, usedMappers, constructorA, constructorB, sourcesMappedOnNull, destinationsMappedOnNull);
+        
+        return new ClassMap<A, B>(aType, bType, fieldsMapping, customizedMapper, usedMappers, constructorA, constructorB,
+                sourcesMappedOnNull, destinationsMappedOnNull, expectations);
     }
     
     /**
-     * @param destinationsMappedOnNull true|false to indicate whether the destination
-     * properties of this class map's fields should be set to null (when mapping in the forward 
-     * direction) if the source property's value is null
+     * @param destinationsMappedOnNull
+     *            true|false to indicate whether the destination properties of
+     *            this class map's fields should be set to null (when mapping in
+     *            the forward direction) if the source property's value is null
      * 
      * @return this FieldMapBuilder
      */
@@ -690,9 +734,10 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * @param sourcesMappedOnNull true|false to indicate whether the source properties of
-     * this class map's fields should be set to null (when mapping in the reverse direction)
-     * if the destination property's value is null
+     * @param sourcesMappedOnNull
+     *            true|false to indicate whether the source properties of this
+     *            class map's fields should be set to null (when mapping in the
+     *            reverse direction) if the destination property's value is null
      * 
      * @return this FieldMapBuilder
      */
@@ -703,7 +748,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * Registers the ClassMap defined by this builder with it's initiating MapperFactory
+     * Registers the ClassMap defined by this builder with it's initiating
+     * MapperFactory
      */
     public void register() {
         if (this.mapperFactory == null) {
@@ -713,35 +759,38 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * @return a pseudo-code description of the class map that is created by this builder
+     * @return a pseudo-code description of the class map that is created by
+     *         this builder
      */
     protected String describeClassMap() {
-    	StringBuilder output = new StringBuilder();
-    	output.append(getClass().getSimpleName() + ".map(" + aType + ", " + bType + ")");
-    	for (FieldMap f: fieldsMapping) {
-    		if (f.isExcluded()) {
-    			output.append("\n\t .exclude('" + f.getSourceName() + "')");
-    		} else {
-    			output.append("\n\t .field( " + f.getSource() + ", " + f.getDestination() + " )");
-    		}
-    	}	
-    	if (constructorA != null) {
-    		output.append("\n\t .constructorA(" + Arrays.toString(constructorA) + ")");
-    	}
-    	if (constructorB != null) {
-    		output.append("\n\t .constructorB(" + Arrays.toString(constructorB) + ")");
-    	}
-    	return output.toString();
+        StringBuilder output = new StringBuilder();
+        output.append(getClass().getSimpleName() + ".map(" + aType + ", " + bType + ")");
+        for (FieldMap f : fieldsMapping) {
+            if (f.isExcluded()) {
+                output.append("\n\t .exclude('" + f.getSourceName() + "')");
+            } else {
+                output.append("\n\t .field( " + f.getSource() + ", " + f.getDestination() + " )");
+            }
+        }
+        if (constructorA != null) {
+            output.append("\n\t .constructorA(" + Arrays.toString(constructorA) + ")");
+        }
+        if (constructorB != null) {
+            output.append("\n\t .constructorB(" + Arrays.toString(constructorB) + ")");
+        }
+        return output.toString();
     }
     
     /**
-     * Creates a new ClassMapBuilder configuration for mapping between <code>aType</code>
-     * and <code>bType</code>.
+     * Creates a new ClassMapBuilder configuration for mapping between
+     * <code>aType</code> and <code>bType</code>.
      * 
      * @param aType
      * @param bType
-     * @return
-     * @deprecated use {@link ma.glasnost.orika.MapperFactory#classMap(Class, Class)} instead
+     * @return a new ClassMapBuilder instnace initialized by the provided types
+     * @deprecated use
+     *             {@link ma.glasnost.orika.MapperFactory#classMap(Class, Class)}
+     *             instead
      */
     public static final <A, B> ClassMapBuilder<A, B> map(Class<A> aType, Class<B> bType) {
         return new ClassMapBuilder<A, B>(TypeFactory.<A> valueOf(aType), TypeFactory.<B> valueOf(bType));
@@ -750,8 +799,10 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * @param aType
      * @param bType
-     * @return
-     * @deprecated use {@link ma.glasnost.orika.MapperFactory#classMap(Type, Type)} instead
+     * @return a new ClassMapBuilder instnace initialized by the provided types
+     * @deprecated use
+     *             {@link ma.glasnost.orika.MapperFactory#classMap(Type, Type)}
+     *             instead
      */
     public static final <A, B> ClassMapBuilder<A, B> map(Type<A> aType, Type<B> bType) {
         return new ClassMapBuilder<A, B>(aType, bType);
@@ -760,8 +811,10 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * @param aType
      * @param bType
-     * @return
-     * @deprecated use {@link ma.glasnost.orika.MapperFactory#classMap(Class, Type)} instead
+     * @return a new ClassMapBuilder instnace initialized by the provided types
+     * @deprecated use
+     *             {@link ma.glasnost.orika.MapperFactory#classMap(Class, Type)}
+     *             instead
      */
     public static final <A, B> ClassMapBuilder<A, B> map(Class<A> aType, Type<B> bType) {
         return new ClassMapBuilder<A, B>(TypeFactory.<A> valueOf(aType), bType);
@@ -770,8 +823,10 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * @param aType
      * @param bType
-     * @return
-     * @deprecated use {@link ma.glasnost.orika.MapperFactory#classMap(Type, Class)} instead
+     * @return a new ClassMapBuilder instnace initialized by the provided types
+     * @deprecated use
+     *             {@link ma.glasnost.orika.MapperFactory#classMap(Type, Class)}
+     *             instead
      */
     public static final <A, B> ClassMapBuilder<A, B> map(Type<A> aType, Class<B> bType) {
         return new ClassMapBuilder<A, B>(aType, TypeFactory.<B> valueOf(bType));
@@ -780,28 +835,33 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * Determines whether the provided string is a valid property expression
      * 
-     * @param expression the expression to evaluate
-     * @return
+     * @param expression
+     *            the expression to evaluate
+     * @return true if the epxression represents a nested property
      */
     protected boolean isNestedPropertyExpression(String expression) {
         return expression.indexOf('.') != -1;
     }
     
     /**
-     * Resolves a property for the particular type, based on the provided property expression
+     * Resolves a property for the particular type, based on the provided
+     * property expression
      * 
-     * @param type the type to resolve
-     * @param expr the property expression to resolve
+     * @param type
+     *            the type to resolve
+     * @param expr
+     *            the property expression to resolve
      * @return the Property referenced by the provided expression
      */
     protected Property resolveProperty(java.lang.reflect.Type type, String expr) {
         return propertyResolver.getProperty(type, expr);
     }
     
-	/**
+    /**
      * Resolves a property expression for this builder's 'A' type
      * 
-     * @param expr the property expression
+     * @param expr
+     *            the property expression
      * @return the Property referenced by the provided expression
      */
     protected Property resolvePropertyForA(String expr) {
@@ -811,7 +871,8 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     /**
      * Resolves a property expression for this builder's 'B' type
      * 
-     * @param expr the property expression
+     * @param expr
+     *            the property expression
      * @return the Property referenced by the provided expression
      */
     protected Property resolvePropertyForB(String expr) {
@@ -822,18 +883,21 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @return the 'A' type for this builder
      */
     public Type<A> getAType() {
-    	return aType;
+        return aType;
     }
     
     /**
      * @return the 'B' type for this builder
      */
     public Type<B> getBType() {
-    	return bType;
+        return bType;
     }
     
+    /**
+     * @param fieldMap adds the field map to the set of field maps
+     */
     protected void addFieldMap(FieldMap fieldMap) {
-    	getMappedFields().add(fieldMap);
+        getMappedFields().add(fieldMap);
         getMappedPropertiesForTypeA().add(fieldMap.getSourceExpression());
         getMappedPropertiesForTypeB().add(fieldMap.getDestinationExpression());
     }
@@ -842,56 +906,57 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      * @return the mapped properties for type A
      */
     protected Set<String> getMappedPropertiesForTypeA() {
-    	return propertiesCacheA;
+        return propertiesCacheA;
     }
     
     /**
      * @return the mapped properties for type B
      */
     protected Set<String> getMappedPropertiesForTypeB() {
-    	return propertiesCacheB;
+        return propertiesCacheB;
     }
     
     /**
      * @return the mapped fields for this builder
      */
     protected Set<FieldMap> getMappedFields() {
-    	return fieldsMapping;
+        return fieldsMapping;
     }
     
     /**
      * @return the known properties for type A
      */
     protected Set<String> getPropertiesForTypeA() {
-    	return aProperties.keySet();
+        return aProperties.keySet();
     }
     
     /**
      * @return the known properties for type B
      */
     protected Set<String> getPropertiesForTypeB() {
-    	return bProperties.keySet();
+        return bProperties.keySet();
     }
     
     /**
      * @return the default field mappers (if any) configured for this builder
      */
     protected DefaultFieldMapper[] getDefaultFieldMappers() {
-    	return defaults;
+        return defaults;
     }
     
     /**
      * @return the property resolver used by this builder
      */
     protected PropertyResolverStrategy getPropertyResolver() {
-    	return this.propertyResolver;
+        return this.propertyResolver;
     }
     
     /**
-     * Declares a constructor to be used for the A type 
-     * with the specified arguments.
+     * Declares a constructor to be used for the A type with the specified
+     * arguments.
      * 
-     * @param args the arguments identifying the constructor to be used
+     * @param args
+     *            the arguments identifying the constructor to be used
      * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> constructorA(String... args) {
@@ -900,16 +965,86 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     }
     
     /**
-     * Declares a constructor to be used for the B type
-     * with the specified arguments.
+     * Declares a constructor to be used for the B type with the specified
+     * arguments.
      * 
-     * @param args the arguments identifying the constructor to be used
+     * @param args
+     *            the arguments identifying the constructor to be used
      * @return this ClassMapBuilder
      */
     public ClassMapBuilder<A, B> constructorB(String... args) {
         this.constructorB = args.clone();
         return this;
     }
+    
+    /**
+     * Sets an expectation about the fields of the generated mapper code
+     * regarding the supplied field names, as to whether they have been mapped
+     * on the A type for this class-map builder<br>
+     * (the reverse direction of the configured ClassMap)<br>
+     * <br>
+     * 
+     * For example,
+     * <code> .expectMappedOnA(Fields.ALL_EXCEPT, "field1", field2") </code>
+     * would set the expectation that all fields for the 'A' type--except
+     * "field1" and "field2"--should be mapped when mapping from B to A (the
+     * reverse direction for the configured ClassMap).<br>
+     * <br>
+     * 
+     * This expectation is evaluated once, at the time the mapper code is
+     * generated; if the expectation is not met, a FailedExpectationException is
+     * thrown with a description of the failed expectation and the relevant
+     * details useful for correcting the problem.
+     * 
+     * @param fieldSet
+     *            the descriptor of the expected fields
+     * @return this ClassMapBuilder
+     */
+    public ClassMapBuilder<A, B> expectMappedOnA(FieldSet fieldSet) {
+        return expect(false, fieldSet);
+    }
+    
+    /**
+     * Sets an expectation about the fields of the generated mapper code
+     * regarding the supplied field names, as to whether they have been mapped
+     * on the B type for this class-map builder<br>
+     * (the forward direction of the configured ClassMap)<br>
+     * <br>
+     * 
+     * For example,
+     * <code> .expectMappedOnB(Fields.ALL_EXCEPT, "field1", field2") </code>
+     * would set the expectation that all fields for the 'B' type--except
+     * "field1" and "field2"--should be mapped when mapping from A to B (the
+     * forward direction for the configured ClassMap).<br>
+     * <em>Note that when <code>ALL_EXCEPT</code> is used, it refers to all fields
+     * that would have been mapped
+     * <br>
+     * 
+     * This expectation is evaluated once, at the time the mapper code is
+     * generated; if the expectation is not met, a FailedExpectationException is
+     * thrown with a description of the failed expectation and the relevant
+     * details useful for correcting the problem.
+     * 
+     * @param fieldSet
+     *            the descriptor of the expected fields
+     * @return this ClassMapBuilder
+     */
+    public ClassMapBuilder<A, B> expectMappedOnB(FieldSet fieldSet) {
+        return expect(true, fieldSet);
+    }
+    
+    /**
+     * @param group
+     * @param aToB
+     * @param fieldNames
+     * @return this ClassMapBuilder
+     */
+    protected ClassMapBuilder<A, B> expect(boolean aToB, FieldSet fieldSet) {
+        Map<String, Property> fields = this.getPropertyExpressions(aToB ? getAType() : getBType());
+        expectations.add(fieldSet.toExpectation(fields, aToB));
+        return this;
+    }
+    
     
     public String toString() {
         return getClass().getSimpleName() + "[" + getAType() + ", " + getBType() + "]";

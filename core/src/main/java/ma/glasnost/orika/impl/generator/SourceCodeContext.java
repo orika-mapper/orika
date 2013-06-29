@@ -53,6 +53,7 @@ import ma.glasnost.orika.impl.generator.specification.AbstractSpecification;
 import ma.glasnost.orika.impl.util.ClassUtil;
 import ma.glasnost.orika.metadata.ClassMap;
 import ma.glasnost.orika.metadata.FieldMap;
+import ma.glasnost.orika.metadata.FieldMapRecorder;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
@@ -83,7 +84,7 @@ public class SourceCodeContext {
     private final UsedMapperFacadesContext usedMapperFacades;
     private final MapperFactory mapperFactory;
     private final CodeGenerationStrategy codeGenerationStrategy;
-    private final StringBuilder logDetails;
+    private final FieldMapRecorder fieldMapRecorder;
     private final PropertyResolverStrategy propertyResolver;
     private final Map<AggregateSpecification, List<FieldMap>> aggregateFieldMaps;
     private final MappingContext mappingContext;
@@ -93,12 +94,10 @@ public class SourceCodeContext {
      * 
      * @param baseClassName
      * @param superClass
-     * @param compilerStrategy
-     * @param propertyResolver
-     * @param mapperFactory
+     * @param mappingContext
      * @param logDetails
      */
-    public SourceCodeContext(final String baseClassName, Class<?> superClass, MappingContext mappingContext, StringBuilder logDetails) {
+    public SourceCodeContext(final String baseClassName, Class<?> superClass, MappingContext mappingContext, FieldMapRecorder logDetails) {
         
         this.mapperFactory = (MapperFactory) mappingContext.getProperty(Properties.MAPPER_FACTORY);
         this.codeGenerationStrategy = (CodeGenerationStrategy) mappingContext.getProperty(Properties.CODE_GENERATION_STRATEGY);
@@ -131,11 +130,18 @@ public class SourceCodeContext {
         
         this.mappingContext = mappingContext;
         this.usedMapperFacades = new UsedMapperFacadesContext();
-        this.logDetails = logDetails;
+        this.fieldMapRecorder = logDetails;
         
         this.aggregateFieldMaps = new LinkedHashMap<AggregateSpecification, List<FieldMap>>();
     }
     
+    /**
+     * Assures the provided name is unique by appending an integer suffix which is unique
+     * across all instances generated
+     * 
+     * @param name the original name
+     * @return the unique name
+     */
     private String makeUniqueClassName(String name) {
         return name + System.nanoTime() + "$" + UNIQUE_CLASS_INDEX.getAndIncrement();
     }
@@ -144,13 +150,22 @@ public class SourceCodeContext {
      * @return true if debug logging is enabled for this context
      */
     public boolean isDebugEnabled() {
-        return logDetails != null;
+        return fieldMapRecorder.isDebugEnabled();
     }
     
+    /**
+     * @param msg
+     */
     public void debug(String msg) {
-        if (isDebugEnabled()) {
-            logDetails.append(msg);
-        }
+        fieldMapRecorder.getLogDetails().append(msg);
+    }
+    
+    /**
+     * @param fieldMap
+     * @param reason
+     */
+    public void mapWithDescription(FieldMap fieldMap, String reason) {
+        fieldMapRecorder.mapWithDescription(fieldMap, reason);
     }
     
     /**
@@ -160,18 +175,30 @@ public class SourceCodeContext {
         return sourceBuilder;
     }
     
+    /**
+     * @return the parent class of the generated class
+     */
     public Class<?> getSuperClass() {
         return superClass;
     }
     
+    /**
+     * @return the simple name of the class to be generated
+     */
     public String getClassSimpleName() {
         return classSimpleName;
     }
     
+    /**
+     * @return the package name of the generated class
+     */
     public String getPackageName() {
         return packageName;
     }
     
+    /**
+     * @return the name to be used for the generated class
+     */
     public String getClassName() {
         return className;
     }
@@ -184,10 +211,25 @@ public class SourceCodeContext {
         return methods;
     }
     
+    
+    /**
+     * @return true if source files are to be written for classes generated using 
+     * this SourceCodeContext
+     */
+    public boolean writesSourceFiles() {
+        return compilerStrategy.writeSourceFiles;
+    }
+    
+    /**
+     * @return true if nulls should be mapped
+     */
     public boolean shouldMapNulls() {
         return (Boolean) mappingContext.getProperty(Properties.SHOULD_MAP_NULLS);
     }
     
+    /**
+     * @return the MappingContext associated with this SourceCodeContext
+     */
     public MappingContext getMappingContext() {
         return mappingContext;
     }
@@ -239,8 +281,7 @@ public class SourceCodeContext {
     
     /**
      * @return a new instance of the (generated) compiled class
-     * @throws CannotCompileException
-     * @throws IOException
+     * @throws SourceCodeGenerationException
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
@@ -253,15 +294,17 @@ public class SourceCodeContext {
         Type<Object>[] usedTypesArray = usedTypes.toArray();
         Converter<Object, Object>[] usedConvertersArray = usedConverters.toArray();
         BoundMapperFacade<Object, Object>[] usedMapperFacadesArray = usedMapperFacades.toArray();
-        if (logDetails != null) {
+        if (fieldMapRecorder.isDebugEnabled()) {
             if (usedTypesArray.length > 0) {
-                logDetails.append("\n\t" + Type.class.getSimpleName() + "s used: " + Arrays.toString(usedTypesArray));
+                fieldMapRecorder.getLogDetails().append("\n\t" + Type.class.getSimpleName() + "s used: " + Arrays.toString(usedTypesArray));
             }
             if (usedConvertersArray.length > 0) {
-                logDetails.append("\n\t" + Converter.class.getSimpleName() + "s used: " + Arrays.toString(usedConvertersArray));
+                fieldMapRecorder.getLogDetails().append(
+                        "\n\t" + Converter.class.getSimpleName() + "s used: " + Arrays.toString(usedConvertersArray));
             }
             if (usedMapperFacadesArray.length > 0) {
-                logDetails.append("\n\t" + BoundMapperFacade.class.getSimpleName() + "s used: " + Arrays.toString(usedMapperFacadesArray));
+                fieldMapRecorder.getLogDetails().append(
+                        "\n\t" + BoundMapperFacade.class.getSimpleName() + "s used: " + Arrays.toString(usedMapperFacadesArray));
             }
         }
         instance.setUsedTypes(usedTypesArray);
@@ -271,16 +314,36 @@ public class SourceCodeContext {
         return instance;
     }
     
+    /**
+     * Returns the source code snippet that can be used to access the specified converter
+     * 
+     * @param converter the converter for which the accessor code should be generated
+     * @return the source code for accessing the converter
+     */
     public String usedConverter(Converter<?, ?> converter) {
         int index = usedConverters.getIndex(converter);
         return "((" + Converter.class.getCanonicalName() + ")usedConverters[" + index + "])";
     }
     
+    /**
+     * Returns the source code snippet that can be used to access the specified type
+     * 
+     * @param type the type for which the accessor code should be generated
+     * @return the source code for accesing the type
+     */
     public String usedType(Type<?> type) {
         int index = usedTypes.getIndex(type);
         return "((" + Type.class.getCanonicalName() + ")usedTypes[" + index + "])";
     }
     
+    /**
+     * Returns the source code snippet representing an access to a BoundMapperFacade that can
+     * be used to map the specified source and destination types
+     * 
+     * @param sourceType
+     * @param destinationType
+     * @return the source code snippet representing access
+     */
     private String usedMapperFacadeCall(Type<?> sourceType, Type<?> destinationType) {
         UsedMapperFacadesIndex usedFacade = usedMapperFacades.getIndex(sourceType, destinationType, mapperFactory);
         String mapInDirection = usedFacade.isReversed ? "mapReverse" : "map";
@@ -288,48 +351,64 @@ public class SourceCodeContext {
     }
     
     /**
+     * Returns the source code snippet representing a call to map the source to map the source
+     * properties onto the destination in-place.
+     * 
      * @param sourceType
      * @param destinationType
      * @param sourceExpression
      * @param destExpression
-     * @return
+     * @return the source code snippet mapping the destination in-place
      */
     public String callMapper(Type<?> sourceType, Type<?> destinationType, String sourceExpression, String destExpression) {
         return usedMapperFacadeCall(sourceType, destinationType) + "(" + sourceExpression + ", " + destExpression + ", mappingContext)";
     }
     
     /**
+     * Returns the source code snippet representing a call to map the source to a new instance of
+     * the destination type
+     * 
      * @param sourceType
      * @param destinationType
      * @param sourceExpression
-     * @return
+     * @return the source code snippet representing the mapping call
      */
     public String callMapper(Type<?> sourceType, Type<?> destinationType, String sourceExpression) {
         return usedMapperFacadeCall(sourceType, destinationType) + "(" + sourceExpression + ", mappingContext)";
     }
     
     /**
+     * Returns the source code snippet representing a call to map the source to map the source
+     * properties onto the destination in-place.
+     * 
      * @param source
      * @param destination
-     * @return
+     * @return the source code snippet representing the in-place mapping
      */
     public String callMapper(VariableRef source, VariableRef destination) {
         return callMapper(source.type(), destination.type(), "" + source, "" + destination);
     }
     
     /**
+     * Returns the source code snippet representing a call to map the source to a new instance of
+     * the destination type.
+     * 
      * @param source
      * @param destination
-     * @return
+     * @return the source code snippet representing the mapping call
      */
     public String callMapper(VariableRef source, Type<?> destination) {
         return callMapper(source.type(), destination, "" + source);
     }
     
-    public String usedMapperFacadeNewObjectCall(VariableRef source, VariableRef destination) {
-        return newObjectFromMapper(source.type(), destination.type());
-    }
-    
+    /**
+     * Returns the source code snippet representing a call to instantiate a new object instance
+     * of the destination type
+     * 
+     * @param sourceType
+     * @param destinationType
+     * @return the source code snippet representing the new instance call
+     */
     public String newObjectFromMapper(Type<?> sourceType, Type<?> destinationType) {
         UsedMapperFacadesIndex usedFacade = usedMapperFacades.getIndex(sourceType, destinationType, mapperFactory);
         String instantiateMethod = usedFacade.isReversed ? "newObjectReverse" : "newObject";
@@ -397,6 +476,12 @@ public class SourceCodeContext {
             end = "\n}\n";
         }
         for (final VariableRef ref : propertyRef.getPath()) {
+            
+            if (!ClassUtil.isConcrete(ref.type()) && !ref.type().isMultiOccurrence()) {
+                if (null == mapperFactory.lookupConcreteDestinationType(source.type(), ref.type(), mappingContext)) {
+                    throw new MappingException("Abstract types are unsupported for nested properties. \n" + ref.name());
+                }
+            }
             
             if (ref.isAssignable()) {
                 append(out, format("if((%s)) { \n", ref.isNull()), ref.assign(newObject(source, ref.type())), "}");
@@ -618,7 +703,7 @@ public class SourceCodeContext {
      * returning true. Otherwise, false is returned.
      * 
      * @param fieldMap
-     * @return
+     * @return true if any aggregate specifications apply for the FieldMap
      */
     public boolean aggregateSpecsApply(FieldMap fieldMap) {
         for (AggregateSpecification spec : codeGenerationStrategy.getAggregateSpecifications()) {
@@ -661,18 +746,18 @@ public class SourceCodeContext {
      *            a variable reference to the destination property
      * @param destinationType
      *            the destination's type
-     * @param logDetails
-     *            a StringBuilder to contain the debug output
+     * @param recorder
+     *            a FieldMapRecorder to record the field mapping results
      * @return a reference to <code>this</code> CodeSourceBuilder
      */
     public String mapFields(FieldMap fieldMap, VariableRef sourceProperty, VariableRef destinationProperty, Type<?> destinationType,
-            StringBuilder logDetails) {
+            FieldMapRecorder recorder) {
         
         StringBuilder out = new StringBuilder();
         StringBuilder closing = new StringBuilder();
         
         if (destinationProperty.isAssignable() || destinationProperty.type().isMultiOccurrence()) {
-        
+            
             if (sourceProperty.isNestedProperty()) {
                 out.append(sourceProperty.ifPathNotNull());
                 out.append("{ \n");
