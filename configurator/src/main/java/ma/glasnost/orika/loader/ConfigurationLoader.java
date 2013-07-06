@@ -16,7 +16,7 @@
 package ma.glasnost.orika.loader;
 
 
-import com.sun.xml.stream.events.XMLEventAllocatorImpl;
+import com.sun.xml.internal.stream.events.XMLEventAllocatorImpl;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.loader.nodetypes.EMappings;
 import ma.glasnost.orika.loader.nodetypes.IElement;
