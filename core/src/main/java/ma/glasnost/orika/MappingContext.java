@@ -82,9 +82,11 @@ public class MappingContext {
     }
     
     /**
+     * Constructs a new MappingContext with the specified (immutable) global properties;
+     * 
      * @param globalProperties
      */
-    protected MappingContext(Map<Object, Object> globalProperties) {
+    public MappingContext(Map<Object, Object> globalProperties) {
         this.mapping = new HashMap<Type<?>, Type<?>>();
         this.typeCache = new OpenIntObjectHashMap();
         this.globalProperties = globalProperties;

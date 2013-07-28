@@ -43,6 +43,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import ma.glasnost.orika.BoundMapperFacade;
 import ma.glasnost.orika.DefaultFieldMapper;
+import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.MapEntry;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFacade;
@@ -99,6 +100,7 @@ public class DefaultMapperFactory implements MapperFactory {
     
     private final Map<MapperKey, ClassMap<Object, Object>> classMapRegistry;
     private final SortedCollection<Mapper<Object, Object>> mappersRegistry;
+    private final SortedCollection<Filter<Object, Object>> filtersRegistry;
     private final MappingContextFactory contextFactory;
     private final MappingContextFactory nonCyclicContextFactory;
     private final ConcurrentHashMap<Type<? extends Object>, ConcurrentHashMap<Type<? extends Object>, ObjectFactory<? extends Object>>> objectFactoryRegistry;
@@ -131,6 +133,7 @@ public class DefaultMapperFactory implements MapperFactory {
         this.compilerStrategy = builder.compilerStrategy;
         this.classMapRegistry = getConcurrentLinkedHashMap(Integer.MAX_VALUE);
         this.mappersRegistry = new SortedCollection<Mapper<Object, Object>>(Ordering.MAPPER);
+        this.filtersRegistry = new SortedCollection<Filter<Object, Object>>(Ordering.FILTER);
         this.explicitAToBRegistry = new ConcurrentHashMap<Type<?>, Set<Type<?>>>();
         this.dynamicAToBRegistry = new ConcurrentHashMap<Type<?>, Set<Type<?>>>();
         this.usedMapperMetadataRegistry = new ConcurrentHashMap<MapperKey, Set<ClassMap<Object, Object>>>();
@@ -138,7 +141,7 @@ public class DefaultMapperFactory implements MapperFactory {
         this.defaultFieldMappers = new CopyOnWriteArrayList<DefaultFieldMapper>();
         this.userUnenahanceStrategy = builder.unenhanceStrategy;
         this.unenhanceStrategy = buildUnenhanceStrategy(builder.unenhanceStrategy, builder.superTypeStrategy);
-        this.contextFactory = new MappingContext.Factory();
+        this.contextFactory = builder.mappingContextFactory;
         this.nonCyclicContextFactory = new NonCyclicMappingContext.Factory(this.contextFactory.getGlobalProperties());
         this.mapperFacade = buildMapperFacade(contextFactory, unenhanceStrategy);
         this.concreteTypeRegistry = new ConcurrentHashMap<java.lang.reflect.Type, Type<?>>();
@@ -171,6 +174,7 @@ public class DefaultMapperFactory implements MapperFactory {
         props.put(Properties.PROPERTY_RESOLVER_STRATEGY, builder.propertyResolverStrategy);
         props.put(Properties.UNENHANCE_STRATEGY, unenhanceStrategy);
         props.put(Properties.MAPPER_FACTORY, this);
+        props.put(Properties.FILTERS, this.filtersRegistry);
         
         /*
          * Register default concrete types for common collection types; these
@@ -242,6 +246,10 @@ public class DefaultMapperFactory implements MapperFactory {
          */
         protected ClassMapBuilderFactory classMapBuilderFactory;
         /**
+         * The MappingContextFactory configured for the MapperFactory
+         */
+        protected MappingContextFactory mappingContextFactory;
+        /**
          * The CodeGenerationStrategy configured for the MapperFactory
          */
         protected CodeGenerationStrategy codeGenerationStrategy = new DefaultCodeGenerationStrategy();
@@ -271,6 +279,7 @@ public class DefaultMapperFactory implements MapperFactory {
             compilerStrategy = UtilityResolver.getDefaultCompilerStrategy();
             propertyResolverStrategy = UtilityResolver.getDefaultPropertyResolverStrategy();
             classMapBuilderFactory = UtilityResolver.getDefaultClassMapBuilderFactory();
+            mappingContextFactory = UtilityResolver.getDefaultMappingContextFactory();
             
             useBuiltinConverters = valueOf(getProperty(USE_BUILTIN_CONVERTERS, "true"));
             useAutoMapping = valueOf(getProperty(USE_AUTO_MAPPING, "true"));
@@ -375,6 +384,17 @@ public class DefaultMapperFactory implements MapperFactory {
          */
         public B classMapBuilderFactory(ClassMapBuilderFactory classMapBuilderFactory) {
             this.classMapBuilderFactory = classMapBuilderFactory;
+            return self();
+        }
+        
+        /**
+         * Configure the MappingContextFactory to use with the generated MapperFactory
+         * 
+         * @param mappingContextFactory
+         * @return a reference to <code>this</code> MapperFactoryBuilder
+         */
+        public B mappingContextFactory(MappingContextFactory mappingContextFactory) {
+            this.mappingContextFactory = mappingContextFactory;
             return self();
         }
         
@@ -1293,5 +1313,13 @@ public class DefaultMapperFactory implements MapperFactory {
     
     public UnenhanceStrategy getUserUnenhanceStrategy() {
         return userUnenahanceStrategy;
+    }
+
+    /* (non-Javadoc)
+     * @see ma.glasnost.orika.MapperFactory#registerFilter(ma.glasnost.orika.Filter)
+     */
+    @SuppressWarnings("unchecked")
+    public void registerFilter(Filter<?, ?> filter) {
+        this.filtersRegistry.add((Filter<Object, Object>) filter);
     }
 }

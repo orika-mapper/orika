@@ -408,4 +408,14 @@ public interface MapperFactory {
 	 * @return the {@link UnenhanceStrategy} associated with this MapperFactory.
 	 */
     public UnenhanceStrategy getUserUnenhanceStrategy();
+    
+    
+    /**
+     * Registers a filter to be applied in the mapping process; such filters may
+     * be used to alter source and destination values of the fields as they
+     * are processed by mappers.
+     * 
+     * @param filter the filter to be registered
+     */
+    public void registerFilter(Filter<?, ?> filter);
 }

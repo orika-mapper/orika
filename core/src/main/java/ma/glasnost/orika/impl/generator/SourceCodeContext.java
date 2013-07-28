@@ -39,12 +39,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javassist.CannotCompileException;
 import ma.glasnost.orika.BoundMapperFacade;
 import ma.glasnost.orika.Converter;
+import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.MapEntry;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.MappingException;
 import ma.glasnost.orika.Properties;
 import ma.glasnost.orika.converter.ConverterFactory;
+import ma.glasnost.orika.impl.AggregateFilter;
 import ma.glasnost.orika.impl.GeneratedObjectBase;
 import ma.glasnost.orika.impl.generator.CompilerStrategy.SourceCodeGenerationException;
 import ma.glasnost.orika.impl.generator.Node.NodeList;
@@ -80,6 +81,7 @@ public class SourceCodeContext {
     
     private final UsedTypesContext usedTypes;
     private final UsedConvertersContext usedConverters;
+    private final UsedFiltersContext usedFilters;
     private final UsedMapperFacadesContext usedMapperFacades;
     private final MapperFactory mapperFactory;
     private final CodeGenerationStrategy codeGenerationStrategy;
@@ -87,23 +89,24 @@ public class SourceCodeContext {
     private final PropertyResolverStrategy propertyResolver;
     private final Map<AggregateSpecification, List<FieldMap>> aggregateFieldMaps;
     private final MappingContext mappingContext;
+    private final Collection<Filter<Object, Object>> filters;
     
     /**
      * Constructs a new instance of SourceCodeContext
      * 
      * @param baseClassName
      * @param superClass
-     * @param compilerStrategy
-     * @param propertyResolver
-     * @param mapperFactory
+     * @param mappingContext
      * @param logDetails
      */
+    @SuppressWarnings("unchecked")
     public SourceCodeContext(final String baseClassName, Class<?> superClass, MappingContext mappingContext, StringBuilder logDetails) {
         
         this.mapperFactory = (MapperFactory) mappingContext.getProperty(Properties.MAPPER_FACTORY);
         this.codeGenerationStrategy = (CodeGenerationStrategy) mappingContext.getProperty(Properties.CODE_GENERATION_STRATEGY);
         this.compilerStrategy = (CompilerStrategy) mappingContext.getProperty(Properties.COMPILER_STRATEGY);
         this.propertyResolver = (PropertyResolverStrategy) mappingContext.getProperty(Properties.PROPERTY_RESOLVER_STRATEGY);
+        this.filters = (Collection<Filter<Object, Object>>) mappingContext.getProperty(Properties.FILTERS);
         
         String safeBaseClassName = baseClassName.replace("[]", "$Array");
         this.sourceBuilder = new StringBuilder();
@@ -128,6 +131,7 @@ public class SourceCodeContext {
         
         this.usedTypes = new UsedTypesContext();
         this.usedConverters = new UsedConvertersContext();
+        this.usedFilters = new UsedFiltersContext();
         
         this.mappingContext = mappingContext;
         this.usedMapperFacades = new UsedMapperFacadesContext();
@@ -253,6 +257,7 @@ public class SourceCodeContext {
         Type<Object>[] usedTypesArray = usedTypes.toArray();
         Converter<Object, Object>[] usedConvertersArray = usedConverters.toArray();
         BoundMapperFacade<Object, Object>[] usedMapperFacadesArray = usedMapperFacades.toArray();
+        Filter<Object, Object>[] usedFiltersArray = usedFilters.toArray();
         if (logDetails != null) {
             if (usedTypesArray.length > 0) {
                 logDetails.append("\n\t" + Type.class.getSimpleName() + "s used: " + Arrays.toString(usedTypesArray));
@@ -263,12 +268,21 @@ public class SourceCodeContext {
             if (usedMapperFacadesArray.length > 0) {
                 logDetails.append("\n\t" + BoundMapperFacade.class.getSimpleName() + "s used: " + Arrays.toString(usedMapperFacadesArray));
             }
+            if (usedFiltersArray.length > 0) {
+                logDetails.append("\n\t" + Filter.class.getSimpleName() + "s used: " + Arrays.toString(usedFiltersArray));
+            }
         }
         instance.setUsedTypes(usedTypesArray);
         instance.setUsedConverters(usedConvertersArray);
         instance.setUsedMapperFacades(usedMapperFacadesArray);
+        instance.setUsedFilters(usedFiltersArray);
         
         return instance;
+    }
+    
+    public String usedFilter(Filter<?, ?> filter) {
+        int index = usedFilters.getIndex(filter);
+        return "((" + Filter.class.getCanonicalName() + ")usedFilters[" + index + "])";
     }
     
     public String usedConverter(Converter<?, ?> converter) {
@@ -618,7 +632,7 @@ public class SourceCodeContext {
      * returning true. Otherwise, false is returned.
      * 
      * @param fieldMap
-     * @return
+     * @return true if aggregate specifications should be applied to the provided field map
      */
     public boolean aggregateSpecsApply(FieldMap fieldMap) {
         for (AggregateSpecification spec : codeGenerationStrategy.getAggregateSpecifications()) {
@@ -672,7 +686,7 @@ public class SourceCodeContext {
         StringBuilder closing = new StringBuilder();
         
         if (destinationProperty.isAssignable() || destinationProperty.type().isMultiOccurrence()) {
-        
+            
             if (sourceProperty.isNestedProperty()) {
                 out.append(sourceProperty.ifPathNotNull());
                 out.append("{ \n");
@@ -695,6 +709,26 @@ public class SourceCodeContext {
             Converter<Object, Object> converter = getConverter(fieldMap, fieldMap.getConverterId());
             sourceProperty.setConverter(converter);
             
+            /*
+             * TODO: need code which collects all of the applicable filters and
+             * adds them into an aggregate filter object
+             */
+            Filter<Object, Object> filter = getFilter(sourceProperty, destinationProperty);
+            if (filter != null) {
+                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, \"%s\", mappingContext)) {", 
+                        usedFilter(filter), 
+                        usedType(sourceProperty.type()),
+                        sourceProperty.name(), 
+                        usedType(destinationProperty.type()), 
+                        destinationProperty.name()));
+                
+                sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
+                destinationProperty = getDestFilter(sourceProperty, destinationProperty, filter);
+                
+                // need to set source property
+                closing.insert(0, "\n}\n");
+            }
+            
             for (Specification spec : codeGenerationStrategy.getSpecifications()) {
                 if (spec.appliesTo(fieldMap)) {
                     String code = spec.generateMappingCode(fieldMap, sourceProperty, destinationProperty, this);
@@ -710,6 +744,94 @@ public class SourceCodeContext {
             out.append(closing.toString());
         }
         return out.toString();
+    }
+    
+    /**
+     * Proxies the destination property as necessary for filters that filter
+     * destination values.
+     * 
+     * @param destinationProperty
+     * @param filter
+     * @return
+     */
+    private VariableRef getDestFilter(final VariableRef src, final VariableRef dest, final Filter<Object, Object> filter) {
+        
+        if (filter.filtersDestination()) {
+            return new VariableRef(dest.property(), dest.owner()) {
+                
+                private String setter;
+                
+                @Override
+                protected String setter() {
+                    if (setter == null) {
+                        String destinationValue = "%s";
+                        if (dest.isPrimitive()) {
+                            destinationValue = ClassUtil.getWrapperType(dest.rawType()).getCanonicalName() + ".valueOf(%s)";
+                        }
+                        String filteredValue = format("%s.filterDestination(%s, %s, \"%s\", %s, \"%s\", mappingContext)", usedFilter(filter),
+                                destinationValue, usedType(src.type()), src.name(), usedType(dest.type()), dest.name()).replace("$$$", "%s");
+                        
+                        setter = super.setter().replace("%s", dest.cast(filteredValue));
+                    }
+                    return setter;
+                }
+            };
+        }
+        
+        return dest;
+    }
+    
+    /**
+     * Proxies the source property as necessary for filters that filter source
+     * values.
+     * 
+     * @param sourceProperty
+     * @param filter
+     * @return
+     */
+    private VariableRef getSourceFilter(final VariableRef src, final VariableRef dest, final Filter<Object, Object> filter) {
+        if (filter.filtersSource()) {
+            return new VariableRef(src.property(), src.owner()) {
+                
+                private String getter;
+                
+                @Override
+                protected String getter() {
+                    if (getter == null) {
+                        getter = src.cast(format("%s.filterSource(%s, %s, \"%s\", %s, \"%s\", mappingContext)", usedFilter(filter),
+                                super.asWrapper(), usedType(src.type()), src.name(), usedType(dest.type()), dest.name()));
+                    }
+                    return getter;
+                }
+            };
+        }
+        
+        return src;
+    }
+    
+    /**
+     * Locates all of the filters that apply to the specified source and
+     * destination properties, and creates a single aggregate filter from them,
+     * which is then returned.<br>
+     * If no filters apply, then null is returned.
+     * 
+     * @param sourceProperty
+     * @param destinationProperty
+     * @return
+     */
+    private Filter<Object, Object> getFilter(VariableRef sourceProperty, VariableRef destinationProperty) {
+        
+        List<Filter<Object, Object>> applicableFilters = new ArrayList<Filter<Object, Object>>();
+        for (Filter<Object, Object> filter : filters) {
+            applicableFilters.add(filter);
+        }
+        if (applicableFilters.isEmpty()) {
+            return null;
+        } else if (applicableFilters.size() == 1) {
+            return applicableFilters.get(0);
+        } else {
+            return new AggregateFilter(applicableFilters);
+        }
     }
     
     /**

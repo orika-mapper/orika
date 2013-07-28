@@ -82,6 +82,13 @@ public final class OrikaSystemProperties {
     public static final String CLASSMAP_BUILDER_FACTORY = "ma.glasnost.orika.classMapBuilderFactory";
     
     /**
+     * Specifies the fully-qualified class name of the MappingContextFactory to be used by
+     * the default mapper factory to generate new MappingContext instances. <br><br>
+     * default value is {@link ma.glasnost.orika.MappingContext.Factory}
+     */
+    public static final String MAPPING_CONTEXT_FACTORY = "ma.glasnost.orika.mappingContextFactory";
+    
+    /**
      * Specifies the fully-qualified class name of the converter factory to use when generating converters
      * for target types;<br><br>
      * default value is determined by the MapperFactory implementation.
