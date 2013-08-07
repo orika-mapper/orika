@@ -408,4 +408,6 @@ public interface MapperFactory {
 	 * @return the {@link UnenhanceStrategy} associated with this MapperFactory.
 	 */
     public UnenhanceStrategy getUserUnenhanceStrategy();
+
+    public boolean isCopyByReference();
 }

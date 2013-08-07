@@ -281,6 +281,8 @@ public class MapperFacadeImpl implements MapperFacade {
     private <D, S> boolean canCopyByReference(Type<D> destinationType, final Type<S> resolvedSourceType) {
         if (ClassUtil.isImmutable(resolvedSourceType) && (destinationType.isAssignableFrom(resolvedSourceType))) {
             return true;
+        } else if (destinationType.equals(resolvedSourceType) && mapperFactory.isCopyByReference()) {
+            return true;
         } else if (resolvedSourceType.isPrimitiveWrapper()
                 && resolvedSourceType.getRawType().equals(ClassUtil.getWrapperType(destinationType.getRawType()))) {
             return true;
