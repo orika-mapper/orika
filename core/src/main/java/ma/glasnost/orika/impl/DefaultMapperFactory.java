@@ -20,9 +20,7 @@ package ma.glasnost.orika.impl;
 
 import static java.lang.Boolean.valueOf;
 import static java.lang.System.getProperty;
-import static ma.glasnost.orika.OrikaSystemProperties.MAP_NULLS;
-import static ma.glasnost.orika.OrikaSystemProperties.USE_AUTO_MAPPING;
-import static ma.glasnost.orika.OrikaSystemProperties.USE_BUILTIN_CONVERTERS;
+import static ma.glasnost.orika.OrikaSystemProperties.*;
 import static ma.glasnost.orika.util.HashMapUtility.getConcurrentLinkedHashMap;
 
 import java.lang.reflect.Constructor;
@@ -119,7 +117,6 @@ public class DefaultMapperFactory implements MapperFactory {
     private final boolean useBuiltinConverters;
     private volatile boolean isBuilt = false;
     private volatile boolean isBuilding = false;
-    private boolean copyByReference = false;
 
     /**
      * Constructs a new instance of DefaultMapperFactory
@@ -130,7 +127,6 @@ public class DefaultMapperFactory implements MapperFactory {
         
         this.converterFactory = builder.converterFactory;
         this.compilerStrategy = builder.compilerStrategy;
-        this.copyByReference = builder.copyByReference;
         this.classMapRegistry = getConcurrentLinkedHashMap(Integer.MAX_VALUE);
         this.mappersRegistry = new SortedCollection<Mapper<Object, Object>>(Ordering.MAPPER);
         this.explicitAToBRegistry = new ConcurrentHashMap<Type<?>, Set<Type<?>>>();
@@ -168,6 +164,7 @@ public class DefaultMapperFactory implements MapperFactory {
         
         Map<Object, Object> props = this.contextFactory.getGlobalProperties();
         props.put(Properties.SHOULD_MAP_NULLS, builder.mapNulls);
+        props.put(Properties.COPY_BY_REFERENCE, builder.copyByReference);
         props.put(Properties.CODE_GENERATION_STRATEGY, builder.codeGenerationStrategy);
         props.put(Properties.COMPILER_STRATEGY, builder.compilerStrategy);
         props.put(Properties.PROPERTY_RESOLVER_STRATEGY, builder.propertyResolverStrategy);
@@ -183,10 +180,6 @@ public class DefaultMapperFactory implements MapperFactory {
         this.registerConcreteType(Set.class, LinkedHashSet.class);
         this.registerConcreteType(Map.class, LinkedHashMap.class);
         this.registerConcreteType(Map.Entry.class, MapEntry.class);
-    }
-
-    public boolean isCopyByReference() {
-        return copyByReference;
     }
 
     /**
@@ -268,7 +261,11 @@ public class DefaultMapperFactory implements MapperFactory {
          */
         protected Boolean mapNulls;
 
-        protected boolean copyByReference = false;
+        /**
+         * The configured value of whether same classes values should be copied; if false
+         * they will be cloned, else will be copied by reference
+         */
+        protected boolean copyByReference;
 
         /**
          * Instantiates a new MapperFactoryBuilder
@@ -282,11 +279,7 @@ public class DefaultMapperFactory implements MapperFactory {
             useBuiltinConverters = valueOf(getProperty(USE_BUILTIN_CONVERTERS, "true"));
             useAutoMapping = valueOf(getProperty(USE_AUTO_MAPPING, "true"));
             mapNulls = valueOf(getProperty(MAP_NULLS, "true"));
-        }
-
-        public MapperFactoryBuilder copyByReference(boolean b) {
-            copyByReference = b;
-            return this;
+            copyByReference = valueOf(getProperty(COPY_BY_REFERENCE, "false"));
         }
 
         /**
@@ -438,6 +431,11 @@ public class DefaultMapperFactory implements MapperFactory {
             return self();
         }
         
+        public B copyByReference(boolean copyByReference) {
+            this.copyByReference = copyByReference;
+            return self();
+        }
+
         /**
          * Get a reference to the CodeGenerationStrategy associated with this MapperFactory,
          * which may be used to configure/customize the individual mapping Specifications

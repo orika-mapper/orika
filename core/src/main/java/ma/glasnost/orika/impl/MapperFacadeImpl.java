@@ -29,15 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.MapEntry;
-import ma.glasnost.orika.Mapper;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.MappingContextFactory;
-import ma.glasnost.orika.MappingException;
-import ma.glasnost.orika.ObjectFactory;
+import ma.glasnost.orika.*;
 import ma.glasnost.orika.converter.ConverterFactory;
 import ma.glasnost.orika.impl.mapping.strategy.MappingStrategy;
 import ma.glasnost.orika.impl.mapping.strategy.MappingStrategyKey;
@@ -281,7 +273,7 @@ public class MapperFacadeImpl implements MapperFacade {
     private <D, S> boolean canCopyByReference(Type<D> destinationType, final Type<S> resolvedSourceType) {
         if (ClassUtil.isImmutable(resolvedSourceType) && (destinationType.isAssignableFrom(resolvedSourceType))) {
             return true;
-        } else if (destinationType.equals(resolvedSourceType) && mapperFactory.isCopyByReference()) {
+        } else if (destinationType.equals(resolvedSourceType) && (Boolean) contextFactory.getContext().getProperty(Properties.COPY_BY_REFERENCE)) {
             return true;
         } else if (resolvedSourceType.isPrimitiveWrapper()
                 && resolvedSourceType.getRawType().equals(ClassUtil.getWrapperType(destinationType.getRawType()))) {

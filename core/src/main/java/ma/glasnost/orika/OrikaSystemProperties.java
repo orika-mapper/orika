@@ -101,6 +101,12 @@ public final class OrikaSystemProperties {
     public static final String MAP_NULLS = "ma.glasnost.orika.mapNulls";
     
     /**
+     * Specifies whether same classes values should be copied by reference.
+     * default value is <code>false</code>
+     */
+    public static final String COPY_BY_REFERENCE = "ma.glasnost.orika.copyByReference";
+
+    /**
      * Specifies whether to use built-in converters
      * default value is <code>true</code>
      */

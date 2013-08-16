@@ -23,6 +23,7 @@ package ma.glasnost.orika;
  */
 public enum Properties {
     SHOULD_MAP_NULLS,
+    COPY_BY_REFERENCE,
     LOG_DETAILS,
     MAPPER_FACTORY,
     CODE_GENERATION_STRATEGY,
