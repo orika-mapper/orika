@@ -38,6 +38,10 @@
         <value>ma.glasnost.orika.test.unenhance.inheritance.MyEntity</value>
         <value>ma.glasnost.orika.test.unenhance.inheritance.Sub1Entity</value>
         <value>ma.glasnost.orika.test.unenhance.inheritance.Sub2Entity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance2.AbstractEntity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance2.RoomEntity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance2.PersonEntity</value>
+        <value>ma.glasnost.orika.test.unenhance.inheritance2.OwnerEntity</value>
       </list>
     </property>
     <property name="hibernateProperties">
