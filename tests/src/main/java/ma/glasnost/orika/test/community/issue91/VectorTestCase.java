@@ -1,21 +1,3 @@
-/*
- * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ma.glasnost.orika.test.community.issue91;
 
 import java.math.BigDecimal;
@@ -23,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
@@ -36,10 +18,12 @@ public class VectorTestCase {
     @Test
     public void test() {
         
-        factory.classMap(XTrade.class, Trade.class)
-               .fieldMap("fees").bElementType(Fee.class).add()
-               .byDefault()
-               .register();
+        // Property.Builder builder = new Property.Builder();
+        // builder.merge(UtilityResolver.getDefaultPropertyResolverStrategy().getProperty(Trade.class,
+        // "fees"));
+        // Property fees = builder.elementType(TypeFactory.valueOf()).build();
+        
+        factory.classMap(XTrade.class, Trade.class).fieldMap("fees").bElementType(Fee.class).add().byDefault().register();
         
         XTrade xtrade = new XTrade();
         XFee xfee = new XFee();

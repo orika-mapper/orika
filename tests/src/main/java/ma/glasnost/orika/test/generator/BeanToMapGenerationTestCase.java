@@ -1,27 +1,9 @@
-/*
- * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ma.glasnost.orika.test.generator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.UtilityResolver;
@@ -33,12 +15,9 @@ import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.property.PropertyResolverStrategy;
 import ma.glasnost.orika.test.MappingUtil;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class BeanToMapGenerationTestCase {
-
-    private final double DELTA = 0.00001;
 
 	@Test
 	public void testBeanToMapGeneration() throws Exception {
@@ -87,8 +66,8 @@ public class BeanToMapGenerationTestCase {
         Assert.assertEquals(student.name.first, mapBack.name.first);
         Assert.assertEquals(student.name.last, mapBack.name.last);
         Assert.assertEquals(student.grade.letter, mapBack.grade.letter);
-        Assert.assertEquals(student.grade.percentage, mapBack.grade.percentage, DELTA);
-        Assert.assertEquals(student.grade.point, mapBack.grade.point, DELTA);
+        Assert.assertEquals(student.grade.percentage, mapBack.grade.percentage);
+        Assert.assertEquals(student.grade.point, mapBack.grade.point);
 		
 	}
 	
@@ -140,8 +119,8 @@ public class BeanToMapGenerationTestCase {
         Assert.assertEquals(student.name.first, mapBack.name.first);
         Assert.assertEquals(student.name.last, mapBack.name.last);
         Assert.assertEquals(student.grade.letter, mapBack.grade.letter);
-        Assert.assertEquals(student.grade.percentage, mapBack.grade.percentage, DELTA);
-        Assert.assertEquals(student.grade.point, mapBack.grade.point, DELTA);
+        Assert.assertEquals(student.grade.percentage, mapBack.grade.percentage);
+        Assert.assertEquals(student.grade.point, mapBack.grade.point);
         
     }
 	

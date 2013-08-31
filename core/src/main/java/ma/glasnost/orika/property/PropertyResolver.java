@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,8 +369,7 @@ public abstract class PropertyResolver implements PropertyResolverStrategy {
      * @return true of the expression represents a nested property
      */
     protected boolean isNestedPropertyExpression(String expression) {
-//        return expression.replaceAll("\\:\\{" + NON_NESTED_PROPERTY_CHARACTERS + "\\}", "").indexOf('.') != -1;
-        return expression.replaceAll("\\:\\{" + DYNAMIC_PROPERTY_CHARACTERS + "\\}", "").indexOf('.') != -1;
+        return expression.replaceAll("\\:\\{" + NON_NESTED_PROPERTY_CHARACTERS + "\\}", "").indexOf('.') != -1;
     }
     
     /**

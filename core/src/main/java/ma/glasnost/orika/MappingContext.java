@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,11 +82,9 @@ public class MappingContext {
     }
     
     /**
-     * Constructs a new MappingContext with the specified (immutable) global properties;
-     * 
      * @param globalProperties
      */
-    public MappingContext(Map<Object, Object> globalProperties) {
+    protected MappingContext(Map<Object, Object> globalProperties) {
         this.mapping = new HashMap<Type<?>, Type<?>>();
         this.typeCache = new OpenIntObjectHashMap();
         this.globalProperties = globalProperties;

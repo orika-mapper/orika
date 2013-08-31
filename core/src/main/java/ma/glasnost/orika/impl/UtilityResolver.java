@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 
 package ma.glasnost.orika.impl;
 
-import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.MappingContextFactory;
 import ma.glasnost.orika.OrikaSystemProperties;
 import ma.glasnost.orika.constructor.ConstructorResolverStrategy;
 import ma.glasnost.orika.constructor.SimpleConstructorResolverStrategy;
@@ -45,7 +43,7 @@ public abstract class UtilityResolver {
      * Provides a default compiler strategy, favoring a type specified in the
      * appropriate system property if found.
      * 
-     * @return the default instance of CompilerStrategy
+     * @return
      */
     public static CompilerStrategy getDefaultCompilerStrategy() {
         return resolveUtility(OrikaSystemProperties.COMPILER_STRATEGY, JavassistCompilerStrategy.class);
@@ -55,7 +53,7 @@ public abstract class UtilityResolver {
      * Provides a default constructor resolver strategy, favoring a type
      * specified in the appropriate system property if found.
      * 
-     * @return the default instance of ConverterFactory
+     * @return
      */
     public static ConverterFactory getDefaultConverterFactory() {
         return resolveUtility(OrikaSystemProperties.CONVERTER_FACTORY, DefaultConverterFactory.class);
@@ -65,7 +63,7 @@ public abstract class UtilityResolver {
      * Provides a default constructor resolver strategy, favoring a type
      * specified in the appropriate system property if found.
      * 
-     * @return the default instance of ConstructorResolverStrategy
+     * @return
      */
     public static ConstructorResolverStrategy getDefaultConstructorResolverStrategy() {
         return resolveUtility(OrikaSystemProperties.CONSTRUCTOR_RESOLVER_STRATEGY, SimpleConstructorResolverStrategy.class);
@@ -75,7 +73,7 @@ public abstract class UtilityResolver {
      * Provides a default constructor resolver strategy, favoring a type
      * specified in the appropriate system property if found.
      * 
-     * @return the default instance of PropertyResolverStrategy
+     * @return
      */
     public static PropertyResolverStrategy getDefaultPropertyResolverStrategy() {
         return resolveUtility(OrikaSystemProperties.PROPERTY_RESOLVER_STRATEGY, IntrospectorPropertyResolver.class);
@@ -86,20 +84,10 @@ public abstract class UtilityResolver {
      * Provides a default ClassMapBuilderFactory instance, favoring a type
      * specified in the appropriate system property if found.
      * 
-     * @return the default instance of ClassMapBuilderFactory
+     * @return
      */
     public static ClassMapBuilderFactory getDefaultClassMapBuilderFactory() {
         return resolveUtility(OrikaSystemProperties.CLASSMAP_BUILDER_FACTORY, ClassMapBuilder.Factory.class);
-    }
-    
-    /**
-     * Provides a default ClassMapBuilderFactory instance, favoring a type
-     * specified in the appropriate system property if found.
-     * 
-     * @return the default instance of MappingContextFactory
-     */
-    public static MappingContextFactory getDefaultMappingContextFactory() {
-        return resolveUtility(OrikaSystemProperties.MAPPING_CONTEXT_FACTORY, MappingContext.Factory.class);
     }
     
     /**

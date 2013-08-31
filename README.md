@@ -3,6 +3,10 @@ Orika ! [![Build Status](https://secure.travis-ci.org/orika-mapper/orika.png)](h
 
 **NEW** We are pleased to announce the release of Orika **1.4.3** ! _This version is available on Maven central repository_ 
 
+
+Also, check out our new [FAQ](https://github.com/elaatifi/orika/wiki/FAQ)
+
+
 What?
 =====
 

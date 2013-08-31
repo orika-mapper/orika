@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,34 +142,31 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
     	    	 int exactMatches = 0;
     	    	 java.lang.reflect.Type[] params = constructor.getGenericParameterTypes();
     	    	 Type<?>[] parameterTypes = new Type[params.length];
-    	    	 
-    	    	 if (targetTypes.size() >= parameterTypes.length) {
-            	     for (int i=0; i < params.length; ++i) {
-            	    	java.lang.reflect.Type param = params[i];
-            	    	
-            	    	parameterTypes[i] = TypeFactory.valueOf(param);
-        	    		for (Iterator<FieldMap> iter = targetTypes.iterator(); iter.hasNext();) {
-        	    			FieldMap fieldMap = iter.next();
-        	    			Type<?> targetType = fieldMap.getDestination().getType();
-        	    			if ((parameterTypes[i].equals(targetType) && ++exactMatches != 0) 
-        	    			        || parameterTypes[i].isAssignableFrom(targetType) ) {
-        	    				++matchScore;
-        	    				
-        	    				String parameterName = fieldMap.getDestination().getName();
-                				FieldMap existingField = targetParameters.get(parameterName);
-                				FieldMap argumentMap = mapConstructorArgument(existingField, parameterTypes[i], byDefault);
-                				constructorMapping.getMappedFields().add(argumentMap);
-        	    				
-        	    				iter.remove();
-        	    				break;
-        	    			} 
-        	    		}
-        	    	 }
-            		 constructorMapping.setParameterTypes(parameterTypes);
-            	     constructorMapping.setConstructor(constructor);
-            	     constructorMapping.setDeclaredParameters(declaredParameterNames);
-            	     constructorsByMatchedParams.put((matchScore*1000 + exactMatches), constructorMapping); 
+        	     for (int i=0; i < params.length; ++i) {
+        	    	java.lang.reflect.Type param = params[i];
+        	    	
+        	    	parameterTypes[i] = TypeFactory.valueOf(param);
+    	    		for (Iterator<FieldMap> iter = targetTypes.iterator(); iter.hasNext();) {
+    	    			FieldMap fieldMap = iter.next();
+    	    			Type<?> targetType = fieldMap.getDestination().getType();
+    	    			if ((parameterTypes[i].equals(targetType) && ++exactMatches != 0) 
+    	    			        || parameterTypes[i].isAssignableFrom(targetType) ) {
+    	    				++matchScore;
+    	    				
+    	    				String parameterName = fieldMap.getDestination().getName();
+            				FieldMap existingField = targetParameters.get(parameterName);
+            				FieldMap argumentMap = mapConstructorArgument(existingField, parameterTypes[i], byDefault);
+            				constructorMapping.getMappedFields().add(argumentMap);
+    	    				
+    	    				iter.remove();
+    	    				break;
+    	    			} 
+    	    		}
     	    	 }
+        		 constructorMapping.setParameterTypes(parameterTypes);
+        	     constructorMapping.setConstructor(constructor);
+        	     constructorMapping.setDeclaredParameters(declaredParameterNames);
+        	     constructorsByMatchedParams.put((matchScore*1000 + exactMatches), constructorMapping); 
         	}
         }
         

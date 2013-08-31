@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 
 package ma.glasnost.orika.test.converter;
 
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import ma.glasnost.orika.test.MappingUtil;
 
 import org.junit.Test;
-import org.junit.Assert;
 
 public class ConverterTestCase {
     
@@ -33,9 +33,9 @@ public class ConverterTestCase {
         
         factory.getConverterFactory().registerConverter(new LongToStringConverter());
         
-        factory.classMap(A.class, B.class).field("id", "string")
-               .register();
-
+        factory.registerClassMap(ClassMapBuilder.map(A.class, B.class).field("id", "string").toClassMap());
+        
+        factory.build();
         
         A source = new A();
         source.setId(42L);

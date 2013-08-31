@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ package ma.glasnost.orika.test.converter;
 import java.util.Calendar;
 import java.util.Date;
 
-
+import junit.framework.Assert;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.converter.ConverterFactory;
 import ma.glasnost.orika.converter.builtin.BuiltinConverters;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.metadata.Type;
@@ -33,7 +32,6 @@ import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.test.MappingUtil;
 
 import org.junit.Test;
-import org.junit.Assert;
 
 /**
  * This test case is intended to assert the resolution behavior
@@ -51,7 +49,7 @@ public class ConverterResolutionTestCase {
         MapperFactory factory = MappingUtil.getMapperFactory();
         
         factory.getConverterFactory().registerConverter(new NameToStringConverter());
-
+        //factory.registerClassMap(factory.classMap(A.class, B.class).field("id", "string").toClassMap());
         
         Converter<?,?> converter = factory.getConverterFactory().getConverter(TypeFactory.valueOf(Name.class), TypeFactory.valueOf(String.class));
         
@@ -61,12 +59,11 @@ public class ConverterResolutionTestCase {
     @Test
     public void testResolveMultipleConverters() {
         MapperFactory factory = MappingUtil.getMapperFactory();
-
-        ConverterFactory converterFactory = factory.getConverterFactory();
-        converterFactory.registerConverter(new ExtendedNameToStringConverter());
-        converterFactory.registerConverter(new NameToStringConverter());
         
-        Converter<?,?> converter = converterFactory.getConverter(TypeFactory.valueOf(ExtendedName.class), TypeFactory.valueOf(String.class));
+        factory.getConverterFactory().registerConverter(new ExtendedNameToStringConverter());
+        factory.getConverterFactory().registerConverter(new NameToStringConverter());
+        
+        Converter<?,?> converter = factory.getConverterFactory().getConverter(TypeFactory.valueOf(ExtendedName.class), TypeFactory.valueOf(String.class));
         
         Assert.assertEquals(ExtendedNameToStringConverter.class, converter.getClass());
     }
@@ -74,12 +71,11 @@ public class ConverterResolutionTestCase {
     @Test
     public void testResolveMultipleConvertersOutOfOrder() {
         MapperFactory factory = MappingUtil.getMapperFactory();
-
-        ConverterFactory converterFactory = factory.getConverterFactory();
-        converterFactory.registerConverter(new NameToStringConverter());
-        converterFactory.registerConverter(new ExtendedNameToStringConverter());
         
-        Converter<?,?> converter = converterFactory.getConverter(TypeFactory.valueOf(ExtendedName.class), TypeFactory.valueOf(String.class));
+        factory.getConverterFactory().registerConverter(new NameToStringConverter());
+        factory.getConverterFactory().registerConverter(new ExtendedNameToStringConverter());
+        
+        Converter<?,?> converter = factory.getConverterFactory().getConverter(TypeFactory.valueOf(ExtendedName.class), TypeFactory.valueOf(String.class));
         
         Assert.assertEquals(ExtendedNameToStringConverter.class, converter.getClass());
     }

@@ -1,20 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ma.glasnost.orika</groupId>
 	<artifactId>orika-parent</artifactId>
 	<name>Orika - parent</name>
 	<version>1.4.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<description>Orika parent project</description>
+	<url>http://code.google.com/p/orika</url>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-
-	<description>Simpler, better and faster Java bean mapping framework</description>
-	<url>http://code.google.com/p/orika</url>
 
 	<organization>
 		<name>Glasnost</name>
@@ -264,17 +262,11 @@
 				<version>0.5-rc1</version>
 				<scope>test</scope>
 			</dependency>
-
+			
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-library</artifactId>
 				<version>1.3</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>2.2.7</version>
 			</dependency>
 
 		</dependencies>

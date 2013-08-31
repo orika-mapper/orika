@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Map;
 
 import ma.glasnost.orika.BoundMapperFacade;
 import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.mapping.strategy.MappingStrategy;
@@ -38,7 +37,6 @@ public abstract class GeneratedObjectBase {
     protected Type<?>[] usedTypes;
     protected Converter<Object, Object>[] usedConverters;
     protected BoundMapperFacade<Object, Object>[] usedMapperFacades;
-    protected Filter<Object, Object>[] usedFilters;
     protected MapperFacade mapperFacade;
     protected boolean fromAutoMapping;
     
@@ -56,10 +54,6 @@ public abstract class GeneratedObjectBase {
     
     public void setUsedMapperFacades(BoundMapperFacade<Object, Object>[] usedMapperFacades) {
         this.usedMapperFacades = usedMapperFacades;
-    }
-    
-    public void setUsedFilters(Filter<Object, Object>[] usedFilters) {
-        this.usedFilters = usedFilters;
     }
     
     public boolean isFromAutoMapping() {

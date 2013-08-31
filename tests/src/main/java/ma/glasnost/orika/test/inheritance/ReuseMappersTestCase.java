@@ -1,21 +1,3 @@
-/*
- * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ma.glasnost.orika.test.inheritance;
 
 import ma.glasnost.orika.MapperFacade;
@@ -34,26 +16,26 @@ public class ReuseMappersTestCase {
         MapperFactory factory = MappingUtil.getMapperFactory();
         
         {
-            factory.classMap(Location.class, LocationDTO.class)
-                   .field("x", "coordinateX")
-                   .field("y", "coordinateY")
-                   .register();
+            ClassMapBuilder<Location, LocationDTO> builder = ClassMapBuilder.map(Location.class, LocationDTO.class);
+            builder.field("x", "coordinateX").field("y", "coordinateY");
+            factory.registerClassMap(builder.toClassMap());
+            
         }
         
         {
-            factory.classMap(NamedLocation.class, NamedLocationDTO.class)
-                    .use(Location.class, LocationDTO.class)
-                    .field("name", "label")
-                    .register();
+            ClassMapBuilder<NamedLocation, NamedLocationDTO> builder = ClassMapBuilder.map(NamedLocation.class, NamedLocationDTO.class);
+            builder.use(Location.class, LocationDTO.class).field("name", "label");
+            factory.registerClassMap(builder.toClassMap());
         }
         
         {
-            factory.classMap(City.class, CityDTO.class)
-                    .use(NamedLocation.class, NamedLocationDTO.class)
-                    .byDefault()
-                    .register();
+            ClassMapBuilder<City, CityDTO> builder = ClassMapBuilder.map(City.class, CityDTO.class);
+            builder.use(NamedLocation.class, NamedLocationDTO.class).byDefault();
+            factory.registerClassMap(builder.toClassMap());
         }
-
+        
+        factory.build();
+        
         MapperFacade mapper = factory.getMapperFacade();
         
         City city = new City();

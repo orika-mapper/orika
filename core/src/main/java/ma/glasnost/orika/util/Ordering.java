@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 package ma.glasnost.orika.util;
 
 import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Type;
@@ -61,7 +60,7 @@ public abstract class Ordering<T> {
     }
     
     /**
-     * An ordering specific to mapper keys
+     * 
      */
     public static final Ordering<MapperKey> MAPPER_KEY = new Ordering<MapperKey>() {
         public OrderingRelation order(MapperKey mapper1, MapperKey mapper2) {
@@ -70,19 +69,10 @@ public abstract class Ordering<T> {
     };
     
     /**
-     * An ordering specific to Mappers
+     * 
      */
     public static final Ordering<Mapper<Object, Object>> MAPPER = new Ordering<Mapper<Object, Object>>() {
         public OrderingRelation order(Mapper<Object, Object> mapper1, Mapper<Object, Object> mapper2) {
-            return Ordering.compare(mapper1.getAType(), mapper1.getBType(), mapper2.getAType(), mapper2.getBType(), true);
-        }
-    };
-    
-    /**
-     * An ordering specific to Filters
-     */
-    public static final Ordering<Filter<Object, Object>> FILTER = new Ordering<Filter<Object, Object>>() {
-        public OrderingRelation order(Filter<Object, Object> mapper1, Filter<Object, Object> mapper2) {
             return Ordering.compare(mapper1.getAType(), mapper1.getBType(), mapper2.getAType(), mapper2.getBType(), true);
         }
     };

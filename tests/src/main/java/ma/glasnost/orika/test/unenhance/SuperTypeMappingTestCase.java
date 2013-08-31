@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,23 +96,19 @@ public class SuperTypeMappingTestCase {
         
         MapperFactory factory = MappingUtil.getMapperFactory();
         
-        factory.classMap(Library.class, LibraryMyDTO.class)
+        factory.registerClassMap(ClassMapBuilder.map(Library.class, LibraryMyDTO.class)
                 .field("title", "myTitle")
                 .field("books", "myBooks")
                 .byDefault()
-                .register();
+                .toClassMap());
         
-        factory.classMap(Author.class, AuthorMyDTO.class)
-               .field("name", "myName")
-               .byDefault()
-               .register();
-
-        factory.classMap(Book.class, BookMyDTO.class)
+        factory.registerClassMap(ClassMapBuilder.map(Author.class, AuthorMyDTO.class).field("name", "myName").byDefault().toClassMap());
+        factory.registerClassMap(ClassMapBuilder.map(Book.class, BookMyDTO.class)
                 .field("title", "myTitle")
                 .field("author", "myAuthor")
                 .byDefault()
-                .register();
-
+                .toClassMap());
+        factory.build();
         
         MapperFacade mapper = factory.getMapperFacade();
         
@@ -132,24 +128,19 @@ public class SuperTypeMappingTestCase {
     public void testMappingInterfaceImplementationWithExistingInheritedMapping() throws Exception {
         
         MapperFactory factory = MappingUtil.getMapperFactory();
-        factory.classMap(Library.class, LibraryMyDTO.class)
+        factory.registerClassMap(ClassMapBuilder.map(Library.class, LibraryMyDTO.class)
                 .field("title", "myTitle")
                 .field("books", "myBooks")
                 .byDefault()
-                .register();
+                .toClassMap());
         
-        factory.classMap(Author.class, AuthorMyDTO.class)
-                .field("name", "myName")
-                .byDefault()
-                .register();
-
-        factory.classMap(Book.class, BookMyDTO.class)
+        factory.registerClassMap(ClassMapBuilder.map(Author.class, AuthorMyDTO.class).field("name", "myName").byDefault().toClassMap());
+        factory.registerClassMap(ClassMapBuilder.map(Book.class, BookMyDTO.class)
                 .field("title", "myTitle")
                 .field("author", "myAuthor")
                 .byDefault()
-                .register();
-
-
+                .toClassMap());
+        factory.build();
         
         MapperFacade mapper = factory.getMapperFacade();
         
@@ -171,21 +162,23 @@ public class SuperTypeMappingTestCase {
     public void testMappingSubclassImplementationWithoutExistingMapping() throws Exception {
         
         MapperFactory factory = MappingUtil.getMapperFactory();
-
+        MappingHint myHint =
         /**
          * This sample hint converts "myProperty" to "property", and vis-versa.
          */
-        DefaultFieldMapper myDefaultFieldMapper = new DefaultFieldMapper() {
-            public String suggestMappedField(String fromProperty, Type<?> fromPropertyType) {
+        new MappingHint() {
+            
+            public String suggestMappedField(String fromProperty, Class<?> fromPropertyType) {
                 if (fromProperty.startsWith("my")) {
                     return fromProperty.substring(2, 1).toLowerCase() + fromProperty.substring(3);
                 } else {
                     return "my" + fromProperty.substring(0, 1).toUpperCase() + fromProperty.substring(1);
                 }
             }
+            
         };
-        factory.registerDefaultFieldMapper(myDefaultFieldMapper);
-
+        factory.registerMappingHint(myHint);
+        factory.build();
         
         MapperFacade mapper = factory.getMapperFacade();
         

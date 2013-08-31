@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static ma.glasnost.orika.impl.generator.SourceCodeContext.statement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Set;
 
 import javassist.CannotCompileException;
 import ma.glasnost.orika.MapperFactory;
@@ -35,6 +36,7 @@ import ma.glasnost.orika.impl.GeneratedObjectFactory;
 import ma.glasnost.orika.metadata.ClassMap;
 import ma.glasnost.orika.metadata.FieldMap;
 import ma.glasnost.orika.metadata.MapperKey;
+import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
 
 import org.slf4j.Logger;
@@ -68,7 +70,6 @@ public class ObjectFactoryGenerator {
     
     /**
      * @param type
-     * @param sourceType
      * @param context
      * @return an instance of the newly generated ObjectFactory
      */
@@ -103,11 +104,7 @@ public class ObjectFactoryGenerator {
             return objectFactory;
             
         } catch (final Exception e) {
-            if (e instanceof MappingException) {
-                throw (MappingException) e;
-            } else {
-                throw new MappingException("exception while creating object factory for " + type.getName(), e);
-            }
+            throw new MappingException("exception while creating object factory for " + type.getName(), e);
         }
     }
     
@@ -120,7 +117,16 @@ public class ObjectFactoryGenerator {
         out.append(format("if(s == null) throw new %s(\"source object must be not null\");",
                 IllegalArgumentException.class.getCanonicalName()));
         
-        out.append(addSourceClassConstructor(code, type, sourceType, mappingContext, logDetails));
+//        Set<Type<? extends Object>> sourceClasses = mapperFactory.lookupMappedClasses(type);
+//        
+//        if (sourceClasses != null && !sourceClasses.isEmpty()) {
+//            for (Type<? extends Object> sourceType : sourceClasses) {
+                out.append(addSourceClassConstructor(code, type, sourceType, mappingContext, logDetails));
+//            }
+//        } else {
+//            throw new MappingException("Cannot generate ObjectFactory for " + type);
+//        }
+        
         out.append(addUnmatchedSourceHandler(code, type, mappingContext, logDetails));
         
         out.append("\n}");
@@ -136,8 +142,8 @@ public class ObjectFactoryGenerator {
      * @param logDetails
      * @return
      */
-    private String addSourceClassConstructor(SourceCodeContext code, Type<?> destinationType, Type<?> sourceType,
-            MappingContext mappingContext, StringBuilder logDetails) {
+    private String addSourceClassConstructor(SourceCodeContext code, Type<?> destinationType, Type<?> sourceType, MappingContext mappingContext,
+            StringBuilder logDetails) {
         
         MapperKey mapperKey = new MapperKey(sourceType, destinationType);
         ClassMap<Object, Object> classMap = mapperFactory.getClassMap(mapperKey);
@@ -152,8 +158,7 @@ public class ObjectFactoryGenerator {
             out.append(addArrayClassConstructor(code, destinationType, sourceType, classMap.getFieldsMapping().size()));
         } else {
             
-            ConstructorMapping<?> constructorMapping = (ConstructorMapping<?>) constructorResolverStrategy.resolve(classMap,
-                    destinationType);
+            ConstructorMapping<?> constructorMapping = (ConstructorMapping<?>) constructorResolverStrategy.resolve(classMap, destinationType);
             Constructor<?> constructor = constructorMapping.getConstructor();
             
             if (constructor == null) {
@@ -164,14 +169,6 @@ public class ObjectFactoryGenerator {
             
             List<FieldMap> properties = constructorMapping.getMappedFields();
             Type<?>[] constructorArguments = constructorMapping.getParameterTypes();
-            
-            if (properties.size() != constructorArguments.length) {
-                throw new MappingException("While attempting to generate ObjectFactory using constructor '" + constructor
-                        + "', an automatic mapping of the source type ('" + sourceType
-                        + "') to this constructor call could not be determined. Please "
-                        + "register a custom ObjectFactory implementation which is able to create an instance of '" + destinationType
-                        + "' from an instance of '" + sourceType + "'.");
-            }
             
             int argIndex = 0;
             
@@ -202,8 +199,7 @@ public class ObjectFactoryGenerator {
              * Any exceptions thrown calling constructors should be propagated
              */
             append(out, "\n} catch (java.lang.Exception e) {\n", "if (e instanceof RuntimeException) {\n", "throw (RuntimeException)e;\n",
-                    "} else {",
-                    "throw new java.lang.RuntimeException(" + "\"Error while constructing new " + destinationType.getSimpleName()
+                    "} else {", "throw new java.lang.RuntimeException(" + "\"Error while constructing new " + destinationType.getSimpleName()
                             + " instance\", e);", "\n}\n}\n}");
         }
         return out.toString();
@@ -230,8 +226,7 @@ public class ObjectFactoryGenerator {
         
         if (out.length() == 0) {
             // TODO: can this condition be reached?
-            // if object factory generation failed, we should not create the
-            // factory
+            // if object factory generation failed, we should not create the factory
             // which is unable to construct an instance of anything.
             out.append(format(
                     "throw new %s(s.getClass().getCanonicalName() + \" is an unsupported source class : \"+s.getClass().getCanonicalName());",

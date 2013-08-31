@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,10 @@ public class AutomaticStringConversionTestCase {
 		source.setPrefijo("2");
 		
 		MapperFactory factory = new DefaultMapperFactory.Builder().build();
-		factory.classMap(CamposEntrada.class, CamposSalida.class)
-            .byDefault()
-            .register();
-
+		factory.registerClassMap(ClassMapBuilder
+				.map(CamposEntrada.class, CamposSalida.class).byDefault()
+				.toClassMap());
+		factory.build();
 		MapperFacade facade = factory.getMapperFacade();
 		
 		CamposSalida result = facade.map(source, CamposSalida.class);

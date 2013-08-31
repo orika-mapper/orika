@@ -1,21 +1,3 @@
-/*
- * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ma.glasnost.orika;
 
 /**
@@ -100,13 +82,6 @@ public final class OrikaSystemProperties {
     public static final String CLASSMAP_BUILDER_FACTORY = "ma.glasnost.orika.classMapBuilderFactory";
     
     /**
-     * Specifies the fully-qualified class name of the MappingContextFactory to be used by
-     * the default mapper factory to generate new MappingContext instances. <br><br>
-     * default value is {@link ma.glasnost.orika.MappingContext.Factory}
-     */
-    public static final String MAPPING_CONTEXT_FACTORY = "ma.glasnost.orika.mappingContextFactory";
-    
-    /**
      * Specifies the fully-qualified class name of the converter factory to use when generating converters
      * for target types;<br><br>
      * default value is determined by the MapperFactory implementation.
@@ -125,6 +100,12 @@ public final class OrikaSystemProperties {
      */
     public static final String MAP_NULLS = "ma.glasnost.orika.mapNulls";
     
+    /**
+     * Specifies whether same classes values should be copied by reference.
+     * default value is <code>false</code>
+     */
+    public static final String COPY_BY_REFERENCE = "ma.glasnost.orika.copyByReference";
+
     /**
      * Specifies whether to use built-in converters
      * default value is <code>true</code>

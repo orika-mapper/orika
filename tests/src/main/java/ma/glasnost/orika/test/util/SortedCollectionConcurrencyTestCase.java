@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.test.ConcurrentRule;

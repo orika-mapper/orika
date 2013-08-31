@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ package ma.glasnost.orika.test.converter;
 import java.math.BigDecimal;
 import java.net.URL;
 
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.MappingException;
 import ma.glasnost.orika.converter.builtin.ConstructorConverter;
 import ma.glasnost.orika.test.MappingUtil;
 
 import org.junit.Test;
-import org.junit.Assert;
 
 
 /**
@@ -61,7 +62,7 @@ public class ConstructorConverterTestCase {
 		Double doubleValue = Double.valueOf("4.99"); 
 		BigDecimal bd = mapper.map(doubleValue, BigDecimal.class);
 		Assert.assertNotNull(bd);
-		Assert.assertEquals(doubleValue, bd.doubleValue(), 0.0001);
+		Assert.assertEquals(doubleValue, bd.doubleValue());
 	}
 	
 	

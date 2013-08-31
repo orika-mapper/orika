@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
@@ -170,7 +170,15 @@ public class CustomMergerTest {
             for (Dto memberDto : srcDtos) {
                 Entity memberEntity = findEntity(dstEntities, memberDto.getId());
                 if (memberEntity == null) {
-                    dstEntities.add((Entity) mapperFacade.map(memberDto, sourceType, destinationType, context));
+                    
+                    dstEntities.add((Entity) mapperFacade.map(memberDto, sourceType, destinationType, context)); // Class
+                                                                                // of
+                                                                                // entity
+                                                                                // destination
+                                                                                // is
+                                                                                // unknown
+                                                                                // in
+                                                                                // merge
                 } else {
                     mapperFacade.map(memberDto, memberEntity);
                 }

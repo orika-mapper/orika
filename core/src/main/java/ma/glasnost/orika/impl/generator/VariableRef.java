@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package ma.glasnost.orika.impl.generator;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +27,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import ma.glasnost.orika.Converter;
-import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.MapEntry;
 import ma.glasnost.orika.impl.util.ClassUtil;
 import ma.glasnost.orika.metadata.NestedProperty;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
+
+import java.util.Collection;
 
 /**
  * VariableRef represents a reference to a given variable or property; it
@@ -54,7 +54,6 @@ public class VariableRef {
     private Type<?> type;
     private boolean declared;
     private Converter<?, ?> converter;
-    private Filter<?, ?> filter;
     private boolean nullPossible;
     private boolean nullPathPossible;
     
@@ -85,14 +84,6 @@ public class VariableRef {
         return converter;
     }
     
-    public Filter<?, ?> getFilter() {
-        return filter;
-    }
-
-    public void setFilter(Filter<?, ?> filter) {
-        this.filter = filter;
-    }
-
     public void setOwner(VariableRef owner) {
         this.owner = owner;
     }

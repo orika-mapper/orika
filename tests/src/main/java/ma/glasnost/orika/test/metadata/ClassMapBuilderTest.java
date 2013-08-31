@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package ma.glasnost.orika.test.metadata;
 
 import static ma.glasnost.orika.metadata.MappingDirection.A_TO_B;
 import static ma.glasnost.orika.metadata.MappingDirection.B_TO_A;
-
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -27,7 +27,6 @@ import ma.glasnost.orika.metadata.CaseInsensitiveClassMapBuilder;
 import ma.glasnost.orika.metadata.MappingDirection;
 
 import org.junit.Test;
-import org.junit.Assert;
 
 /**
  * @author matt.deboer@gmail.com

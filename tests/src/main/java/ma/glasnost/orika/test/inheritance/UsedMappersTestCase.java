@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package ma.glasnost.orika.test.inheritance;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
@@ -32,17 +32,18 @@ public class UsedMappersTestCase {
     public void testReuseOfMapper() {
         MapperFactory mapperFactory = MappingUtil.getMapperFactory();
         {
-            mapperFactory.classMap(A.class, C.class)
-                         .field("name", "nom")
-                         .register();
+            ClassMapBuilder<A, C> classMapBuilder = ClassMapBuilder.map(A.class, C.class);
+            classMapBuilder.field("name", "nom");
+            mapperFactory.registerClassMap(classMapBuilder.toClassMap());
         }
         
         {
-            mapperFactory.classMap(B.class, D.class)
-                    .use(A.class, C.class)
-                    .field("age", "ages")
-                    .register();
+            ClassMapBuilder<B, D> classMapBuilder = ClassMapBuilder.map(B.class, D.class);
+            classMapBuilder.field("age", "ages").use(A.class, C.class);
+            mapperFactory.registerClassMap(classMapBuilder.toClassMap());
         }
+        
+        mapperFactory.build();
         
         MapperFacade mapperFacade = mapperFactory.getMapperFacade();
         
@@ -61,17 +62,17 @@ public class UsedMappersTestCase {
     public void testOneCallOfFieldMapping() {
         MapperFactory mapperFactory = MappingUtil.getMapperFactory();
         {
-            mapperFactory.classMap(A.class, E.class)
-                    .byDefault()
-                    .register();
+            ClassMapBuilder<A, E> classMapBuilder = ClassMapBuilder.map(A.class, E.class);
+            mapperFactory.registerClassMap(classMapBuilder.byDefault().toClassMap());
         }
         {
-            mapperFactory.classMap(B.class, F.class)
-                    .use(A.class, E.class)
-                    .byDefault()
-                    .register();
+            ClassMapBuilder<B, F> classMapBuilder = ClassMapBuilder.map(B.class, F.class);
+            classMapBuilder.byDefault().use(A.class, E.class);
+            mapperFactory.registerClassMap(classMapBuilder.toClassMap());
         }
-
+        
+        mapperFactory.build();
+        
         MapperFacade mapperFacade = mapperFactory.getMapperFacade();
         
         B source = new B();

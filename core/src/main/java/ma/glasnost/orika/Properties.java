@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ package ma.glasnost.orika;
  */
 public enum Properties {
     SHOULD_MAP_NULLS,
+    COPY_BY_REFERENCE,
     LOG_DETAILS,
     MAPPER_FACTORY,
     CODE_GENERATION_STRATEGY,
     PROPERTY_RESOLVER_STRATEGY,
     COMPILER_STRATEGY,
-    UNENHANCE_STRATEGY,
-    FILTERS
+    UNENHANCE_STRATEGY
     ;
 }

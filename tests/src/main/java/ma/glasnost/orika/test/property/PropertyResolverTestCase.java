@@ -1,7 +1,7 @@
 /*
  * Orika - simpler, better and faster Java bean mapping
- *
- * Copyright (C) 2011-2013 Orika authors
+ * 
+ * Copyright (C) 2011 Orika authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -45,43 +45,7 @@ import org.junit.Test;
 
 public class PropertyResolverTestCase {
 
-    /**
-     * Extend resolver, make methods public for ease of testing
-     *
-     */
-    private static class TestResolverStrategy extends IntrospectorPropertyResolver {
-
-        public boolean hasTypeParameters(Class<?> type) {
-            return super.hasTypeParameters(type);
-        }
-
-        public boolean isNestedPropertyExpression(String expression) {
-            return super.isNestedPropertyExpression(expression);
-        }
-
-        public boolean isElementPropertyExpression(String expression) {
-            return super.isElementPropertyExpression(expression);
-        }
-
-        public boolean isIndividualElementExpression(String expression) {
-            return super.isIndividualElementExpression(expression);
-        }
-
-        public String[] splitNestedProperty(String propertyName) {
-            return super.splitNestedProperty(propertyName);
-        }
-
-        public String[] splitElementProperty(String propertyName) {
-            return super.splitElementProperty(propertyName);
-        }
-
-        public boolean isInlinePropertyExpression(String expression) {
-            return super.isInlinePropertyExpression(expression);
-        }
-        
-    }
-    
-    private TestResolverStrategy propertyResolver = new TestResolverStrategy();
+    private PropertyResolverStrategy propertyResolver = new IntrospectorPropertyResolver();
     
 	@Test
 	public void testNestedProperty() {
@@ -105,23 +69,6 @@ public class PropertyResolverTestCase {
         }
     }
 
-	@Test
-	public void testIsNestedProperty() {
-	    Assert.assertTrue(propertyResolver.isNestedPropertyExpression("a.b"));
-	    Assert.assertTrue(propertyResolver.isNestedPropertyExpression("a[1].b"));
-	    Assert.assertFalse(propertyResolver.isNestedPropertyExpression("a['b']"));
-	    
-	    String inlineProp1 = "points:{getAttribute('points')|setAttribute('points', %s)|type=ma.glasnost.orika.test.property.PropertyResolverTestCase.Point}";
-	    Assert.assertFalse(propertyResolver.isNestedPropertyExpression(inlineProp1));
-        Assert.assertTrue(propertyResolver.isNestedPropertyExpression(inlineProp1 + ".b"));
-	    
-	    String inlineProp2 = "points:{getAttribute('points')|setAttribute('points', %s)|type=List<ma.glasnost.orika.test.property.PropertyResolverTestCase.Point>}";
-	    Assert.assertFalse(propertyResolver.isNestedPropertyExpression(inlineProp2));
-	    Assert.assertTrue(propertyResolver.isNestedPropertyExpression(inlineProp2 + ".b"));
-	    
-	}
-	
-	
 	@Test
 	public void testBooleanMapping() {
 		SpecialCase sc = new SpecialCase();
@@ -477,14 +424,12 @@ public class PropertyResolverTestCase {
             String nameDef = "name:{getAttribute('name')|setAttribute('name',%s)|type=ma.glasnost.orika.test.property.PropertyResolverTestCase.Element}";
             String firstNameDef = "first:{getAttribute('first')|setAttribute('first', %s)|type=java.lang.String}";
             String lastNameDef = "last:{getAttribute('last')|setAttribute('last', %s)|type=java.lang.String}";
-            String pointsDef = "points:{getAttribute('points')|setAttribute('points', %s)|type=List<ma.glasnost.orika.test.property.PropertyResolverTestCase.Point>}";
             
             factory.classMap(Element.class, PersonDto.class)
                 .field(employmentDef + "." + jobTitleDef, "jobTitles")
                 .field("employment." + salaryDef, "salary") // reuse the in-line declaration of 'employment' property
                 .field(nameDef + "." + firstNameDef, "firstName")
                 .field("name." + lastNameDef, "lastName") // reuses the in-line declaration of 'name' property
-                .field(pointsDef, "points")
                 .register();
         }
         
@@ -541,7 +486,6 @@ public class PropertyResolverTestCase {
         public String lastName;
         public List<String> jobTitles;
         public long salary;
-        public List<Point> points;
     }
     
 	public static class Point {
