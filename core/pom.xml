@@ -45,7 +45,10 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
-
+ 		<dependency>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-log4j12</artifactId>
+	        </dependency>
 		<dependency>
 			<groupId>com.googlecode.concurrentlinkedhashmap</groupId>
 			<artifactId>concurrentlinkedhashmap-lru</artifactId>
@@ -70,9 +73,9 @@
 							<shadedClassifierName>deps-included</shadedClassifierName> <!-- Any name that makes sense -->
 							<minimizeJar>true</minimizeJar>
 							<artifactSet>
-								<excludes>
-									<exclude>org.slf4j:slf4j-api</exclude>
-								</excludes>
+								<!--<excludes>-->
+								<!--	<exclude>org.slf4j:slf4j-api</exclude>-->
+								<!--</excludes>-->
 							</artifactSet>
 							<relocations>
 								<relocation>
