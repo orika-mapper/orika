@@ -38,15 +38,28 @@ public abstract class CustomFilter<A, B> implements Filter<A, B> {
     private final Type<B> destinationType;
     
     /**
-     * Constructs a new CustomFilter, inferring A-type and B-type from
-     * the generic arguments.
+     * Constructs a new CustomFilter, invoking {@link #inferTypes} to get the A-type and B-type.
      */
     public CustomFilter() {
+        MappedTypePair<A, B> types = inferTypes();
+        sourceType = types.getAType();
+        destinationType = types.getBType();
+    }
+
+    /**
+     * Infer A-type and B-type from the generic arguments. Subclasses may override this to
+     * do their own inference.
+     *
+     * @return the A-type and B-type
+     * @throws IllegalStateException if the types cannot be inferred
+     */
+    protected MappedTypePair<A, B> inferTypes() {
         java.lang.reflect.Type genericSuperclass = getClass().getGenericSuperclass();
         if (genericSuperclass != null && genericSuperclass instanceof ParameterizedType) {
-            ParameterizedType superType = (ParameterizedType) genericSuperclass;
-            sourceType = TypeFactory.valueOf(superType.getActualTypeArguments()[0]);
-            destinationType = TypeFactory.valueOf(superType.getActualTypeArguments()[1]);
+            final ParameterizedType superType = (ParameterizedType) genericSuperclass;
+            return new MappedTypePairHolder<A, B>(
+                    (Type<A>) TypeFactory.valueOf(superType.getActualTypeArguments()[0]),
+                    (Type<B>) TypeFactory.valueOf(superType.getActualTypeArguments()[1]));
         } else {
             throw new IllegalStateException("When you subclass the ConverterBase S and D type-parameters are required.");
         }
@@ -73,4 +86,36 @@ public abstract class CustomFilter<A, B> implements Filter<A, B> {
         return sourceType.isAssignableFrom(source.getType()) && destinationType.isAssignableFrom(destination.getType());
     }
     
+    /**
+     * Simple implementation of MappedTypePair that holds the given pair of types.
+     */
+    protected static class MappedTypePairHolder<A, B> implements MappedTypePair<A, B> {
+        private final Type<A> aType;
+        private final Type<B> bType;
+
+        /**
+         * Create a MappedTypePairHolder with the given types.
+         *
+         * @param aType the A-type
+         * @param bType the B-type
+         */
+        public MappedTypePairHolder(Type<A> aType, Type<B> bType) {
+            this.aType = aType;
+            this.bType = bType;
+        }
+
+        /* (non-Javadoc)
+         * @see ma.glasnost.orika.MappedTypePair#getAType()
+         */
+        public Type<A> getAType() {
+            return aType;
+        }
+
+        /* (non-Javadoc)
+         * @see ma.glasnost.orika.MappedTypePair#getBType()
+         */
+        public Type<B> getBType() {
+            return bType;
+        }
+    }
 }
