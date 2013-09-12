@@ -54,17 +54,18 @@ public abstract class UseCustomMapperStrategy extends AbstractMappingStrategy {
     
     public Object map(final Object sourceObject, final Object destinationObject, final MappingContext context) {
         
-        context.beginMapping();
-        
         Object resolvedSourceObject = unenhancer.unenhanceObject(sourceObject, sourceType);
         
         Object newInstance = getInstance(resolvedSourceObject, destinationObject, context);
         
         context.cacheMappedObject(sourceObject, destinationType, newInstance);
         
-        customMapper.mapAtoB(resolvedSourceObject, newInstance, context);
-        
-        context.endMapping();
+        context.beginMapping(sourceType, resolvedSourceObject, destinationType, newInstance);
+        try {
+            customMapper.mapAtoB(resolvedSourceObject, newInstance, context);
+        } finally {
+            context.endMapping();
+        }
         
         return newInstance;
     }

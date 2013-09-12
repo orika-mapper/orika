@@ -232,9 +232,28 @@ public class MappingContext {
     
     /**
      * Mark the beginning of a particular mapping
+     *
+     * @deprecated This variant exists for backwards compatibility only; if overriding,
+     *             override {@link #beginMapping(Type, Object, Type, Object)} instead.
      */
     public void beginMapping() {
         ++depth;
+    }
+    
+    /**
+     * Mark the beginning of a particular mapping
+     *
+     * @param sourceType
+     *            the type of the source object being mapped
+     * @param source
+     *            the source object being mapped
+     * @param destType
+     *            the type of the destination object being mapped into
+     * @param dest
+     *            the destination object being mapped into
+     */
+    public void beginMapping(Type<?> sourceType, Object source, Type<?> destType, Object dest) {
+        beginMapping();
     }
     
     /**

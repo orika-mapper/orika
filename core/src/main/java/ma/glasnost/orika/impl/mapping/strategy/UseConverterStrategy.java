@@ -49,6 +49,11 @@ public class UseConverterStrategy extends AbstractMappingStrategy {
         // TODO: mappingContext is not passed to converters, which could 
         //       be a problem with converters now (recently) having access
         //       to the MapperFacade; 
-        return converter.convert(unenhancer.unenhanceObject(sourceObject, sourceType), destinationType);
+        context.beginMapping(sourceType, sourceObject, destinationType, destinationObject);
+        try {
+            return converter.convert(unenhancer.unenhanceObject(sourceObject, sourceType), destinationType);
+        } finally {
+            context.endMapping();
+        }
     }
 }
