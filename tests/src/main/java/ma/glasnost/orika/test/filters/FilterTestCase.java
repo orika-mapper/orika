@@ -19,11 +19,14 @@
 package ma.glasnost.orika.test.filters;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import ma.glasnost.orika.CustomFilter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
+import ma.glasnost.orika.NullFilter;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.test.MappingUtil;
@@ -69,13 +72,9 @@ public class FilterTestCase {
         
     }
 
-    public static class SecurityFilter extends CustomFilter<Object, Object> {
+    public static class SecurityFilter extends NullFilter<Object, Object> {
         
         private final String MASK = "*************";
-        
-        public boolean filtersSource() {
-            return false;
-        }
         
         public boolean filtersDestination() {
             return true;
@@ -97,11 +96,6 @@ public class FilterTestCase {
             }
             return destinationValue;
             
-        }
-        
-        public <S> S filterSource(final S sourceValue, final Type<S> sourceType, final String sourceName, final Type<?> destType,
-                final String destName, final MappingContext mappingContext) {
-            return sourceValue;
         }
     }
     
@@ -125,15 +119,10 @@ public class FilterTestCase {
         Assert.assertEquals(source.creditCardNumber, dest.creditCardNumber);
     }
     
-    private static class CostFilter extends CustomFilter<Number, Number> {
+    private static class CostFilter extends NullFilter<Number, Number> {
         @Override
         public boolean appliesTo(Property source, Property destination) {
             return super.appliesTo(source, destination) && source.getName().equals("cost");
-        }
-
-        @Override
-        public boolean filtersSource() {
-            return false;
         }
     
         @Override
@@ -142,21 +131,59 @@ public class FilterTestCase {
         }
     
         @Override
-        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Number source, final Type<?> destType, final String destName,
-                final MappingContext mappingContext) {
-            return true;
-        }
-    
-        @Override
         public <D> D filterDestination(D destinationValue, final Type<?> sourceType, final String sourceName, final Type<D> destType,
                 final String destName, final MappingContext mappingContext) {
             return (D) ((BigDecimal) destinationValue).multiply(BigDecimal.valueOf(2));
         }
+    }
     
+    @Test
+    public void testMultiOccurenceFiltering() {
+        // run without filter
+        MapperFactory factory = MappingUtil.getMapperFactory();
+        factory.classMap(Source.class, Destination.class)
+                .field("infoMap{key}", "infos{item}")
+                .field("infoMap{value}", "infos{info}")
+                .byDefault().register();
+
+        MapperFacade mapper = factory.getMapperFacade();
+        
+        Source source = new Source();
+        source.age = 35;
+        source.infoMap = new HashMap<String, String>();
+        source.infoMap.put("weather", "nice");
+        
+        Destination dest = mapper.map(source, Destination.class);
+        
+        Assert.assertEquals(source.age, (int) dest.age);
+        Assert.assertEquals(1, dest.infos.size());
+        Info info = dest.infos.get(0);
+        Assert.assertEquals("weather", info.item);
+        Assert.assertEquals("nice", info.info);
+
+        // run with filter
+        factory = MappingUtil.getMapperFactory();
+        factory.classMap(Source.class, Destination.class)
+                .field("infoMap{key}", "infos{item}")
+                .field("infoMap{value}", "infos{info}")
+                .byDefault().register();
+        factory.registerFilter(new InfoFilter());
+        mapper = factory.getMapperFacade();
+        
+        dest = mapper.map(source, Destination.class);
+        
+        Assert.assertEquals(source.age, (int) dest.age);
+        Assert.assertNull(dest.infos);
+    }
+    
+    private static class InfoFilter extends NullFilter<Map<?, ?>, List<?>> {
         @Override
-        public <S> S filterSource(final S sourceValue, final Type<S> sourceType, final String sourceName, final Type<?> destType,
-                final String destName, final MappingContext mappingContext) {
-            return sourceValue;
+        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Map<?, ?> source, final Type<?> destType, final String destName,
+                final MappingContext mappingContext) {
+            if (sourceName.equals("infoMap")) {
+                return false;
+            }
+            return true;
         }
     }
     
@@ -167,6 +194,7 @@ public class FilterTestCase {
         public double cost;
         public String creditCardNumber;
         public SourceAddress address;
+        public Map<String, String> infoMap;
     }
     
     public static class SourceName {
@@ -187,10 +215,16 @@ public class FilterTestCase {
         public String creditCardNumber;
         public String street;
         public String city;
+        public List<Info> infos;
     }
     
     public static class DestinationName {
         public String first;
         public String last;
+    }
+    
+    public static class Info {
+        public String item;
+        public String info;
     }
 }

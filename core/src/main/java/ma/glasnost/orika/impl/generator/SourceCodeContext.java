@@ -709,26 +709,9 @@ public class SourceCodeContext {
             Converter<Object, Object> converter = getConverter(fieldMap, fieldMap.getConverterId());
             sourceProperty.setConverter(converter);
             
-            /*
-             * TODO: need code which collects all of the applicable filters and
-             * adds them into an aggregate filter object
-             */
-            Filter<Object, Object> filter = getFilter(sourceProperty, destinationProperty);
-            if (filter != null) {
-                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", mappingContext)) {",
-                        usedFilter(filter),
-                        usedType(sourceProperty.type()),
-                        varPath(sourceProperty),
-                        sourceProperty.asWrapper(),
-                        usedType(destinationProperty.type()),
-                        varPath(destinationProperty)));
-                
-                sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
-                destinationProperty = getDestFilter(sourceProperty, destinationProperty, filter);
-                
-                // need to set source property
-                closing.insert(0, "\n}\n");
-            }
+            VariableRef[] filteredProperties = applyFilters(sourceProperty, destinationProperty, out, closing);
+            sourceProperty = filteredProperties[0];
+            destinationProperty = filteredProperties[1];
             
             for (Specification spec : codeGenerationStrategy.getSpecifications()) {
                 if (spec.appliesTo(fieldMap)) {
@@ -745,6 +728,30 @@ public class SourceCodeContext {
             out.append(closing.toString());
         }
         return out.toString();
+    }
+
+    public VariableRef[] applyFilters(VariableRef sourceProperty, VariableRef destinationProperty, StringBuilder out, StringBuilder closing) {
+        /*
+         * TODO: need code which collects all of the applicable filters and
+         * adds them into an aggregate filter object
+         */
+        Filter<Object, Object> filter = getFilter(sourceProperty, destinationProperty);
+        if (filter != null) {
+            out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", mappingContext)) {",
+                    usedFilter(filter),
+                    usedType(sourceProperty.type()),
+                    varPath(sourceProperty),
+                    sourceProperty.asWrapper(),
+                    usedType(destinationProperty.type()),
+                    varPath(destinationProperty)));
+            
+            sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
+            destinationProperty = getDestFilter(sourceProperty, destinationProperty, filter);
+            
+            // need to set source property
+            closing.insert(0, "\n}\n");
+        }
+        return new VariableRef[] { sourceProperty, destinationProperty };
     }
 
     private static String varPath(VariableRef var) {

@@ -32,7 +32,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.GeneratedObjectBase;
+import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.test.MappingUtil;
 
 import org.junit.Before;
@@ -184,6 +186,62 @@ public class MultiOccurrenceToMultiOccurrenceTestCase {
         MapOfScores mapBack = mapper.map(result, MapOfScores.class);
         Assert.assertTrue(source.getScores().keySet().containsAll(mapBack.getScores().keySet()));
         Assert.assertTrue(mapBack.getScores().keySet().containsAll(source.getScores().keySet()));
+    }
+	
+    @Test
+    public void mappingContext() throws Exception {
+        
+        
+        MapperFactory factory = MappingUtil.getMapperFactory(true);
+        factory.registerClassMap(
+                factory.classMap(MapOfScores.class, GenericDto.class)
+                .field("scores{key}", "gradeList{letterGrade}")
+                .field("scores{value}", "gradeList{minimumScore}")
+                .byDefault());
+        
+        MapOfScores source = new MapOfScores();
+        source.setScores(
+                new LinkedHashMap<String, String>() {{
+                put("A", "90");
+                put("B", "80");
+                put("C", "70");
+                put("D", "60");
+                put("F", "50");
+            }});
+        
+        MapperFacade mapper = factory.getMapperFacade();
+
+        final int[] maxDepth = new int[] { 0 };
+        MappingContext context = new MappingContext(null) {
+            @Override
+            public void beginMapping(Type<?> sourceType, Object source, Type<?> destType, Object dest) {
+                super.beginMapping(sourceType, source, destType, dest);
+
+                maxDepth[0] = getDepth();
+
+                switch (getDepth()) {
+                    case 1:
+                        Assert.assertEquals(MapOfScores.class, sourceType.getRawType());
+                        Assert.assertEquals(GenericDto.class, destType.getRawType());
+                        Assert.assertNotNull(source);
+                        Assert.assertNotNull(dest);
+                        break;
+
+                    case 2:
+                        Assert.assertEquals(Map.class, sourceType.getRawType());
+                        Assert.assertEquals(List.class, destType.getRawType());
+                        Assert.assertEquals(5, ((Map) source).size());
+                        Assert.assertNotNull(dest);
+                        break;
+
+                    default:
+                        Assert.fail("Unexpected depth " + getDepth());
+                }
+            }
+        };
+        
+        mapper.map(source, GenericDto.class, context);
+        Assert.assertEquals(2, maxDepth[0]);
     }
 	
 	
