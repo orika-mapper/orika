@@ -83,7 +83,12 @@ public abstract class CustomFilter<A, B> implements Filter<A, B> {
      * @see ma.glasnost.orika.Filter#appliesTo(ma.glasnost.orika.metadata.Property, ma.glasnost.orika.metadata.Property)
      */
     public boolean appliesTo(Property source, Property destination) {
-        return sourceType.isAssignableFrom(source.getType()) && destinationType.isAssignableFrom(destination.getType());
+        return sourceType.isAssignableFrom(getObjectType(source.getType())) &&
+               destinationType.isAssignableFrom(getObjectType(destination.getType()));
+    }
+
+    private static Type<?> getObjectType(Type<?> type) {
+        return (type.isPrimitive() ? type.getWrapperType() : type);
     }
     
     /**

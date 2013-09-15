@@ -24,6 +24,7 @@ import ma.glasnost.orika.CustomFilter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
+import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.test.MappingUtil;
 
@@ -58,7 +59,7 @@ public class FilterTestCase {
         Assert.assertEquals("************3210", dest.creditCardNumber);
         
     }
-    
+
     public static class SecurityFilter extends CustomFilter<Object, Object> {
         
         private final String MASK = "*************";
@@ -89,6 +90,61 @@ public class FilterTestCase {
             
         }
         
+        public <S> S filterSource(final S sourceValue, final Type<S> sourceType, final String sourceName, final Type<?> destType,
+                final String destName, final MappingContext mappingContext) {
+            return sourceValue;
+        }
+    }
+    
+    @Test
+    public void testFilterAppliesTo() {
+        MapperFactory factory = MappingUtil.getMapperFactory();
+        factory.classMap(Source.class, Destination.class).byDefault().register();
+        factory.registerFilter(new CostFilter());
+
+        MapperFacade mapper = factory.getMapperFacade();
+        
+        Source source = new Source();
+        source.age = 35;
+        source.cost = 12.34d;
+        source.creditCardNumber = "cc";
+        
+        Destination dest = mapper.map(source, Destination.class);
+        
+        Assert.assertEquals(source.age, (int) dest.age);
+        Assert.assertEquals(source.cost * 2, dest.cost.doubleValue(), 0.01d);
+        Assert.assertEquals(source.creditCardNumber, dest.creditCardNumber);
+    }
+    
+    private static class CostFilter extends CustomFilter<Number, Number> {
+        @Override
+        public boolean appliesTo(Property source, Property destination) {
+            return super.appliesTo(source, destination) && source.getName().equals("cost");
+        }
+
+        @Override
+        public boolean filtersSource() {
+            return false;
+        }
+    
+        @Override
+        public boolean filtersDestination() {
+            return true;
+        }
+    
+        @Override
+        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Type<?> destType, final String destName,
+                final MappingContext mappingContext) {
+            return true;
+        }
+    
+        @Override
+        public <D> D filterDestination(D destinationValue, final Type<?> sourceType, final String sourceName, final Type<D> destType,
+                final String destName, final MappingContext mappingContext) {
+            return (D) ((BigDecimal) destinationValue).multiply(BigDecimal.valueOf(2));
+        }
+    
+        @Override
         public <S> S filterSource(final S sourceValue, final Type<S> sourceType, final String sourceName, final Type<?> destType,
                 final String destName, final MappingContext mappingContext) {
             return sourceValue;

@@ -823,7 +823,9 @@ public class SourceCodeContext {
         
         List<Filter<Object, Object>> applicableFilters = new ArrayList<Filter<Object, Object>>();
         for (Filter<Object, Object> filter : filters) {
-            applicableFilters.add(filter);
+            if (filter.appliesTo(sourceProperty.property(), destinationProperty.property())) {
+                applicableFilters.add(filter);
+            }
         }
         if (applicableFilters.isEmpty()) {
             return null;
