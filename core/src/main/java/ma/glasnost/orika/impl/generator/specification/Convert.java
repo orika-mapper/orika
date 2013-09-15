@@ -67,7 +67,7 @@ public class Convert extends AbstractSpecification {
             } else if (source.type().isPrimitive()) {
                 return format("(%s == %s.convert(%s, %s))", destination.asWrapper(), code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
             } else {
-                return format("(%s != null && %s.equals(%s.convert(%s, %s)))", source, destination, code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
+                return format("(%s != null && %s.equals(%s.convert(%s, %s)))", destination, destination, code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
             }
         }
     }
