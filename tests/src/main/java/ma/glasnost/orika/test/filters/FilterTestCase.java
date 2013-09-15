@@ -37,7 +37,10 @@ public class FilterTestCase {
     public void testFiltering() {
         
         MapperFactory factory = MappingUtil.getMapperFactory();
-        factory.classMap(Source.class, Destination.class).byDefault().register();
+        factory.classMap(Source.class, Destination.class)
+               .field("address.street", "street")
+               .field("address.city", "city")
+               .byDefault().register();
         factory.registerFilter(new SecurityFilter());
         
         MapperFacade mapper = factory.getMapperFacade();
@@ -50,13 +53,19 @@ public class FilterTestCase {
         source.age = 35;
         source.cost = 12.34d;
         source.creditCardNumber = "5432109876543210";
+        source.address = new SourceAddress();
+        source.address.street = "ashbury";
+        source.address.city = "SF";
         
         Destination dest = mapper.map(source, Destination.class);
         
         Assert.assertEquals(source.name.first, dest.name.first);
         Assert.assertEquals(source.name.last, dest.name.last);
         Assert.assertNull(dest.age);
+        Assert.assertEquals(source.cost, dest.cost.doubleValue(), 0.01d);
         Assert.assertEquals("************3210", dest.creditCardNumber);
+        Assert.assertNull(dest.street);
+        Assert.assertEquals(source.address.city, dest.city);
         
     }
 
@@ -72,9 +81,9 @@ public class FilterTestCase {
             return true;
         }
         
-        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Type<?> destType, final String destName,
+        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Object source, final Type<?> destType, final String destName,
                 final MappingContext mappingContext) {
-            if ("age".equals(sourceName)) {
+            if ("age".equals(sourceName) || "address.street".equals(sourceName)) {
                 return false;
             }
             return true;
@@ -133,7 +142,7 @@ public class FilterTestCase {
         }
     
         @Override
-        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Type<?> destType, final String destName,
+        public boolean shouldMap(final Type<?> sourceType, final String sourceName, final Number source, final Type<?> destType, final String destName,
                 final MappingContext mappingContext) {
             return true;
         }
@@ -157,11 +166,17 @@ public class FilterTestCase {
         public int age;
         public double cost;
         public String creditCardNumber;
+        public SourceAddress address;
     }
     
     public static class SourceName {
         public String first;
         public String last;
+    }
+    
+    public static class SourceAddress {
+        public String street;
+        public String city;
     }
     
     public static class Destination {
@@ -170,6 +185,8 @@ public class FilterTestCase {
         public Integer age;
         public BigDecimal cost;
         public String creditCardNumber;
+        public String street;
+        public String city;
     }
     
     public static class DestinationName {

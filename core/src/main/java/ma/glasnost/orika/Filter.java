@@ -79,6 +79,8 @@ public interface Filter<A, B> extends MappedTypePair<A, B> {
      *            the type of the source field
      * @param sourceName
      *            the name of the source field
+     * @param source
+     *            the value of the source field
      * @param destType
      *            the type of the destination field
      * @param destName
@@ -87,7 +89,8 @@ public interface Filter<A, B> extends MappedTypePair<A, B> {
      *            the current mapping context
      * @return true if the fields represented by these types and names
      */
-    public boolean shouldMap(Type<?> sourceType, String sourceName, Type<?> destType, String destName, MappingContext mappingContext);
+    public boolean shouldMap(Type<?> sourceType, String sourceName, A source, Type<?> destType, String destName,
+            MappingContext mappingContext);
     
     /**
      * This method is called to provide the Filter an opportunity to modify the destination

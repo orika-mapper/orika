@@ -715,12 +715,13 @@ public class SourceCodeContext {
              */
             Filter<Object, Object> filter = getFilter(sourceProperty, destinationProperty);
             if (filter != null) {
-                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, \"%s\", mappingContext)) {", 
-                        usedFilter(filter), 
+                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", mappingContext)) {",
+                        usedFilter(filter),
                         usedType(sourceProperty.type()),
-                        sourceProperty.name(), 
-                        usedType(destinationProperty.type()), 
-                        destinationProperty.name()));
+                        varPath(sourceProperty),
+                        sourceProperty.asWrapper(),
+                        usedType(destinationProperty.type()),
+                        varPath(destinationProperty)));
                 
                 sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
                 destinationProperty = getDestFilter(sourceProperty, destinationProperty, filter);
@@ -744,6 +745,15 @@ public class SourceCodeContext {
             out.append(closing.toString());
         }
         return out.toString();
+    }
+
+    private static String varPath(VariableRef var) {
+        List<VariableRef> path = var.getPath();
+        if (path.isEmpty()) {
+            return var.name();
+        } else {
+            return path.get(path.size() - 1).property().getExpression() + "." + var.name();
+        }
     }
     
     /**
