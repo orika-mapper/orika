@@ -80,7 +80,7 @@ public class AggregateFilter implements Filter<Object, Object> {
         return filtersDestination;
     }
 
-    public boolean shouldMap(Type<?> sourceType, String sourceName, Object source, Type<?> destType, String destName,
+    public <S, D> boolean shouldMap(Type<S> sourceType, String sourceName, S source, Type<D> destType, String destName,
             MappingContext mappingContext) {
         boolean shouldMap = true;
         for (Filter<Object, Object> filter: filters) {

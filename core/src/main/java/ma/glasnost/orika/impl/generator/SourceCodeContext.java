@@ -809,14 +809,21 @@ public class SourceCodeContext {
     private VariableRef getSourceFilter(final VariableRef src, final VariableRef dest, final Filter<Object, Object> filter) {
         if (filter.filtersSource()) {
             return new VariableRef(src.property(), src.owner()) {
-                
+                {
+                    setConverter(src.getConverter());
+                }
+
                 private String getter;
                 
                 @Override
                 protected String getter() {
                     if (getter == null) {
+                        String sourceValue = super.getter();
+                        if (src.isPrimitive()) {
+                            sourceValue = ClassUtil.getWrapperType(src.rawType()).getCanonicalName() + ".valueOf(" + sourceValue + ")";
+                        }
                         getter = src.cast(format("%s.filterSource(%s, %s, \"%s\", %s, \"%s\", mappingContext)", usedFilter(filter),
-                                super.asWrapper(), usedType(src.type()), src.name(), usedType(dest.type()), dest.name()));
+                                sourceValue, usedType(src.type()), src.name(), usedType(dest.type()), dest.name()));
                     }
                     return getter;
                 }

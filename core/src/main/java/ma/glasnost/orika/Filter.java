@@ -89,7 +89,7 @@ public interface Filter<A, B> extends MappedTypePair<A, B> {
      *            the current mapping context
      * @return true if the fields represented by these types and names
      */
-    public boolean shouldMap(Type<?> sourceType, String sourceName, A source, Type<?> destType, String destName,
+    public <S extends A, D extends B> boolean shouldMap(Type<S> sourceType, String sourceName, S source, Type<D> destType, String destName,
             MappingContext mappingContext);
     
     /**
@@ -114,7 +114,7 @@ public interface Filter<A, B> extends MappedTypePair<A, B> {
      *            the current mapping context
      * @return the filtered output value
      */
-    public <D> D filterDestination(D destinationValue, Type<?> sourceType, String sourceName, Type<D> destType, String destName,
+    public <D extends B> D filterDestination(D destinationValue, Type<?> sourceType, String sourceName, Type<D> destType, String destName,
             MappingContext mappingContext);
     
     /**
@@ -140,7 +140,7 @@ public interface Filter<A, B> extends MappedTypePair<A, B> {
      *            the current mapping context
      * @return the filtered output value
      */
-    public <S> S filterSource(S sourceValue, Type<S> sourceType, String sourceName, Type<?> destType, String destName,
+    public <S extends A> S filterSource(S sourceValue, Type<S> sourceType, String sourceName, Type<?> destType, String destName,
             MappingContext mappingContext);
     
 }
