@@ -139,8 +139,8 @@ public class ExpanderTestCase {
         item.monthName = "October";
         item.yearNumber = 2011;
         item.yearAnimal = "monkey";
-        
         flatData.add(item);
+        
         item = new FlatData();
         item.dayNumber = 2;
         item.dayOfWeek = "Tuesday";
@@ -150,11 +150,20 @@ public class ExpanderTestCase {
         item.yearAnimal = "monkey";
         flatData.add(item);
         
+        item = new FlatData();
+        item.dayNumber = 2;
+        item.dayOfWeek = "Tuesday";
+        item.monthNumber = 12;
+        item.monthName = "December";
+        item.yearNumber = 2012;
+        item.yearAnimal = "dragon";
+        flatData.add(item);
+        
         List<Year> years = mapper.map(flatData, typeOf_FlatData, typeOf_Year);
         
         Assert.assertNotNull(years);
         Assert.assertFalse(years.isEmpty());
-        Assert.assertEquals(1, years.size());
+        Assert.assertEquals(2, years.size());
         
         Year year = years.get(0);
         Assert.assertEquals(2011, year.yearNumber);
@@ -175,6 +184,18 @@ public class ExpanderTestCase {
         Day m2d1 = m2.days.get(0); 
         Assert.assertEquals("Tuesday", m2d1.dayOfWeek);
         Assert.assertEquals(2,m2d1.dayNumber);
+        
+        year = years.get(1);
+        Assert.assertEquals(2012, year.yearNumber);
+        Assert.assertEquals(1, year.months.size());
+        
+        m1 = year.months.get(0);
+        Assert.assertEquals("December", m1.monthName);
+        Assert.assertEquals(12, m1.monthNumber);
+        
+        m1d1 = m1.days.get(0); 
+        Assert.assertEquals("Tuesday", m1d1.dayOfWeek);
+        Assert.assertEquals(2,m1d1.dayNumber);
         
         
         List<FlatData> mapBack = mapper.map(years, typeOf_Year, typeOf_FlatData);

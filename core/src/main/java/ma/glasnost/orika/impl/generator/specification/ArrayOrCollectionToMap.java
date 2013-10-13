@@ -45,11 +45,6 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
         return fieldMap.getDestination().isMap() && (fieldMap.getSource().isCollection() || fieldMap.getSource().isArray());
     }
 
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        // TODO:
-        return "";
-    }
-
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         StringBuilder out = new StringBuilder();
@@ -82,7 +77,7 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
          */
         if (s.isArray()) {
             if (code.isDebugEnabled()) {
-                code.debug("mapping " + s.elementTypeName() + "[] to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
+                code.debugField(fieldMap, "mapping " + s.elementTypeName() + "[] to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
             }
             append(out,
                     format("for( int entryIndex = 0, entryLen = %s.length; entryIndex < entryLen; ++entryIndex ) {\n", s),
@@ -93,7 +88,7 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
                     "}");
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("mapping Collection<" + s.elementTypeName() + "> to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
+                code.debugField(fieldMap, "mapping Collection<" + s.elementTypeName() + "> to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
             }
             append(out,
                     format("for( java.util.Iterator entryIter = %s.iterator(); entryIter.hasNext(); ) {\n", s),

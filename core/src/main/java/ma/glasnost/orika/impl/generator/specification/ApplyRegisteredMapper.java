@@ -49,7 +49,7 @@ public class ApplyRegisteredMapper extends ObjectToObject {
                 sourceType = mapper.getBType();
                 destType = mapper.getAType();
             }
-            code.debug("mapping using registered Mapper<" + sourceType + "," +
+            code.debugField(fieldMap, "mapping using registered Mapper<" + sourceType + "," +
                     destType + ">");
         }
         

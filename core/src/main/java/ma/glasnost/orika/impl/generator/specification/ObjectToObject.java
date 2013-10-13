@@ -35,17 +35,10 @@ public class ObjectToObject extends AbstractSpecification {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see ma.glasnost.orika.impl.generator.specification.AbstractSpecification#generateEqualityTestCode(ma.glasnost.orika.metadata.FieldMap, ma.glasnost.orika.impl.generator.VariableRef, ma.glasnost.orika.impl.generator.VariableRef, ma.glasnost.orika.impl.generator.SourceCodeContext)
-     */
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return "";
-    }
-
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("mapping object to object");
+            code.debugField(fieldMap, "mapping object to object");
         }
         
         String mapNewObject = destination.assign(format("(%s)%s", destination.typeName(), code.callMapper(source, destination.type()), source));

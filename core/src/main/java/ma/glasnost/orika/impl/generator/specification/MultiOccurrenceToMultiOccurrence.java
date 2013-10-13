@@ -19,7 +19,9 @@
 package ma.glasnost.orika.impl.generator.specification;
 
 import static java.lang.String.format;
-import static ma.glasnost.orika.impl.generator.SourceCodeContext.*;
+import static ma.glasnost.orika.impl.generator.SourceCodeContext.append;
+import static ma.glasnost.orika.impl.generator.SourceCodeContext.join;
+import static ma.glasnost.orika.impl.generator.SourceCodeContext.statement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +40,6 @@ import ma.glasnost.orika.impl.generator.VariableRef;
 import ma.glasnost.orika.impl.util.ClassUtil;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import ma.glasnost.orika.metadata.FieldMap;
-import ma.glasnost.orika.metadata.NestedProperty;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
@@ -423,7 +424,7 @@ public class MultiOccurrenceToMultiOccurrence implements AggregateSpecification 
             for (Node srcRef : sourceNodes) {
                 
                 if (!srcRef.isLeaf()) {
-                    out.append(statement(srcRef.elementRef.declare(srcRef.multiOccurrenceVar.nextElement())));
+                    out.append(statement(srcRef.elementRef.declare(srcRef.multiOccurrenceVar.nextElementRef())));
                     iterateSources(srcRef.children, destNodes, out, endWhiles);
                 }
             }

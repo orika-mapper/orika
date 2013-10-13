@@ -41,13 +41,13 @@ public class AnyTypeToString extends AbstractSpecification {
         
         if (source.isPrimitive()) {
             if (code.isDebugEnabled()) {
-                code.debug("converting primitive to String");
+                code.debugField(fieldMap, "converting primitive to String");
             }
             
             return statement(destination.assign("\"\"+ %s", source));
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("converting " + source.typeName() + " using toString()");
+                code.debugField(fieldMap, "converting " + source.typeName() + " using toString()");
             }
             
             if (shouldMapNulls(fieldMap, code)) {

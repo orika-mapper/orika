@@ -59,14 +59,10 @@ public class ConvertArrayOrCollectionToCollection extends AbstractSpecification 
         return false;
     }
     
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return "";
-    }
-    
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("converting to Collection using " + source.getConverter());
+            code.debugField(fieldMap, "converting to Collection using " + source.getConverter());
         }
         
         StringBuilder convertCollection = new StringBuilder();

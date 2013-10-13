@@ -38,11 +38,6 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
         return (fieldMap.getSource().isArray() || fieldMap.getSource().isCollection()) && fieldMap.getDestination().isCollection();
     }
 
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        // TODO:
-        return "";
-    }
-
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         StringBuilder out = new StringBuilder();
@@ -75,7 +70,7 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
         
         if (s.isArray()) {
             if (code.isDebugEnabled()) {
-                code.debug("mapping " + s.elementTypeName() + "[] to Collection<" + d.elementTypeName() + ">");
+                code.debugField(fieldMap, "mapping " + s.elementTypeName() + "[] to Collection<" + d.elementTypeName() + ">");
             }
             
             if (s.elementType().isPrimitive()) {
@@ -87,7 +82,7 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
             }
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("mapping Collection<" + s.elementTypeName() + "> to Collection<" + d.elementTypeName() + ">");
+                code.debugField(fieldMap, "mapping Collection<" + s.elementTypeName() + "> to Collection<" + d.elementTypeName() + ">");
             }
             append(out,
                     "\n",

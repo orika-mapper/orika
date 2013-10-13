@@ -40,8 +40,7 @@ public class CopyByReferenceConverter extends CustomConverter<Object, Object> {
      */
     public boolean canConvert(Type<?> sourceType, Type<?> destinationType) {
         
-        return /*destinationType.isAssignableFrom(sourceType)
-                || */(ClassUtil.isImmutable(sourceType) && (sourceType.equals(destinationType) || sourceType.isWrapperFor(destinationType) || destinationType.isWrapperFor(sourceType)));
+        return (ClassUtil.isImmutable(sourceType) && (sourceType.equals(destinationType) || sourceType.isWrapperFor(destinationType) || destinationType.isWrapperFor(sourceType)));
     }
     
     public Object convert(Object source, Type<? extends Object> destinationType) {

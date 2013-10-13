@@ -51,18 +51,15 @@ public final class MapperGenerator {
     
     public GeneratedMapperBase build(ClassMap<?, ?> classMap, MappingContext context) {
         
+        StringBuilder logDetails = null;
         try {
             compilerStrategy.assureTypeIsAccessible(classMap.getAType().getRawType());
             compilerStrategy.assureTypeIsAccessible(classMap.getBType().getRawType());
             
-            
-            StringBuilder logDetails;
             if (LOGGER.isDebugEnabled()) {
             	logDetails = new StringBuilder();
             	logDetails.append("Generating new mapper for (" + classMap.getAType()+", " + classMap.getBTypeName() +")");
-            } else {
-            	logDetails = null;
-            }
+            } 
             
             final SourceCodeContext mapperCode = new SourceCodeContext(
                     classMap.getMapperClassName(), GeneratedMapperBase.class, context, logDetails);
@@ -78,6 +75,7 @@ public final class MapperGenerator {
             
             if (logDetails != null) {
             	LOGGER.debug(logDetails.toString());
+            	logDetails = null;
             }
             
             /*
@@ -92,6 +90,14 @@ public final class MapperGenerator {
             return instance;
             
         } catch (final Exception e) {
+            if (logDetails != null) {
+                /*
+                 * Print out the partial progress of the code generation, as
+                 * it can help to pinpoint the location of the internal error
+                 */
+                logDetails.append("\n<---- ERROR occurred here");
+                LOGGER.debug(logDetails.toString());
+            }
             throw new MappingException(e);
         }
     }
@@ -140,15 +146,14 @@ public final class MapperGenerator {
         	
             if (currentFieldMap.isExcluded()) {
             	if (logDetails != null) {
-            		logDetails.append(getFieldTag(currentFieldMap) + "excuding (explicitly)");
+            		code.debugField(currentFieldMap, "excuding (explicitly)");
             	}
                 continue;
             }
             
             if (isAlreadyExistsInUsedMappers(currentFieldMap, classMap)) {
             	if (logDetails != null) {
-            		logDetails.append(getFieldTag(currentFieldMap) + "excluding because it is already handled by another mapper in this hierarchy");
-            		
+            		code.debugField(currentFieldMap, "excluding because it is already handled by another mapper in this hierarchy");
             	}
             	continue;
             }
@@ -161,10 +166,6 @@ public final class MapperGenerator {
             if (code.aggregateSpecsApply(fieldMap)) {
                 continue;
             }
-            
-            if (logDetails != null) {
-        		logDetails.append(getFieldTag(fieldMap));
-        	}
             
             if (!fieldMap.isIgnored()) {
                 try {
@@ -180,7 +181,7 @@ public final class MapperGenerator {
                     throw me;
                 }
             } else if (logDetails !=null) {
-            	logDetails.append("ignored for this mapping direction");
+            	code.debugField(fieldMap, "ignored for this mapping direction");
             }
         }
         

@@ -99,6 +99,14 @@ public final class Specifications {
         return OBJECT_CLASS_PROPERTY;
     }
     
+    public static Specification aOneToManyElementMap() {
+        return ONE_TO_MANY;
+    }
+    
+    public static Specification aManyToOneElementMap() {
+        return MANY_TO_ONE;
+    }
+    
     public static Specification aMultiOccurrenceElementMap() {
         return MULTI_OCCURRENCE_ELEMENT;
     }
@@ -270,10 +278,24 @@ public final class Specifications {
         }
     };
     
+    private static final Specification MANY_TO_ONE = new Specification() {
+        
+        public boolean apply(FieldMap fieldMap) {
+            return fieldMap.getSource().getContainer() != null && fieldMap.getDestination().getContainer() == null;
+        }
+    };
+    
+    private static final Specification ONE_TO_MANY = new Specification() {
+        
+        public boolean apply(FieldMap fieldMap) {
+            return fieldMap.getSource().getContainer() == null && fieldMap.getDestination().getContainer() != null;
+        }
+    };
+    
     private static final Specification MULTI_OCCURRENCE_ELEMENT = new Specification() {
         
         public boolean apply(FieldMap fieldMap) {
-            return fieldMap.getSource().getContainer() != null || fieldMap.getDestination().getContainer() != null;
+            return fieldMap.getSource().getContainer() != null && fieldMap.getDestination().getContainer() != null;
         }
     };
 }

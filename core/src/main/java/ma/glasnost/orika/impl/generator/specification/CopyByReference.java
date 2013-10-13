@@ -47,7 +47,7 @@ public class CopyByReference extends AbstractSpecification {
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("copying " + source.elementTypeName() + " by reference");
+            code.debugField(fieldMap, "copying " + source.elementTypeName() + " by reference");
         }
         
         StringBuilder out = new StringBuilder();

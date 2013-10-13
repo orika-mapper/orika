@@ -44,17 +44,13 @@ public class MapToMap extends AbstractSpecification {
         return fieldMap.getSource().isMap() && fieldMap.getDestination().isMap();
     }
 
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return source + " == " + destination;
-    }
-
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         MultiOccurrenceVariableRef d = MultiOccurrenceVariableRef.from(destination);
         MultiOccurrenceVariableRef s = MultiOccurrenceVariableRef.from(source);
         
         if (code.isDebugEnabled()) {
-            code.debug("mapping from Map<" + source.type().getNestedType(0) + ", " + 
+            code.debugField(fieldMap, "mapping from Map<" + source.type().getNestedType(0) + ", " + 
             source.type().getNestedType(1) + "> to Map<" + destination.type().getNestedType(0) + ", " + 
             destination.type().getNestedType(1) + ">");
         }

@@ -22,7 +22,6 @@ import static java.lang.reflect.Modifier.isStatic;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
@@ -607,9 +606,25 @@ public abstract class PropertyResolver implements PropertyResolverStrategy {
     }
     
     
+    /* (non-Javadoc)
+     * @see ma.glasnost.orika.property.PropertyResolverStrategy#getProperty(java.lang.reflect.Type, java.lang.String)
+     */
     public Property getProperty(java.lang.reflect.Type type, String expr) {
         
         return getProperty(type, expr, false, null);
+    }
+    
+    /* (non-Javadoc)
+     * @see ma.glasnost.orika.property.PropertyResolverStrategy#hasProperty(java.lang.reflect.Type, java.lang.String)
+     */
+    public boolean existsProperty(java.lang.reflect.Type type, String expr) {
+        try {
+            return getProperty(type, expr) != null;
+        } catch (PropertyNotFoundException e) {
+            return false;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
     
     public Property getProperty(Property owner, String expr) {

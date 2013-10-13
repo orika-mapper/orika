@@ -64,6 +64,19 @@ public interface PropertyResolverStrategy {
      */
     Property getProperty(java.lang.reflect.Type type, String dynamicPropertyExpression);
     
+    
+    /**
+     * Determines whether a property matching the given expression exists 
+     * for the specified type.
+     * 
+     * @param type the type to test
+     * @param dynamicPropertyExpression
+     * @return true if a property can be found matching the specified expression
+     *  owned by the specified type
+     */
+    boolean existsProperty(java.lang.reflect.Type type, String dynamicPropertyExpression);
+    
+    
     /**
      * Resolves a property for the specified type; nested and dynamically defined properties
      * should be handled automatically.

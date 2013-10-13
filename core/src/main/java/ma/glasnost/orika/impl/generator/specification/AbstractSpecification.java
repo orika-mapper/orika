@@ -18,6 +18,7 @@
 
 package ma.glasnost.orika.impl.generator.specification;
 
+import static java.lang.String.format;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.generator.SourceCodeContext;
 import ma.glasnost.orika.impl.generator.Specification;
@@ -56,7 +57,7 @@ public abstract class AbstractSpecification implements Specification {
     public abstract boolean appliesTo(FieldMap fieldMap);
     
     public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return source + ".equals(" + destination + ")";
+        return format("%s.equals(%s)", source, destination);
     }
     
     public abstract String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code);

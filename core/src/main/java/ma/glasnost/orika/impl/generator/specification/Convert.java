@@ -51,9 +51,9 @@ public class Convert extends AbstractSpecification {
             if (destination.type().isPrimitive() && source.type().isPrimitive()) {
                 return format("(%s == %s)", destination, source);
             } else if (destination.type().isPrimitive()) {
-                return format("(%s != null && %s == %s.%Value())", source, destination, source,  source.type().getPrimitiveType().getName());
+                return format("(%s != null && %s == %s.%sValue())", source, destination, source,  source.type().getName());
             } else if (source.type().isPrimitive()) {
-                return format("(%s != null && %s.%Value == %s)", destination, destination, destination.type().getPrimitiveType().getName(), source);
+                return format("(%s != null && %s.%sValue() == %s)", destination, destination, destination.type().getPrimitiveType().getName(), source);
             } else {
                 return format("(%s != null && %s.equals(%s))", source, source, destination);
             }
@@ -62,8 +62,9 @@ public class Convert extends AbstractSpecification {
         
             if (destination.type().isPrimitive()) {
                 String wrapper = source.asWrapper();
-                String primitive = source.type().getPrimitiveType().getName();
-                return format("(%s == ((%s)%s.convert(%s, %s)).%Value())", destination, wrapper, code.usedConverter(source.getConverter()), wrapper, code.usedType(destination), primitive);
+                String wrapperType = destination.type().getWrapperType().getSimpleName();
+                String primitive = destination.type().getName();
+                return format("(%s == ((%s)%s.convert(%s, %s)).%sValue())", destination, wrapperType, code.usedConverter(source.getConverter()), wrapper, code.usedType(destination), primitive);
             } else if (source.type().isPrimitive()) {
                 return format("(%s == %s.convert(%s, %s))", destination.asWrapper(), code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
             } else {
@@ -80,13 +81,13 @@ public class Convert extends AbstractSpecification {
         boolean canHandleNulls;
         if (source.getConverter() instanceof CopyByReferenceConverter) {
             if (code.isDebugEnabled()) {
-                code.debug("copying " + source.type() + " by reference");
+                code.debugField(fieldMap, "copying " + source.type() + " by reference");
             }
             statement = destination.assignIfPossible(source);
             canHandleNulls = true;
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("converting using " + source.getConverter());
+                code.debugField(fieldMap, "converting using " + source.getConverter());
             }
             statement = destination.assignIfPossible("%s.convert(%s, %s)", code.usedConverter(source.getConverter()), source.asWrapper(), code.usedType(destination));
             canHandleNulls = false;

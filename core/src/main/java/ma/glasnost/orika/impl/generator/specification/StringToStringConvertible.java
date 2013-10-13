@@ -42,7 +42,7 @@ public class StringToStringConvertible extends AbstractSpecification {
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("converting from String to " + destination.type());
+            code.debugField(fieldMap, "converting from String to " + destination.type());
         }
         
         String value = source.toString();

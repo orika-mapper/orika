@@ -30,10 +30,12 @@ import java.util.Set;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Filter;
 import ma.glasnost.orika.MapEntry;
+import ma.glasnost.orika.PropertyNotFoundException;
 import ma.glasnost.orika.impl.util.ClassUtil;
 import ma.glasnost.orika.metadata.NestedProperty;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
+import ma.glasnost.orika.property.PropertyResolverStrategy;
 
 /**
  * VariableRef represents a reference to a given variable or property; it
@@ -344,6 +346,11 @@ public class VariableRef {
             } else if (type.isPrimitiveWrapper() && isPrimitiveLiteral(castValue, type)) {
                 castValue = format("%s.valueOf(%s)", type.getWrapperType().getCanonicalName(), castValue);
             } else if (type.isString()) {
+                /*
+                 * This case should be avoided if at all possible; how can we
+                 * detect and avoid the case where we're applying this to a
+                 * 'castValue' that is already a String ?
+                 */
                 castValue = "\"\" + " + castValue;
             } else if (!value.startsWith("(" + typeName + ")") && !value.startsWith("((" + typeName + ")")) {
                 castValue = "((" + typeName + ")" + castValue + ")";
@@ -418,16 +425,15 @@ public class VariableRef {
      * Returns Java code which declares this variable, initialized with the
      * provided value.
      * 
-     * @param value
-     *            the value to assign
-     * @param args
-     *            any replacement arguments to applied to value via
-     *            String.format()
+     * @param initialValueRef the VariableRef instance which describes the
+     *      initial value of the receiver
      * @return the code which declares this variable, and explicitly assigns the
      *         provided value.
      */
-    public String declare(VariableRef ref) {
-        return declare(cast(ref));
+    public String declare(VariableRef initialValueRef) {
+        String valueExpr = cast(initialValueRef);
+        declared = true;
+        return format("\n%s %s = %s", typeName(), name(), valueExpr);
     }
     
     public boolean isDeclared() {
@@ -828,5 +834,25 @@ public class VariableRef {
         }
         return true;
     }
+ 
+    /**
+     * Returns true if this VariableRef represents a valid property reference,
+     * or is not a property
+     * 
+     * @param resolver
+     * @return true if this VariableRef is simply a variable, or if it
+     *  is a property reference and the property's expression
+     *  is valid for this VariableRef's type
+     */
+    public boolean isValidPropertyReference(PropertyResolverStrategy resolver) {
+        try {
+            return this.property == null || this.owner == null ||
+                    resolver.getProperty(owner.type(), property().getExpression()) != null;
+        } catch (PropertyNotFoundException e) {
+            return false;
+        }
+        
+    }
+    
     
 }

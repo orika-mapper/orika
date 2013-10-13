@@ -42,7 +42,7 @@ public class StringToEnum extends AbstractSpecification {
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("converting String to enum " + destination.type());
+            code.debugField(fieldMap, "converting String to enum " + destination.type());
         }
         
         String assignEnum = destination.assign("Enum.valueOf(%s.class, \"\"+%s)", destination.typeName(), source);

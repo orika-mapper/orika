@@ -39,14 +39,10 @@ public class ObjectToMultiOccurrenceElement extends AbstractSpecification {
         
     }
 
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return source + " == " + destination;
-    }
-
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (code.isDebugEnabled()) {
-            code.debug("mapping object to multi-occurrence element of type Object");
+            code.debugField(fieldMap, "mapping object to multi-occurrence element of type Object");
         }
         
         StringBuilder out = new StringBuilder();

@@ -124,6 +124,10 @@ public class MultiOccurrenceVariableRef extends VariableRef {
         return next;
     }
     
+    public VariableRef nextElementRef() {
+        return new VariableRef(elementType(), nextElement());
+    }
+    
     public String iteratorHasNext() {
         if (!iteratorDeclared) {
             throw new IllegalStateException("Iterator has not been declared");

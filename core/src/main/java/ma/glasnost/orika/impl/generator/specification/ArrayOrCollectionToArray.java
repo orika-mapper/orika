@@ -33,9 +33,6 @@ public class ArrayOrCollectionToArray extends AbstractSpecification {
         return fieldMap.getDestination().isArray() && (fieldMap.getSource().isArray() || fieldMap.getSource().isCollection());
     }
 
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return "";
-    }
 
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
@@ -45,12 +42,12 @@ public class ArrayOrCollectionToArray extends AbstractSpecification {
         String mapArray;
         if (destination.elementType().isPrimitive()) {
             if (code.isDebugEnabled()) {
-                code.debug("mapping to primitive array");
+                code.debugField(fieldMap, "mapping to primitive array");
             }
             mapArray = format("mapArray(%s, asList(%s), %s.class, mappingContext)", arrayVar.name(), source, arrayVar.typeName());
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("mapping to array");
+                code.debugField(fieldMap, "mapping to array");
             }
             mapArray = format("mapperFacade.mapAsArray(%s, asList(%s), %s, %s, mappingContext)", arrayVar.name(), source, code.usedType(source.elementType()),
                     code.usedType(destination.elementType()));

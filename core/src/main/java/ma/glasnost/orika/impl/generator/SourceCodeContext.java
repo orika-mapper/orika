@@ -58,6 +58,7 @@ import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Property;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeFactory;
+import ma.glasnost.orika.property.PropertyResolver;
 import ma.glasnost.orika.property.PropertyResolverStrategy;
 
 /**
@@ -155,6 +156,17 @@ public class SourceCodeContext {
         if (isDebugEnabled()) {
             logDetails.append(msg);
         }
+    }
+    
+    public void debugField(FieldMap fieldMap, String msg)  {
+        if (isDebugEnabled()) {
+            logDetails.append(fieldTag(fieldMap));
+            logDetails.append(msg);
+        }
+    }
+    
+    public String fieldTag(FieldMap fieldMap) {
+        return "\n\t Field(" + fieldMap.getSource() + ", " + fieldMap.getDestination() + ") : ";
     }
     
     /**
@@ -496,6 +508,7 @@ public class SourceCodeContext {
      * @param dest
      * @param srcNodes
      * @param destNodes
+     * @param mappings any relevant declared field mappings
      * @return a code snippet suitable to use as an equality comparison test for
      *         the provided source and destination nodes
      */
@@ -503,14 +516,8 @@ public class SourceCodeContext {
         
         StringBuilder comparator = new StringBuilder();
         
-        MapperKey key = new MapperKey(source.elementRef.type(), dest.elementRef.type());
-        ClassMap<?, ?> classMap = mapperFactory.getClassMap(key);
-        if (classMap == null) {
-            classMap = mapperFactory.classMap(key.getAType(), key.getBType()).byDefault().toClassMap();
-        }
-        
         String or = "";
-        Set<FieldMap> fieldMaps = new HashSet<FieldMap>(classMap.getFieldsMapping());
+        Set<FieldMap> fieldMaps = new HashSet<FieldMap>();
         for (Node node : source.children) {
             if (node.value != null) {
                 fieldMaps.add(node.value);
@@ -523,44 +530,81 @@ public class SourceCodeContext {
         }
         
         Set<String> comparisons = new HashSet<String>();
-        
         for (FieldMap fieldMap : fieldMaps) {
             if (!(fieldMap.is(aMultiOccurrenceElementMap()) && fieldMap.isByDefault()) && !fieldMap.isExcluded() && !fieldMap.isIgnored()) {
                 
-                Node srcNode = Node.findFieldMap(fieldMap, srcNodes, true);
-                if (srcNode != null && srcNode.parent != null) {
-                    srcNode = srcNode.parent;
-                } else {
-                    srcNode = source;
-                }
-                
-                Node destNode = Node.findFieldMap(fieldMap, destNodes, false);
-                if (destNode != null && destNode.parent != null) {
-                    destNode = destNode.parent;
-                } else {
-                    destNode = dest;
-                }
-                
-                Type<?> sourceType = source.elementRef.type();
-                Type<?> destType = dest.elementRef.type();
-                
-                try {
-                    propertyResolver.getProperty(sourceType, fieldMap.getSource().getName());
-                    propertyResolver.getProperty(destType, fieldMap.getDestination().getName());
-                    
-                    VariableRef s = new VariableRef(fieldMap.getSource(), srcNode.elementRef);
-                    VariableRef d = new VariableRef(fieldMap.getDestination(), destNode.elementRef);
-                    String code = this.compareFields(fieldMap, s, d, key.getBType(), null);
+                VariableRef sourceRef = getVariableForComparison(fieldMap, srcNodes, true, source);
+                VariableRef destRef = getVariableForComparison(fieldMap, destNodes, false, dest);
+
+                if (sourceRef != null && destRef != null) {
+                    if (!sourceRef.isValidPropertyReference(propertyResolver)) {
+                        throw new IllegalStateException(sourceRef + " is not valid!!");
+                    } else if (!destRef.isValidPropertyReference(propertyResolver)) {
+                        throw new IllegalStateException(destRef + " is not valid!!");
+                    }
+                        
+                    String code = this.compareFields(fieldMap, sourceRef, destRef, dest.elementRef.type(), null);
                     if (!"".equals(code) && comparisons.add(code)) {
                         comparator.append(or + "!(" + code + ")");
                         or = " || ";
                     }
-                } catch (Exception e) {
-                    
                 }
             }
         }
         return comparator.toString();
+    }
+    
+    /**
+     * Resolves a VariableRef instance to be used for comparison;
+     * 
+     * @param fieldMap
+     * @param nodes
+     * @param useSource
+     * @param defaultParent
+     * @return
+     */
+    private VariableRef getVariableForComparison(FieldMap fieldMap, NodeList nodes, boolean useSource, Node defaultParent) {
+        
+        VariableRef parentRef;
+        Node destNode = Node.findFieldMap(fieldMap, nodes, useSource);
+        Property prop = useSource ? fieldMap.getSource() : fieldMap.getDestination();
+        if (destNode != null && destNode.parent != null) {
+            parentRef = destNode.parent.elementRef;
+            if (isSelfOrParentComparison(destNode.parent, defaultParent)) {
+                return new VariableRef(prop.getElement(), parentRef);
+            } else {
+                return null;
+            }
+        } else if (prop.getContainer() != null){
+            parentRef = defaultParent.elementRef;
+            return new VariableRef(parentRef.type(), parentRef.name());
+        } else {
+            /*
+             * Need to check whether the defaultParent.elementRef.type() can
+             * actually have a property of the specified type; if not, then
+             * it must be a reference to the outermost 'source' or 'destination'
+             * variables -- though we should have been able to properly detect
+             * this earlier...
+             */
+            parentRef = defaultParent.elementRef;
+            if (propertyResolver.existsProperty(parentRef.type(), prop.getExpression())) {
+                return new VariableRef(prop, defaultParent.elementRef);
+            } else {
+                return new VariableRef(prop, useSource ? "source" : "destination");
+            }
+        }
+    }
+    
+    private boolean isSelfOrParentComparison(Node node, Node reference) {
+        Node parent = reference;
+        while (parent != null) {
+            if (parent.elementRef.equals(node.elementRef)) {
+                return true;
+            } else {
+                parent = parent.parent;
+            }
+        }
+        return false;
     }
     
     private Property root(Property prop) {
@@ -878,7 +922,7 @@ public class SourceCodeContext {
         
         out.append("(");
         if (sourceProperty.isNestedProperty()) {
-            out.append(sourceProperty.ifPathNotNull());
+            out.append(sourceProperty.pathNotNull());
             out.append(" && ");
         }
         
@@ -887,7 +931,6 @@ public class SourceCodeContext {
                 out.append(sourceProperty.notNull());
                 out.append(" && ");
             }
-            out.append(assureInstanceExists(destinationProperty, sourceProperty));
         }
         
         Converter<Object, Object> converter = getConverter(fieldMap, fieldMap.getConverterId());
@@ -899,14 +942,13 @@ public class SourceCodeContext {
                 if (code == null || "".equals(code)) {
                     throw new IllegalStateException("empty code returned for spec " + spec + ", sourceProperty = " + sourceProperty
                             + ", destinationProperty = " + destinationProperty);
-                }
+                } 
                 out.append(code);
                 break;
             }
         }
         
         out.append(")");
-        
         return out.toString();
     }
     

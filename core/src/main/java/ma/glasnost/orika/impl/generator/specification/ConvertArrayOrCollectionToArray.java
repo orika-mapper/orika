@@ -58,19 +58,15 @@ public class ConvertArrayOrCollectionToArray extends AbstractSpecification {
         return false;
     }
     
-    public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        return "";
-    }
-    
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (destination.elementType().isPrimitive()) {
             if (code.isDebugEnabled()) {
-                code.debug("converting to primitive array using " + source.getConverter());
+                code.debugField(fieldMap, "converting to primitive array using " + source.getConverter());
             }
         } else {
             if (code.isDebugEnabled()) {
-                code.debug("converting to array using " + source.getConverter());
+                code.debugField(fieldMap, "converting to array using " + source.getConverter());
             }
         }
         

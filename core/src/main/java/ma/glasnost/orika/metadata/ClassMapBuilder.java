@@ -19,6 +19,8 @@
 package ma.glasnost.orika.metadata;
 
 import static ma.glasnost.orika.impl.Specifications.aMultiOccurrenceElementMap;
+import static ma.glasnost.orika.impl.Specifications.aManyToOneElementMap;
+import static ma.glasnost.orika.impl.Specifications.aOneToManyElementMap;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -835,12 +837,19 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
     	return bType;
     }
     
+    /**
+     * @param fieldMap
+     */
     protected void addFieldMap(FieldMap fieldMap) {
     	getMappedFields().add(fieldMap);
         getMappedPropertiesForTypeA().add(fieldMap.getSourceExpression());
         getMappedPropertiesForTypeB().add(fieldMap.getDestinationExpression());
         
-        if (fieldMap.is(aMultiOccurrenceElementMap())) {
+        if (fieldMap.is(aManyToOneElementMap())) {
+            getMappedPropertiesForTypeA().add(fieldMap.getSource().getContainer().getExpression());
+        } else if (fieldMap.is(aOneToManyElementMap())) {
+            getMappedPropertiesForTypeB().add(fieldMap.getDestination().getContainer().getExpression());
+        } else if (fieldMap.is(aMultiOccurrenceElementMap())) {
             getMappedPropertiesForTypeA().add(fieldMap.getSource().getContainer().getExpression());
             getMappedPropertiesForTypeB().add(fieldMap.getDestination().getContainer().getExpression());
         }
