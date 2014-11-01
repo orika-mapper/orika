@@ -33,20 +33,13 @@ import ma.glasnost.orika.impl.generator.eclipsejdt.CompilationUnit;
 import ma.glasnost.orika.impl.generator.eclipsejdt.CompilerRequestor;
 import ma.glasnost.orika.impl.generator.eclipsejdt.NameEnvironment;
 
-//import org.eclipse.jdt.core.JavaCore;
-//import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
-//import org.eclipse.jdt.core.formatter.CodeFormatter;
-//import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-//import org.eclipse.jface.text.Document;
-//import org.eclipse.jface.text.IDocument;
-//import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +61,6 @@ public class EclipseJdtCompiler {
 	private static final String JAVA_SOURCE_ENCODING = "UTF-8";
 
 	private final ByteCodeClassLoader byteCodeClassLoader;
-	//private final CodeFormatter formatter;
 	private final NameEnvironment compilerNameEnvironment;
 	private final CompilerRequestor compilerRequester;
 	private final Compiler compiler;
@@ -79,8 +71,6 @@ public class EclipseJdtCompiler {
 
 	public EclipseJdtCompiler(ClassLoader parentLoader) {
 		this.byteCodeClassLoader = new ByteCodeClassLoader(parentLoader);
-		/*this.formatter = ToolFactory
-				.createCodeFormatter(getFormattingOptions());*/
 		this.compilerNameEnvironment = new NameEnvironment(
 				this.byteCodeClassLoader);
 		this.compilerRequester = new CompilerRequestor();
