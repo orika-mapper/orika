@@ -60,7 +60,7 @@ public class ConstructorParameterResolver {
                     
                     for (Constructor<?> constructor : resolvedType.getRawType().getConstructors()) {
                         
-                        String[] names = paranamer.lookupParameterNames(constructor);
+                        String[] names = paranamer.lookupParameterNames(constructor, false);
                         java.lang.reflect.Type[] types = constructor.getGenericParameterTypes();
                         List<Property> constructorArgs = new ArrayList<Property>();
                         
