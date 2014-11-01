@@ -24,10 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import java.net.URL;
 import java.net.URLStreamHandler;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
@@ -463,6 +460,21 @@ public class ConstructorMappingTestCase {
     	Assert.assertEquals(dto1.hostX, url.getHost());
     	Assert.assertEquals(dto1.portX, url.getPort());
     	
+    }
+
+    @Test
+    public void testForUnexpectedRuntimeException() {
+        MapperFactory factory = MappingUtil.getMapperFactory();
+        URLDto1 dto1 = new URLDto1();
+        dto1.protocolX = "http";
+        dto1.hostX = "somewhere.com";
+        dto1.portX = 8080;
+        dto1.fileX = "index.html";
+        Map map = factory.getMapperFacade(URLDto1.class, Map.class).map(dto1);
+        Assert.assertEquals(map.get("protocolX"), dto1.protocolX);
+        Assert.assertEquals(map.get("hostX"), dto1.hostX);
+        Assert.assertEquals(map.get("portX"), dto1.portX);
+        Assert.assertEquals(map.get("fileX"), dto1.fileX);
     }
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
