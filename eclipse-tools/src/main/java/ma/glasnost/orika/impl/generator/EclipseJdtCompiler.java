@@ -89,25 +89,6 @@ public class EclipseJdtCompiler {
 				getCompilerOptions(), compilerRequester,
 				new DefaultProblemFactory(Locale.getDefault()));
 	}
-	
-	/**
-	 * Return the options to be passed when creating {@link CodeFormatter}
-	 * instance.
-	 * 
-	 * @return
-	 */
-	/*private Map<Object, Object> getFormattingOptions() {
-
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> options = DefaultCodeFormatterConstants
-				.getEclipseDefaultSettings();
-		options.put(JavaCore.COMPILER_SOURCE, JAVA_COMPILER_SOURCE_VERSION);
-		options.put(JavaCore.COMPILER_COMPLIANCE,
-				JAVA_COMPILER_COMPLIANCE_VERSION);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM,
-				JAVA_COMPILER_CODEGEN_TARGET_PLATFORM_VERSION);
-		return options;
-	}*/
 
 	private CompilerOptions getCompilerOptions() {
 
@@ -146,25 +127,7 @@ public class EclipseJdtCompiler {
 	 */
 	public String formatSource(String code) {
 
-		String lineSeparator = "\n";
-
-		/*TextEdit te = formatter.format(CodeFormatter.K_COMPILATION_UNIT, code,
-				0, code.length(), 0, lineSeparator);
-		if (te == null) {
-			throw new IllegalArgumentException(
-					"source code was unable to be formatted; \n"
-							+ "//--- BEGIN ---\n" + code + "\n//--- END ---");
-		}*/
-
-		/*IDocument doc = new Document(code);
-		try {
-			te.apply(doc);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}*/
-		String formattedCode = code;//doc.get();
-
-		return formattedCode;
+		return code;
 	}
 
 	public void assertTypeAccessible(Class<?> type)  throws IllegalStateException {
