@@ -54,7 +54,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<javassist.version>3.16.1-GA</javassist.version>
+		<javassist.version>3.18.2-GA</javassist.version>
 		<springframework.version>3.1.1.RELEASE</springframework.version>
 		<hibernate.version>3.3.2.GA</hibernate.version>
 		<junit.version>4.11</junit.version>
@@ -72,9 +72,9 @@
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
 				<version>${javassist.version}</version>
-			</dependency>
+            </dependency>
 
-			<dependency>
+            <dependency>
 				<groupId>com.thoughtworks.paranamer</groupId>
 				<artifactId>paranamer</artifactId>
 				<version>${paranamer.version}</version>
