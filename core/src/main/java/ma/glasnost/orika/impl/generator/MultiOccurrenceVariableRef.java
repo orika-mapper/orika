@@ -17,8 +17,7 @@
  */
 package ma.glasnost.orika.impl.generator;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import ma.glasnost.orika.MapEntry;
 import ma.glasnost.orika.impl.util.ClassUtil;
@@ -241,6 +240,9 @@ public class MultiOccurrenceVariableRef extends VariableRef {
         if (isArray()) {
             return "new " + rawType().getComponentType().getCanonicalName() + "[" + sizeExpr + "]";
         } else if (isMap()) {
+            if (SortedMap.class.isAssignableFrom(rawType())) {
+                return "new java.util.TreeMap()";
+            }
             return "new java.util.LinkedHashMap(" + sizeExpr + ")";
         } else if ("Set".equals(collectionType())) {
             if (ClassUtil.isConcrete(type())) {
@@ -254,7 +256,10 @@ public class MultiOccurrenceVariableRef extends VariableRef {
                     
                 }
                 
-            } 
+            }
+            if (SortedSet.class.isAssignableFrom(rawType())) {
+                return "new java.util.TreeSet()";
+            }
             return "new java.util.LinkedHashSet(" + sizeExpr + ")";
             
         } else {
@@ -274,6 +279,9 @@ public class MultiOccurrenceVariableRef extends VariableRef {
     }
     
     public String newMap(String sizeExpr) {
+        if (SortedMap.class.isAssignableFrom(rawType())) {
+            return "new java.util.TreeMap()";
+        }
         return "new java.util.LinkedHashMap(" + sizeExpr + ")";
     }
     
