@@ -65,4 +65,8 @@ public class CompilationUnit implements ICompilationUnit {
 		}
 		return result;
 	}
+
+    public boolean ignoreOptionalProblems() {
+        return true;
+    }
 }

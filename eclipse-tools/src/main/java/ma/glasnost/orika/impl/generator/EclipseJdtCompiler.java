@@ -33,20 +33,13 @@ import ma.glasnost.orika.impl.generator.eclipsejdt.CompilationUnit;
 import ma.glasnost.orika.impl.generator.eclipsejdt.CompilerRequestor;
 import ma.glasnost.orika.impl.generator.eclipsejdt.NameEnvironment;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +61,6 @@ public class EclipseJdtCompiler {
 	private static final String JAVA_SOURCE_ENCODING = "UTF-8";
 
 	private final ByteCodeClassLoader byteCodeClassLoader;
-	private final CodeFormatter formatter;
 	private final NameEnvironment compilerNameEnvironment;
 	private final CompilerRequestor compilerRequester;
 	private final Compiler compiler;
@@ -79,8 +71,6 @@ public class EclipseJdtCompiler {
 
 	public EclipseJdtCompiler(ClassLoader parentLoader) {
 		this.byteCodeClassLoader = new ByteCodeClassLoader(parentLoader);
-		this.formatter = ToolFactory
-				.createCodeFormatter(getFormattingOptions());
 		this.compilerNameEnvironment = new NameEnvironment(
 				this.byteCodeClassLoader);
 		this.compilerRequester = new CompilerRequestor();
@@ -88,25 +78,6 @@ public class EclipseJdtCompiler {
 				DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 				getCompilerOptions(), compilerRequester,
 				new DefaultProblemFactory(Locale.getDefault()));
-	}
-	
-	/**
-	 * Return the options to be passed when creating {@link CodeFormatter}
-	 * instance.
-	 * 
-	 * @return
-	 */
-	private Map<Object, Object> getFormattingOptions() {
-
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> options = DefaultCodeFormatterConstants
-				.getEclipseDefaultSettings();
-		options.put(JavaCore.COMPILER_SOURCE, JAVA_COMPILER_SOURCE_VERSION);
-		options.put(JavaCore.COMPILER_COMPLIANCE,
-				JAVA_COMPILER_COMPLIANCE_VERSION);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM,
-				JAVA_COMPILER_CODEGEN_TARGET_PLATFORM_VERSION);
-		return options;
 	}
 
 	private CompilerOptions getCompilerOptions() {
@@ -131,11 +102,11 @@ public class EclipseJdtCompiler {
 				CompilerOptions.IGNORE);
 
 		// Ignore unchecked types and raw types
-		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION,
+		options.put(CompilerOptions.OPTION_ReportUncheckedTypeOperation,
 				CompilerOptions.IGNORE);
-		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE,
+		options.put(CompilerOptions.OPTION_ReportRawTypeReference,
 				CompilerOptions.IGNORE);
-		options.put(JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST, 
+		options.put(CompilerOptions.OPTION_ReportVarargsArgumentNeedCast,
 				CompilerOptions.IGNORE);
 
 		return new CompilerOptions(options);
@@ -146,25 +117,7 @@ public class EclipseJdtCompiler {
 	 */
 	public String formatSource(String code) {
 
-		String lineSeparator = "\n";
-
-		TextEdit te = formatter.format(CodeFormatter.K_COMPILATION_UNIT, code,
-				0, code.length(), 0, lineSeparator);
-		if (te == null) {
-			throw new IllegalArgumentException(
-					"source code was unable to be formatted; \n"
-							+ "//--- BEGIN ---\n" + code + "\n//--- END ---");
-		}
-
-		IDocument doc = new Document(code);
-		try {
-			te.apply(doc);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		String formattedCode = doc.get();
-
-		return formattedCode;
+		return code;
 	}
 
 	public void assertTypeAccessible(Class<?> type)  throws IllegalStateException {
