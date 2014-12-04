@@ -160,13 +160,56 @@ public class PropertyResolverTestCase {
 	    Assert.assertEquals("name.firstName", prop.getExpression());
 	    Assert.assertEquals(TypeFactory.valueOf(String.class), prop.getType());
 	}
-	
+
+    @Test
+    public void testAdHocResolutionGetterOnly() {
+
+        Property prop = propertyResolver.getProperty(A.class, "name:{readTheNameForThisBean}.firstName");
+
+        Assert.assertNotNull(prop);
+        Assert.assertEquals("firstName", prop.getName());
+        Assert.assertEquals("name.firstName", prop.getExpression());
+        Assert.assertEquals(TypeFactory.valueOf(String.class), prop.getType());
+    }
+
+    @Test
+    public void testAdHocResolutionSetterOnly() {
+
+        Property prop = propertyResolver.getProperty(A.class, "name:{|assignTheName}.firstName");
+
+        Assert.assertNotNull(prop);
+        Assert.assertEquals("firstName", prop.getName());
+        Assert.assertEquals("name.firstName", prop.getExpression());
+        Assert.assertEquals(TypeFactory.valueOf(String.class), prop.getType());
+    }
 	
 	@Test
     public void testAdHocResolution_withType() {
         
         Property prop = propertyResolver.getProperty(A.class, "name:{readTheNameForThisBean|assignTheName|type=ma.glasnost.orika.test.property.TestCaseClasses$Name}.firstName");
         
+        Assert.assertNotNull(prop);
+        Assert.assertEquals("firstName", prop.getName());
+        Assert.assertEquals("name.firstName", prop.getExpression());
+        Assert.assertEquals(TypeFactory.valueOf(String.class), prop.getType());
+    }
+
+    @Test
+    public void testAdHocResolutionGetterOnly_withType() {
+
+        Property prop = propertyResolver.getProperty(A.class, "name:{readTheNameForThisBean|type=ma.glasnost.orika.test.property.TestCaseClasses$Name}.firstName");
+
+        Assert.assertNotNull(prop);
+        Assert.assertEquals("firstName", prop.getName());
+        Assert.assertEquals("name.firstName", prop.getExpression());
+        Assert.assertEquals(TypeFactory.valueOf(String.class), prop.getType());
+    }
+
+    @Test
+    public void testAdHocResolutionSetterOnly_withType() {
+
+        Property prop = propertyResolver.getProperty(A.class, "name:{|assignTheName|type=ma.glasnost.orika.test.property.TestCaseClasses$Name}.firstName");
+
         Assert.assertNotNull(prop);
         Assert.assertEquals("firstName", prop.getName());
         Assert.assertEquals("name.firstName", prop.getExpression());

@@ -706,8 +706,9 @@ public abstract class PropertyResolver implements PropertyResolverStrategy {
         }
     }
 
-    private static final Pattern INLINE_PROPERTY_PATTERN = Pattern.compile("([\\w]+)\\:\\{\\s*([\\w\\(\\)'\"\\% ]+)\\s*\\|\\s*([\\w\\(\\)'\"\\%, ]+)\\s*\\|?\\s*(?:(?:type=)([\\w.\\$ \\<\\>]+))?\\}");
-    
+    private static final Pattern INLINE_PROPERTY_PATTERN = Pattern.compile("([\\w]+)\\:\\{(?:\\s*([\\w\\(\\)'\\\"\\% ]+))?\\s*(?:\\|\\s*([\\w\\(\\)'\\\"\\%, ]+)\\s*)?(?:\\|?\\s*(?:type=)([\\w.\\$ \\<\\>]+))?\\}");
+
+
     /**
      * Determines whether the provided string is a valid in-line property
      * expression
@@ -717,7 +718,8 @@ public abstract class PropertyResolver implements PropertyResolverStrategy {
      * @return true if the expression represents an in-line property
      */
     protected boolean isInlinePropertyExpression(String expression) {
-        return INLINE_PROPERTY_PATTERN.matcher(expression).matches();
+        Matcher matcher = INLINE_PROPERTY_PATTERN.matcher(expression);
+        return matcher.matches() && (matcher.group(2) != null || matcher.group(3) != null);
     }
     
     /**
@@ -747,8 +749,12 @@ public abstract class PropertyResolver implements PropertyResolverStrategy {
         
         if (matcher.matches()) {
             Property.Builder builder = new Property.Builder(theType, matcher.group(1));
-            builder.getter(matcher.group(2));
-            builder.setter(matcher.group(3));
+            if (matcher.group(2) != null) {
+                builder.getter(matcher.group(2));
+            }
+            if (matcher.group(3) != null) {
+                builder.setter(matcher.group(3));
+            }
             builder.type(matcher.group(4));
             return builder.build(this);
         } else {
