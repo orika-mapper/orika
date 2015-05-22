@@ -3,7 +3,7 @@
 	<groupId>ma.glasnost.orika</groupId>
 	<artifactId>orika-parent</artifactId>
 	<name>Orika - parent</name>
-	<version>1.4.6-SNAPSHOT</version>
+	<version>1.4.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -54,7 +54,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<javassist.version>3.18.2-GA</javassist.version>
+		<javassist.version>3.19.0-GA</javassist.version>
 		<springframework.version>3.1.1.RELEASE</springframework.version>
 		<hibernate.version>3.3.2.GA</hibernate.version>
 		<junit.version>4.11</junit.version>
