@@ -13,7 +13,7 @@
 	<parent>
 		<artifactId>orika-parent</artifactId>
 		<groupId>ma.glasnost.orika</groupId>
-		<version>1.4.6-SNAPSHOT</version>
+		<version>1.4.7-SNAPSHOT</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
