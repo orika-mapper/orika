@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/orika-mapper/orika.png?label=ready)](https://waffle.io/orika-mapper/orika)  
 Orika ! [![Build Status](https://secure.travis-ci.org/orika-mapper/orika.png)](http://travis-ci.org/orika-mapper/orika)
 -----------------------------------------------------------------------
 
