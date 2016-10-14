@@ -18,11 +18,14 @@
 package ma.glasnost.orika.impl.util;
 
 
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Character.isJavaIdentifierStart;
+
 /**
  * @author matt.deboer@gmail.com
  *
  */
-public abstract class StringUtil {
+public class StringUtil {
     
     public static String capitalize(String string) {
         if ("".equals(string)) {
@@ -32,5 +35,24 @@ public abstract class StringUtil {
         } else {
             return string.substring(0,1).toUpperCase() + string.substring(1);
         }
+    }
+
+    public static String toValidVariableName(String string) {
+        StringBuilder output = new StringBuilder();
+
+        if (!isJavaIdentifierStart(string.charAt(0))) {
+            output.append("_");
+        }
+
+        for (int i=0; i < string.length(); i++) {
+            char character = string.charAt(i);
+            if (isJavaIdentifierPart(character)) {
+                output.append(character);
+            }
+            else {
+                output.append("_");
+            }
+        }
+        return output.toString();
     }
 }
