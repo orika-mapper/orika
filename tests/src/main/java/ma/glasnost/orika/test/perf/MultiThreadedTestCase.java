@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -52,6 +51,7 @@ import ma.glasnost.orika.test.common.types.TestCaseClasses.LibraryDTO;
 import ma.glasnost.orika.test.common.types.TestCaseClasses.LibraryImpl;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -374,7 +374,6 @@ public class MultiThreadedTestCase {
     	if (IS_IBM_JDK) {
     		synchronized(this) {
 	    		SoftReference<Object> checkReference = new SoftReference<Object>(new Object());
-		        Assert.assertNotNull(checkReference.get());
 		        List<byte[]> byteBucket = new ArrayList<byte[]>();
 		        try {
 		            for (int i = 0; i < Integer.MAX_VALUE; ++i) {
@@ -395,7 +394,6 @@ public class MultiThreadedTestCase {
     		}
     	} else {
 	        SoftReference<Object> checkReference = new SoftReference<Object>(new Object());
-	        Assert.assertNotNull(checkReference.get());
 	        List<byte[]> byteBucket = new ArrayList<byte[]>();
 	        try {
 	            for (int i = 0; i < Integer.MAX_VALUE; ++i) {

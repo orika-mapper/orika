@@ -18,7 +18,6 @@
 
 package ma.glasnost.orika.metadata;
 
-import com.google.common.collect.ImmutableSet;
 import ma.glasnost.orika.impl.util.ClassUtil;
 
 import java.lang.reflect.Modifier;
@@ -60,30 +59,36 @@ public final class Type<T> implements ParameterizedType, Comparable<Type<?>> {
     private final TypeKey key;
     private final int uniqueIndex;
 
-    private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES = ImmutableSet.<Class<?>>builder()
-            .add(Byte.class)
-            .add(Short.class)
-            .add(Integer.class)
-            .add(Long.class)
-            .add(Boolean.class)
-            .add(Character.class)
-            .add(Float.class)
-            .add(Double.class)
-            .build();
+    private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES;
 
-    private static final Set<Class<?>> IMMUTABLE_WRAPPER_TYPES = ImmutableSet.<Class<?>>builder()
-            .addAll(PRIMITIVE_WRAPPER_TYPES)
-            .add(String.class)
-            .add(BigDecimal.class)
-            .add(Byte.TYPE)
-            .add(Short.TYPE)
-            .add(Integer.TYPE)
-            .add(Long.TYPE)
-            .add(Boolean.TYPE)
-            .add(Character.TYPE)
-            .add(Float.TYPE)
-            .add(Double.TYPE)
-            .build();
+    private static final Set<Class<?>> IMMUTABLE_WRAPPER_TYPES;
+    
+    static {
+        Set<Class<?>> tmpPrimitiveWrapperTypes = new HashSet<Class<?>>();
+        tmpPrimitiveWrapperTypes.add(Byte.class);
+        tmpPrimitiveWrapperTypes.add(Short.class);
+        tmpPrimitiveWrapperTypes.add(Integer.class);
+        tmpPrimitiveWrapperTypes.add(Long.class);
+        tmpPrimitiveWrapperTypes.add(Boolean.class);
+        tmpPrimitiveWrapperTypes.add(Character.class);
+        tmpPrimitiveWrapperTypes.add(Float.class);
+        tmpPrimitiveWrapperTypes.add(Double.class);
+        PRIMITIVE_WRAPPER_TYPES = Collections.unmodifiableSet(tmpPrimitiveWrapperTypes);
+        
+        Set<Class<?>> tmpImmutableWrapperTypes = new HashSet<Class<?>>();
+        tmpImmutableWrapperTypes.addAll(PRIMITIVE_WRAPPER_TYPES);
+        tmpImmutableWrapperTypes.add(String.class);
+        tmpImmutableWrapperTypes.add(BigDecimal.class);
+        tmpImmutableWrapperTypes.add(Byte.TYPE);
+        tmpImmutableWrapperTypes.add(Short.TYPE);
+        tmpImmutableWrapperTypes.add(Integer.TYPE);
+        tmpImmutableWrapperTypes.add(Long.TYPE);
+        tmpImmutableWrapperTypes.add(Boolean.TYPE);
+        tmpImmutableWrapperTypes.add(Character.TYPE);
+        tmpImmutableWrapperTypes.add(Float.TYPE);
+        tmpImmutableWrapperTypes.add(Double.TYPE);
+        IMMUTABLE_WRAPPER_TYPES = Collections.unmodifiableSet(tmpImmutableWrapperTypes);
+    }
 
     /**
      * @param rawType

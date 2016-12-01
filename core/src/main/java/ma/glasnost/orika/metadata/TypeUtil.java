@@ -96,7 +96,9 @@ abstract class TypeUtil {
                         } catch (IllegalArgumentException e) {
                             defaultTypeArguments[i] = typeFromArgument;
                         }
-                        hasUnresolvedTypes = true;
+                        if (defaultTypeArguments[i] == null || defaultTypeArguments[i].equals(TypeFactory.TYPE_OF_OBJECT)) {
+                            hasUnresolvedTypes = true;
+                        }
                     }
                 }
             }

@@ -337,7 +337,6 @@ public class ClassLoaderLeakageTestCase {
 	private synchronized void forceClearSoftAndWeakReferences() {
 
 		SoftReference<Object> checkReference = new SoftReference<Object>(new Object());
-		Assert.assertNotNull(checkReference.get());
 		List<byte[]> byteBucket = new ArrayList<byte[]>();
 		try {
 			for (int i = 0; i < Integer.MAX_VALUE; ++i) {

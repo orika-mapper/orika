@@ -19,12 +19,11 @@
 package ma.glasnost.orika.test.inheritance;
 
 import org.junit.Assert;
+import org.junit.Test;
+
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.metadata.ClassMapBuilder;
 import ma.glasnost.orika.test.MappingUtil;
-
-import org.junit.Test;
 
 public class UsedMappersTestCase {
     
@@ -89,12 +88,16 @@ public class UsedMappersTestCase {
     public void exclusionOnAbstractParent() throws Throwable {
     	
     	MapperFactory factory = MappingUtil.getMapperFactory();
-    	
-    	factory.classMap(Throwable.class, RuntimeException.class)
-    		.exclude("stackTrace")
-    		.favorExtension(true)
-    		.byDefault()
-    		.register();
+
+        factory.classMap(Throwable.class, RuntimeException.class)
+            .exclude("stackTrace")
+            .favorExtension(true)
+            .byDefault()
+            .register();
+        // TODO 17. Sep. 2015 : why is this registration required:
+        factory.classMap(UserUpdateException.class, UserRegistrationModelException.class)
+            .byDefault()
+            .register();
     	
     	UserUpdateException src = new UserUpdateException(true);
     	UserRegistrationModelException dest = factory.getMapperFacade().map(src, UserRegistrationModelException.class);
@@ -102,9 +105,10 @@ public class UsedMappersTestCase {
     	Assert.assertEquals(src.isEmailDuplicate(), dest.isEmailDuplicate());
     }
     
-    public static class UserUpdateException extends RuntimeException {
+    public static class UserUpdateException extends TestRuntimeException {
+        private static final long serialVersionUID = 1L;
 
-		private final boolean emailDuplicate;
+        private final boolean emailDuplicate;
 
 		public UserUpdateException(boolean emailDuplicate) {
 			this.emailDuplicate = emailDuplicate;
@@ -116,7 +120,8 @@ public class UsedMappersTestCase {
 
 	}
 
-	public static class UserRegistrationModelException extends Exception {
+    public static class UserRegistrationModelException extends TestException {
+        private static final long serialVersionUID = 1L;
 
 		private boolean emailDuplicate;
 
@@ -128,7 +133,35 @@ public class UsedMappersTestCase {
 			this.emailDuplicate = emailDuplicate;
 		}
 
-	}
+    }
+
+    public abstract static class TestRuntimeException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public StackTraceElement[] getStackTrace() {
+            throw new UnsupportedOperationException("getStackTrace should never be called.");
+        }
+
+        @Override
+        public void setStackTrace(StackTraceElement[] stackTrace) {
+            super.setStackTrace(stackTrace);
+        }
+    }
+
+    public abstract static class TestException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public StackTraceElement[] getStackTrace() {
+            throw new UnsupportedOperationException("getStackTrace should never be called.");
+        }
+
+        @Override
+        public void setStackTrace(StackTraceElement[] stackTrace) {
+            super.setStackTrace(stackTrace);
+        }
+    }
     
     public static abstract class A {
         private String name;

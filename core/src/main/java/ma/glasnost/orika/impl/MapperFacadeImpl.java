@@ -172,8 +172,9 @@ public class MapperFacadeImpl implements MapperFacade, Reportable {
                 
             } else {
                 strategyRecorder.setInstantiate(true);
-                Type<? extends D> resolvedDestinationType = resolveDestinationType(context, sourceType, destinationType, resolvedSourceType);
-
+                Type<? extends D> resolvedDestinationType = resolveDestinationType(context, sourceType, destinationType,
+                        resolvedSourceType);
+                
                 strategyRecorder.setResolvedDestinationType(resolvedDestinationType);
                 strategyRecorder.setResolvedMapper(resolveMapper(resolvedSourceType, resolvedDestinationType));
                 if (!mapInPlace) {

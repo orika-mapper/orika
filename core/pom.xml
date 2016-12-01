@@ -100,6 +100,28 @@
 					</execution>
 				</executions>
 			</plugin>
+
+	        <plugin>
+	          <groupId>org.codehaus.mojo</groupId>
+	          <artifactId>animal-sniffer-maven-plugin</artifactId>
+	          <version>1.15</version>
+	          <configuration>
+	            <signature>
+	              <groupId>org.codehaus.mojo.signature</groupId>
+	              <artifactId>java16</artifactId>
+	              <version>1.1</version>
+	            </signature>
+	          </configuration>
+	          <executions>
+	            <execution>
+	              <id>animal-sniffer-check</id>
+	              <goals>
+	                <goal>check</goal>
+	              </goals>
+	              <phase>test</phase>
+	            </execution>
+	          </executions>
+	        </plugin>
 		</plugins>
 	</build>
 

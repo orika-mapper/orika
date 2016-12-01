@@ -1,3 +1,4 @@
+sudo: false
 language: java
 jdk:
   - oraclejdk7
@@ -5,6 +6,7 @@ jdk:
 branches:
   only:
     - master
+    - orika-1.5.x
 
 notifications:
   recipients:
