@@ -56,18 +56,18 @@ import com.thoughtworks.paranamer.Paranamer;
  *
  */
 public class SimpleConstructorResolverStrategy implements ConstructorResolverStrategy {
-    
+
 	private Paranamer paranamer = new CachingParanamer(new AdaptiveParanamer(new BytecodeReadingParanamer(), new AnnotationParanamer()));
-	
+
     @SuppressWarnings({ "unchecked" })
     public <T, A, B> ConstructorMapping<T> resolve(ClassMap<A, B> classMap, Type<T> sourceType) {
         boolean aToB = classMap.getBType().equals(sourceType);
-        
+
         Type<?> targetClass = aToB ? classMap.getBType() : classMap.getAType();
         Type<?> sourceClass = aToB ? classMap.getAType() : classMap.getBType();
-        
+
         String[] declaredParameterNames = aToB ? classMap.getConstructorB() : classMap.getConstructorA();
-        
+
         Map<String, FieldMap> targetParameters = new LinkedHashMap<String, FieldMap>();
         if (declaredParameterNames != null) {
         	/*
@@ -102,9 +102,9 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
 	        		targetParameters.put(fieldMap.getDestination().getName(), fieldMap);
         		}
         	}
-        	
+
         }
-        
+
         boolean foundDeclaredConstructor = false;
         Constructor<T>[] constructors = (Constructor<T>[]) targetClass.getRawType().getDeclaredConstructors();
         TreeMap<Integer, ConstructorMapping<T>> constructorsByMatchedParams = new TreeMap<Integer, ConstructorMapping<T>>();
@@ -112,7 +112,7 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
         	ConstructorMapping<T> constructorMapping = new ConstructorMapping<T>();
         	constructorMapping.setDeclaredParameters(declaredParameterNames);
         	boolean byDefault = declaredParameterNames == null;
-        	
+
         	try {
         		/*
         		 * 1) A constructor's parameters are all matched by known parameter names
@@ -126,13 +126,16 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
         		Type<?>[] parameterTypes = new Type[genericParameterTypes.length];
         		constructorMapping.setParameterNameInfoAvailable(true);
         		if (targetParameters.keySet().containsAll(Arrays.asList(parameterNames))) {
-        		    
+
         		    constructorMapping.setConstructor(constructor);
         			for (int i=0; i < parameterNames.length; ++i) {
         				String parameterName = parameterNames[i];
         				parameterTypes[i] = TypeFactory.valueOf(genericParameterTypes[i]);
         				FieldMap existingField = targetParameters.get(parameterName);
-        				FieldMap argumentMap = mapConstructorArgument(existingField, parameterTypes[i], byDefault);
+                        if (parameterTypes[i].isAssignableFrom(existingField.getBType())) {
+                            parameterTypes[i] = existingField.getBType();
+                        }
+                        FieldMap argumentMap = mapConstructorArgument(existingField, parameterTypes[i], byDefault);
         				constructorMapping.getMappedFields().add(argumentMap);
         			}
         			constructorMapping.setParameterTypes(parameterTypes);
@@ -148,37 +151,37 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
     	    	 int exactMatches = 0;
     	    	 java.lang.reflect.Type[] params = constructor.getGenericParameterTypes();
     	    	 Type<?>[] parameterTypes = new Type[params.length];
-    	    	 
+
     	    	 if (targetTypes.size() >= parameterTypes.length) {
             	     for (int i=0; i < params.length; ++i) {
             	    	java.lang.reflect.Type param = params[i];
-            	    	
+
             	    	parameterTypes[i] = TypeFactory.valueOf(param);
         	    		for (Iterator<FieldMap> iter = targetTypes.iterator(); iter.hasNext();) {
         	    			FieldMap fieldMap = iter.next();
         	    			Type<?> targetType = fieldMap.getDestination().getType();
-        	    			if ((parameterTypes[i].equals(targetType) && ++exactMatches != 0) 
+        	    			if ((parameterTypes[i].equals(targetType) && ++exactMatches != 0)
         	    			        || parameterTypes[i].isAssignableFrom(targetType) ) {
         	    				++matchScore;
-        	    				
+
         	    				String parameterName = fieldMap.getDestination().getName();
                 				FieldMap existingField = targetParameters.get(parameterName);
                 				FieldMap argumentMap = mapConstructorArgument(existingField, parameterTypes[i], byDefault);
                 				constructorMapping.getMappedFields().add(argumentMap);
-        	    				
+
         	    				iter.remove();
         	    				break;
-        	    			} 
+        	    			}
         	    		}
         	    	 }
             		 constructorMapping.setParameterTypes(parameterTypes);
             	     constructorMapping.setConstructor(constructor);
             	     constructorMapping.setDeclaredParameters(declaredParameterNames);
-            	     constructorsByMatchedParams.put((matchScore*1000 + exactMatches), constructorMapping); 
+            	     constructorsByMatchedParams.put((matchScore*1000 + exactMatches), constructorMapping);
     	    	 }
         	}
         }
-        
+
         if (constructorsByMatchedParams.size() > 0) {
             return constructorsByMatchedParams.get(constructorsByMatchedParams.lastKey());
         } else if (declaredParameterNames != null) {
@@ -194,7 +197,7 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
                 msg.append(")")
                     .append(" could not be matched to the source fields of ")
                     .append(sourceClass);
-                
+
                 throw new IllegalStateException(msg.toString());
             } else {
                 StringBuilder msg = new StringBuilder();
@@ -212,9 +215,9 @@ public class SimpleConstructorResolverStrategy implements ConstructorResolverStr
                 msg.append(")")
                     .append(" could not be matched to the source fields of ")
                     .append(sourceClass);
-                
-                
-            	throw new IllegalArgumentException("No constructors found for " + targetClass + 
+
+
+            	throw new IllegalArgumentException("No constructors found for " + targetClass +
             			" matching the specified constructor parameters " + Arrays.toString(declaredParameterNames) +
             			(declaredParameterNames.length == 0 ? " (no-arg constructor)": ""));
             }
