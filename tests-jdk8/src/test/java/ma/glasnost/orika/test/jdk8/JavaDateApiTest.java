@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -192,7 +191,7 @@ public class JavaDateApiTest {
                 if (zipEntry.getName().startsWith(rootPackagePath)) {
                     String className = zipEntry.getName();
                     if (className.endsWith(".class")) {
-                        className = StringUtils.removeEnd(className, ".class");
+                        className = className.substring(0, className.length() - ".class".length());
                         className = className.replace('/', '.');
                         Class<?> clazz = Class.forName(className);
                         if (type.isAssignableFrom(clazz)) {
@@ -206,15 +205,15 @@ public class JavaDateApiTest {
         
         return subTypes;
     }
-    
+
     private File getJarFile(String filePath) throws Exception {
         String jarFilePath = filePath;
         jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
         if (jarFilePath.startsWith("file:")) {
-            jarFilePath = StringUtils.substringAfter(jarFilePath, "file:");
+            jarFilePath = jarFilePath.substring(jarFilePath.lastIndexOf("file:") + "file:".length(), jarFilePath.length());
         }
         if (jarFilePath.contains(".jar!")) {
-            jarFilePath = StringUtils.substringBefore(jarFilePath, ".jar!") + ".jar";
+        	jarFilePath = jarFilePath.substring(0, jarFilePath.lastIndexOf(".jar!"))+ ".jar";
         }
         return new File(jarFilePath);
     }
@@ -358,5 +357,5 @@ public class JavaDateApiTest {
         }
 
     }
-    
+
 }
