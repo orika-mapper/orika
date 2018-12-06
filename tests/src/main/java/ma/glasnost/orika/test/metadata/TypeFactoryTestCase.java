@@ -17,26 +17,23 @@
  */
 package ma.glasnost.orika.test.metadata;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.Type;
+import ma.glasnost.orika.metadata.TypeFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ma.glasnost.orika.metadata.Type;
-import ma.glasnost.orika.metadata.TypeFactory;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 
 /**
  * @author matt.deboer@gmail.com
@@ -176,4 +173,36 @@ public class TypeFactoryTestCase {
     public static class MyObjectWithMultibleBound<T extends Object & Collection<String> & Set<String>> {
         // test Class
     }
+
+	@Test
+	public void testCollectionParameterizedType() {
+		MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+		B b = new B();
+		A a = new A();
+		a.setE(Arrays.asList(b));
+		D d = mapperFactory.getMapperFacade().map(a, D.class);
+		Assert.assertEquals(d.e.get(0).getClass(), C.class);
+	}
+
+	public static class A<E extends B> {
+		List<E> e;
+
+		public List<E> getE() {
+			return e;
+		}
+
+		public void setE(List<E> e) {
+			this.e = e;
+		}
+	}
+
+	public static class B {
+	}
+
+	public static class C extends B {
+	}
+
+	public static class D extends A<C> {
+
+	}
 }

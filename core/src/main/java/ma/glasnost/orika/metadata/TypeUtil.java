@@ -82,9 +82,15 @@ abstract class TypeUtil {
                     if (typeArg instanceof TypeVariable) {
                         var = (TypeVariable<?>) typeArg;
                     }
-                    Type<?> typeFromReference = (Type<?>) currentReference.getTypeByVariable(var);
-                    
-                    if (typeFromReference != null && typeArg.equals(var)) {
+
+					Type<?> typeFromReference = null;
+					Type<?> targetReference = currentReference;
+					while (typeFromReference == null && !TypeFactory.TYPE_OF_OBJECT.equals(targetReference)) {
+						typeFromReference = (Type<?>) targetReference.getTypeByVariable(var);
+						targetReference = targetReference.getSuperType();
+					}
+
+					if (typeFromReference != null && typeArg.equals(var)) {
                         if (actualTypeArguments[i] == null
                                 || (actualTypeArguments[i] instanceof Type && ((Type<?>) actualTypeArguments[i]).isAssignableFrom(typeFromReference))) {
                             actualTypeArguments[i] = typeFromReference;
