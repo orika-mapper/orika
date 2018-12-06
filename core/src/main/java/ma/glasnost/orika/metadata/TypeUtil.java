@@ -85,9 +85,11 @@ abstract class TypeUtil {
 
 					Type<?> typeFromReference = null;
 					Type<?> targetReference = currentReference;
-					while (typeFromReference == null && !TypeFactory.TYPE_OF_OBJECT.equals(targetReference)) {
+					while (!TypeFactory.TYPE_OF_OBJECT.equals(targetReference)) {
 						typeFromReference = (Type<?>) targetReference.getTypeByVariable(var);
-						targetReference = targetReference.getSuperType();
+						if(typeFromReference != null)
+							break;
+						targetReference = TypeFactory.valueOf(targetReference.getRawType().getGenericSuperclass());
 					}
 
 					if (typeFromReference != null && typeArg.equals(var)) {
