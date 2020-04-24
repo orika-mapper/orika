@@ -42,7 +42,8 @@ public class Convert extends AbstractSpecification {
         return fieldMap.getConverterId() != null
                 || mapperFactory.getConverterFactory().canConvert(fieldMap.getAType(), fieldMap.getBType());
     }
-    
+
+    @Override
     public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         
         if (source.getConverter() instanceof CopyByReferenceConverter) {
@@ -80,8 +81,14 @@ public class Convert extends AbstractSpecification {
             }
         }
     }
-    
+
+    @Override
     public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
+        return generateMappingCode(fieldMap, source, source.asWrapper(), destination, code);
+    }
+
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
 
         String statement;
         boolean canHandleNulls;
@@ -89,26 +96,26 @@ public class Convert extends AbstractSpecification {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "copying " + source.type() + " by reference");
             }
-            statement = destination.assignIfPossible(source);
+            statement = destination.assignIfPossible(source, sourceValue);
             canHandleNulls = true;
         } else {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "converting using " + source.getConverter());
             }
             statement = destination.assignIfPossible("%s.convert(%s, %s, mappingContext)", code.usedConverter(source.getConverter()),
-                    source.asWrapper(), code.usedType(destination));
+                    sourceValue, code.usedType(destination));
             canHandleNulls = false;
         }
-        
+
         boolean shouldSetNull = shouldMapNulls(fieldMap, code) && !destination.isPrimitive();
         String destinationNotNull = destination.ifPathNotNull();
-        
+
         if (!source.isNullPossible() || (canHandleNulls && shouldSetNull && "".equals(destinationNotNull))) {
             return statement(statement);
         } else {
             String elseSetNull = shouldSetNull ? (" else " + destinationNotNull + "{ \n" + destination.assignIfPossible("null")) + ";\n }"
                     : "";
-            return statement(source.ifNotNull() + "{ \n" + statement) + "\n}" + elseSetNull;
+            return statement(source.ifNotNull(sourceValue) + "{ \n" + statement) + "\n}" + elseSetNull;
         }
     }
 }

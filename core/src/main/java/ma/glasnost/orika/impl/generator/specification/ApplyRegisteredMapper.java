@@ -34,9 +34,10 @@ public class ApplyRegisteredMapper extends ObjectToObject {
     public boolean appliesTo(FieldMap fieldMap) {
         return mapperFactory.existsRegisteredMapper(fieldMap.getAType(), fieldMap.getBType(), false);
     }
-    
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             Mapper<Object, Object> mapper = mapperFactory.lookupMapper(
                     new MapperKey(source.type(), destination.type()), code.getMappingContext());
@@ -52,7 +53,7 @@ public class ApplyRegisteredMapper extends ObjectToObject {
             code.debugField(fieldMap, "mapping using registered Mapper<" + sourceType + "," +
                     destType + ">");
         }
-        
-        return super.generateMappingCode(fieldMap, source, destination, code);
+
+        return super.generateMappingCode(fieldMap, source, sourceValue, destination, code);
     }
 }

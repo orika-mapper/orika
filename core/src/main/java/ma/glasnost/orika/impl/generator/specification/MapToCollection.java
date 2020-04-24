@@ -33,14 +33,16 @@ public class MapToCollection extends ArrayOrCollectionToCollection {
         return fieldMap.getSource().isMap() && fieldMap.getDestination().isCollection();
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
-            code.debugField(fieldMap, "mapping from Map<" + source.type().getNestedType(0) + ", " + 
+            code.debugField(fieldMap, "mapping from Map<" + source.type().getNestedType(0) + ", " +
                     source.type().getNestedType(1) + "> to Collection<" + destination.elementTypeName() + ">");
         }
-        
-        return super.generateMappingCode(fieldMap, entrySetRef(source), destination, code);
+
+        VariableRef entrySource = entrySetRef(source, sourceValue);
+
+        return super.generateMappingCode(fieldMap, entrySource, entrySource.toString(), destination, code);
     }
-    
 }

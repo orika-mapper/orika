@@ -34,27 +34,27 @@ public class ArrayOrCollectionToArray extends AbstractSpecification {
         return fieldMap.getDestination().isArray() && (fieldMap.getSource().isArray() || fieldMap.getSource().isCollection());
     }
 
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
         final VariableRef arrayVar = destination.elementRef(destination.name()+"Array__");
         String newArray = format("%s[] %s = new %s[%s]", destination.elementTypeName(), arrayVar.validVariableName(), destination.elementTypeName(), source.size());
-        
+
         String mapArray;
         if (destination.elementType().isPrimitive()) {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "mapping to primitive array");
             }
-            mapArray = format("mapArray(%s, asList(%s), %s.class, mappingContext)", arrayVar.validVariableName(), source, arrayVar.typeName());
+            mapArray = format("mapArray(%s, asList(%s), %s.class, mappingContext)", arrayVar.validVariableName(), sourceValue, arrayVar.typeName());
         } else {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "mapping to array");
             }
-            mapArray = format("mapperFacade.mapAsArray(%s, asList(%s), %s, %s, mappingContext)", arrayVar.validVariableName(), source, code.usedType(source.elementType()),
+            mapArray = format("mapperFacade.mapAsArray(%s, asList(%s), %s, %s, mappingContext)", arrayVar.validVariableName(), sourceValue, code.usedType(source.elementType()),
                     code.usedType(destination.elementType()));
         }
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else { %s; }", destination.assignIfPossible("null")) : "";
-        return format(" %s { %s; %s; %s; } %s", source.ifNotNull(), newArray, mapArray, destination.assign(arrayVar), mapNull);
+        return format(" %s { %s; %s; %s; } %s", source.ifNotNull(sourceValue), newArray, mapArray, destination.assign(arrayVar), mapNull);
     }
-    
+
 }

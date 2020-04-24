@@ -39,14 +39,15 @@ public class StringToEnum extends AbstractSpecification {
         return "(Enum.valueOf(%s.class, \"\"+%s) == " + destination +")";
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "converting String to enum " + destination.type());
         }
-        
-        String assignEnum = destination.assign("Enum.valueOf(%s.class, \"\"+%s)", destination.typeName(), source);
+
+        String assignEnum = destination.assign("Enum.valueOf(%s.class, \"\"+%s)", destination.typeName(), sourceValue);
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", destination.assignIfPossible("null")): "";
-        return statement("%s { %s; } %s", source.ifNotNull(), assignEnum, mapNull);
+        return statement("%s { %s; } %s", source.ifNotNull(sourceValue), assignEnum, mapNull);
     }
 }

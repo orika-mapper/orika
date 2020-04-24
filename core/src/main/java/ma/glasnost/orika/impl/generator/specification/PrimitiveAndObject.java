@@ -45,19 +45,21 @@ public class PrimitiveAndObject extends AbstractSpecification {
         return source + " == " + destination;
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         LOGGER.debug("PrimitiveAndObject condition occurred; context: " +
-                "\nsrc: " + source.property() + 
-                "\nsrc.isArrayElement: " + source.property().isArrayElement() + 
-                "\nsrc.isListElement: " + source.property().isListElement() + 
-                "\nsrc.isMapKey: " + source.property().isMapKey() + 
-                "\ndest: " + destination.property() + 
-                "\ndest.isArrayElement: " + destination.property().isArrayElement() + 
-                "\ndest.isListElement: " + destination.property().isListElement() + 
+                "\nsrc: " + source.property() +
+                "\nsrc.isArrayElement: " + source.property().isArrayElement() +
+                "\nsrc.isListElement: " + source.property().isListElement() +
+                "\nsrc.isMapKey: " + source.property().isMapKey() +
+                "\ndest: " + destination.property() +
+                "\ndest.isArrayElement: " + destination.property().isArrayElement() +
+                "\ndest.isListElement: " + destination.property().isListElement() +
                 "\ndest.isMapKey: " + destination.property().isMapKey()
-                );
+        );
         throw new MappingException("Encountered mapping of primitive to object (or vise-versa); sourceType="+
                 source.type() + ", destinationType=" + destination.type());
     }
-    
+
 }

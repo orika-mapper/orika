@@ -37,24 +37,26 @@ public class AnyTypeToString extends AbstractSpecification {
         return "(\"\" + " + source + ").equals(" + destination +")";
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (source.isPrimitive()) {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "converting primitive to String");
             }
-            
-            return statement(destination.assign("\"\"+ %s", source));
+
+            return statement(destination.assign("\"\"+ %s", sourceValue));
         } else {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "converting " + source.typeName() + " using toString()");
             }
-            
+
             if (shouldMapNulls(fieldMap, code)) {
-                return statement("if (" + source.notNull() + ") {" + statement(destination.assign("%s.toString()", source)) + "} else {" + statement(destination.assign("null")) + "}");
+                return statement("if (" + source.notNull(sourceValue) + ") {" + statement(destination.assign("%s.toString()", sourceValue)) + "} else {" + statement(destination.assign("null")) + "}");
             } else {
-                return statement(source.ifNotNull() + destination.assign("%s.toString()", source));
+                return statement(source.ifNotNull(sourceValue) + destination.assign("%s.toString()", sourceValue));
             }
         }
+
     }
 }

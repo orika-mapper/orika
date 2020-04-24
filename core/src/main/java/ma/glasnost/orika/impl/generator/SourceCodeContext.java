@@ -143,6 +143,20 @@ public class SourceCodeContext {
             logDetails.append(msg);
         }
     }
+
+    public String optionallyMakeDestinationVariableAndGetValue(StringBuilder out, VariableRef destination, boolean getDestinationOnMapping){
+
+        if(!getDestinationOnMapping){
+            return "null";
+        }
+
+        if(shouldCaptureFieldContext){
+            addVariable(out, destination);
+            return destination.getGlobalUniqueName();
+        }
+
+        return destination.asWrapper();
+    }
     
     public String fieldTag(FieldMap fieldMap) {
         return "\n\t Field(" + fieldMap.getSource() + ", " + fieldMap.getDestination() + ") : ";
@@ -354,7 +368,11 @@ public class SourceCodeContext {
      *         from a mapper
      */
     public String newObjectFromMapper(VariableRef source, Type<?> destinationType) {
-        return newObjectFromMapper(source.type(), destinationType) + "(" + source.asWrapper() + ", mappingContext)";
+        return newObjectFromMapper(source, source.asWrapper(), destinationType);
+    }
+
+    public String newObjectFromMapper(VariableRef source, String sourceValue, Type<?> destinationType) {
+        return newObjectFromMapper(source.type(), destinationType) + "(" + sourceValue + ", mappingContext)";
     }
     
     /**
@@ -374,12 +392,16 @@ public class SourceCodeContext {
      *         default value in cases of primitive types
      */
     public String newObject(VariableRef source, Type<?> destinationType) {
+        return newObject(source, source.asWrapper(), destinationType);
+    }
+
+    public String newObject(VariableRef source, String sourceValue, Type<?> destinationType) {
         if (destinationType.isPrimitive()) {
             return VariableRef.getDefaultValue(destinationType.getRawType());
         } else if (destinationType.isString()) {
             return "null";
         } else {
-            return newObjectFromMapper(source, destinationType);
+            return newObjectFromMapper(source, sourceValue, destinationType);
         }
     }
 
@@ -499,9 +521,13 @@ public class SourceCodeContext {
      *         variable ref, which should be a Map type
      */
     public static VariableRef entrySetRef(VariableRef s) {
+        return entrySetRef(s, s.toString());
+    }
+
+    public static VariableRef entrySetRef(VariableRef s, String value) {
         @SuppressWarnings("unchecked")
         Type<?> sourceEntryType = TypeFactory.valueOf(Set.class, MapEntry.entryType((Type<? extends Map<Object, Object>>) s.type()));
-        return new VariableRef(sourceEntryType, s + ".entrySet()");
+        return new VariableRef(sourceEntryType, value + ".entrySet()");
     }
     
     /**
@@ -751,18 +777,25 @@ public class SourceCodeContext {
             source.setConverter(converter);
 
             boolean getDestinationOnMapping = AbstractSpecification.shouldGetDestinationOnMapping(fieldMap, this);
+            addVariable(out, source);
+            String sourceValue = source.getGlobalUniqueName();
+            String destinationValue = optionallyMakeDestinationVariableAndGetValue(out, destination, getDestinationOnMapping);
 
             if (shouldCaptureFieldContext) {
-                beginCaptureFieldContext(out, fieldMap, source, destination, getDestinationOnMapping);
+                beginCaptureFieldContext(out, fieldMap, sourceValue, destinationValue);
             }
             StringBuilder filterClosing = new StringBuilder();
-            VariableRef[] filteredProperties = applyFilters(source, destination, out, filterClosing, getDestinationOnMapping);
-            source = filteredProperties[0];
+            VariableRef[] filteredProperties = applyFilters(source, destination, out, filterClosing, sourceValue, destinationValue);
+
+            if(filteredProperties[0] != source){
+                source = filteredProperties[0];
+                sourceValue = source.asWrapper();
+            }
             destination = filteredProperties[1];
             
             for (Specification spec : codeGenerationStrategy.getSpecifications()) {
                 if (spec.appliesTo(fieldMap)) {
-                    String code = spec.generateMappingCode(fieldMap, source, destination, this);
+                    String code = spec.generateMappingCode(fieldMap, source, sourceValue, destination, this);
                     if (code == null || "".equals(code)) {
                         throw new IllegalStateException("empty code returned for spec " + spec + ", sourceProperty = " + source
                                 + ", destinationProperty = " + destination);
@@ -781,10 +814,15 @@ public class SourceCodeContext {
         return out.toString();
     }
 
-    private void beginCaptureFieldContext(StringBuilder out, FieldMap fieldMap, VariableRef source, VariableRef dest, boolean getDestinationValueOnMapping) {
+    private void beginCaptureFieldContext(StringBuilder out, FieldMap fieldMap, String sourceValue, String destinationValue) {
         out.append(format("mappingContext.beginMappingField(\"%s\", %s, %s, \"%s\", %s, %s);\n" + "try{\n",
-                escapeQuotes(fieldMap.getSource().getExpression()), usedType(fieldMap.getAType()), source.asWrapper(),
-                escapeQuotes(fieldMap.getDestination().getExpression()), usedType(fieldMap.getBType()), (getDestinationValueOnMapping)?dest.asWrapper():"null"));
+                escapeQuotes(fieldMap.getSource().getExpression()), usedType(fieldMap.getAType()), sourceValue,
+                escapeQuotes(fieldMap.getDestination().getExpression()), usedType(fieldMap.getBType()), destinationValue));
+    }
+
+    public void addVariable(StringBuilder out, VariableRef variable){
+        String sourceVariableType = variable.isPrimitive()? variable.wrapperTypeName() : variable.typeName();
+        out.append(sourceVariableType).append(" ").append(variable.getGlobalUniqueName()).append(" = ").append(variable.asWrapper()).append(";\n");
     }
     
     private void endCaptureFieldContext(StringBuilder out) {
@@ -794,36 +832,42 @@ public class SourceCodeContext {
     private String escapeQuotes(String string) {
         return string.replaceAll("(?<!\\\\)\"", "\\\\\"");
     }
-    
+
     public VariableRef[] applyFilters(VariableRef sourceProperty, VariableRef destinationProperty, StringBuilder out, StringBuilder closing, boolean getDestinationOnMapping) {
+        return applyFilters(sourceProperty, destinationProperty, out, closing, sourceProperty.asWrapper(), (getDestinationOnMapping)?destinationProperty.asWrapper():"null");
+    }
+
+    public VariableRef[] applyFilters(VariableRef sourceProperty, VariableRef destinationProperty, StringBuilder out, StringBuilder closing,
+                                      String sourceValue, String destinationValue) {
         /*
          * TODO: need code which collects all of the applicable filters and adds
          * them into an aggregate filter object
          */
         Filter<Object, Object> filter = getFilter(sourceProperty, destinationProperty);
         if (filter != null) {
+
             if (destinationProperty.isNestedProperty()) {
                 out.append("if (");
                 out.append(format("(%s && %s.shouldMap(%s, \"%s\", %s, %s, \"%s\", %s, mappingContext))", destinationProperty.pathNotNull(),
-                    usedFilter(filter), usedType(sourceProperty.type()), varPath(sourceProperty), sourceProperty.asWrapper(),
-                    usedType(destinationProperty.type()), varPath(destinationProperty), (getDestinationOnMapping)?destinationProperty.asWrapper():"null"));
+                        usedFilter(filter), usedType(sourceProperty.type()), varPath(sourceProperty), sourceValue,
+                        usedType(destinationProperty.type()), varPath(destinationProperty), destinationValue));
 
                 out.append(" || ");
 
                 out.append(format("(%s && %s.shouldMap(%s, \"%s\", %s, %s, \"%s\", null, mappingContext))", destinationProperty.pathNull(),
-                    usedFilter(filter), usedType(sourceProperty.type()), varPath(sourceProperty), sourceProperty.asWrapper(),
-                    usedType(destinationProperty.type()), varPath(destinationProperty)));
+                        usedFilter(filter), usedType(sourceProperty.type()), varPath(sourceProperty), sourceValue,
+                        usedType(destinationProperty.type()), varPath(destinationProperty)));
 
                 out.append(") {");
             } else {
                 out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", %s, mappingContext)) {", usedFilter(filter),
-                    usedType(sourceProperty.type()), varPath(sourceProperty), sourceProperty.asWrapper(),
-                    usedType(destinationProperty.type()), varPath(destinationProperty), (getDestinationOnMapping)?destinationProperty.asWrapper():"null"));
+                        usedType(sourceProperty.type()), varPath(sourceProperty), sourceValue,
+                        usedType(destinationProperty.type()), varPath(destinationProperty), destinationValue));
             }
 
             sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
             destinationProperty = getDestFilter(sourceProperty, destinationProperty, filter);
-            
+
             // need to set source property
             closing.insert(0, "\n}\n");
         }

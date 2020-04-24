@@ -57,5 +57,11 @@ public class CodeGenerationAddSpecificationCase {
                                           SourceCodeContext code) {
             return super.generateMappingCode(fieldMap, source, destination, code);
         }
+
+        @Override
+        public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue,
+                                          VariableRef destination, SourceCodeContext code) {
+            return super.generateMappingCode(fieldMap, source, sourceValue, destination, code);
+        }
     }
 }

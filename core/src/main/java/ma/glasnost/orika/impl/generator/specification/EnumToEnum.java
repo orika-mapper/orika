@@ -36,16 +36,17 @@ public class EnumToEnum extends AbstractSpecification {
     public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         return "(Enum.valueOf(%s.class, %s.name()) == " + destination + ")";
     }
-    
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "converting enum " + source.typeName() + " to enum " + destination.typeName());
         }
-        
-        String assignEnum = destination.assign("Enum.valueOf(%s.class, %s.name())", destination.typeName(), source);
+
+        String assignEnum = destination.assign("Enum.valueOf(%s.class, %s.name())", destination.typeName(), sourceValue);
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", destination.assignIfPossible("null")): "";
-        return statement("%s { %s; } %s", source.ifNotNull(), assignEnum, mapNull);
+        return statement("%s { %s; } %s", source.ifNotNull(sourceValue), assignEnum, mapNull);
     }
 }
 

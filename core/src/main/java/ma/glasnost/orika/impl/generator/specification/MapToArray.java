@@ -32,14 +32,16 @@ public class MapToArray extends ArrayOrCollectionToArray {
         return fieldMap.getSource().isMap() && fieldMap.getDestination().isArray();
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
-            code.debugField(fieldMap, "mapping Map<" + source.type().getNestedType(0) + ", " + 
+            code.debugField(fieldMap, "mapping Map<" + source.type().getNestedType(0) + ", " +
                     source.type().getNestedType(1) + "> to " + destination.elementTypeName() + "[]");
         }
-        
-        return super.generateMappingCode(fieldMap, entrySetRef(source), destination, code);
+
+        VariableRef entrySource = entrySetRef(source, sourceValue);
+
+        return super.generateMappingCode(fieldMap, entrySource, entrySource.toString(), destination, code);
     }
-    
 }

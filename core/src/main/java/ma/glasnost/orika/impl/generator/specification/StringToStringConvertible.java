@@ -39,13 +39,14 @@ public class StringToStringConvertible extends AbstractSpecification {
         return "(" + source.notNull() + " && " + source + ".equals(\"\" + " + destination +"))";
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "converting from String to " + destination.type());
         }
-        
-        String value = source.toString();
+
+        String value = sourceValue;
         if (String.class.equals(source.rawType()) && (Character.class.equals(destination.rawType()) || char.class.equals(destination.rawType()))) {
             value = value + ".charAt(0)";
         }
@@ -53,7 +54,7 @@ public class StringToStringConvertible extends AbstractSpecification {
             return statement(destination.assign("%s.valueOf(%s)", destination.wrapperTypeName(), value));
         } else {
             String mapNull = shouldMapNulls(fieldMap, code) ? format(" else { %s; }", destination.assignIfPossible("null")): "";
-            return statement(format("%s {\n %s; } %s", source.ifNotNull(), destination.assign("%s.valueOf(%s)", destination.typeName(), value), mapNull));
+            return statement(format("%s {\n %s; } %s", source.ifNotNull(sourceValue), destination.assign("%s.valueOf(%s)", destination.typeName(), value), mapNull));
         }
     }
 }

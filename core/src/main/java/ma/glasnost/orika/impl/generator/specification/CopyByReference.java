@@ -43,21 +43,22 @@ public class CopyByReference extends AbstractSpecification {
         
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "copying " + source.elementTypeName() + " by reference");
         }
-        
+
         StringBuilder out = new StringBuilder();
         if (!source.isPrimitive()) {
-            out.append(source.ifNotNull() + "{");
+            out.append(source.ifNotNull(sourceValue) + "{");
         }
         out.append(statement(destination.assign(source)));
         if (!source.isPrimitive()) {
             out.append("\n }");
             if (shouldMapNulls(fieldMap, code) && !destination.isPrimitive()) {
-                append(out, 
+                append(out,
                         " else {",
                         destination.assignIfPossible("null"),
                         "\n }");
@@ -65,5 +66,5 @@ public class CopyByReference extends AbstractSpecification {
         }
         return out.toString();
     }
-    
+
 }

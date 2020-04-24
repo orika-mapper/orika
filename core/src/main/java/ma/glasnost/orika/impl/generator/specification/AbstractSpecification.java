@@ -74,7 +74,4 @@ public abstract class AbstractSpecification implements Specification {
     public String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
         return format("%s.equals(%s)", source, destination);
     }
-    
-    public abstract String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code);
-    
 }

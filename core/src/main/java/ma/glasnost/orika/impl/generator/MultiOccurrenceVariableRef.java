@@ -67,6 +67,10 @@ public class MultiOccurrenceVariableRef extends VariableRef {
     }
     
     public String declareIterator() {
+        return declareIterator(getter());
+    }
+
+    public String declareIterator(String value) {
         if (iteratorDeclared) {
             throw new IllegalStateException("Iterator has already been declared");
         }
@@ -76,7 +80,7 @@ public class MultiOccurrenceVariableRef extends VariableRef {
         } else if (isMap()) {
             iterator = new EntrySetRef(this, name()).declareIterator();
         } else {
-            iterator = "java.util.Iterator " + getIteratorName() + " = " + getter() + ".iterator()";
+            iterator = "java.util.Iterator " + getIteratorName() + " = " + value + ".iterator()";
         }
         iteratorDeclared = true;
         return iterator;

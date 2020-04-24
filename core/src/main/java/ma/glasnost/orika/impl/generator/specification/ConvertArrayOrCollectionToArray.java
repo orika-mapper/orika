@@ -57,9 +57,10 @@ public class ConvertArrayOrCollectionToArray extends AbstractSpecification {
         }
         return false;
     }
-    
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (destination.elementType().isPrimitive()) {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "converting to primitive array using " + source.getConverter());
@@ -69,24 +70,24 @@ public class ConvertArrayOrCollectionToArray extends AbstractSpecification {
                 code.debugField(fieldMap, "converting to array using " + source.getConverter());
             }
         }
-        
+
         String assureInstanceExists = format("if((%s)) { \n %s; \n}", destination.isNull(),
                 destination.assign("new %s[%s]", destination.elementTypeName(), source.size()));
-        
+
         StringBuilder convertArray = new StringBuilder();
         MultiOccurrenceVariableRef moSource = MultiOccurrenceVariableRef.from(source);
         MultiOccurrenceVariableRef moDest = MultiOccurrenceVariableRef.from(destination);
-        
+
         append(convertArray,
-                moSource.declareIterator(),
+                moSource.declareIterator(sourceValue),
                 moDest.declareIterator(),
                 "while(" + moSource.iteratorHasNext() + ") {",
                 format("%s = (%s) %s.convert((%s)%s, %s, mappingContext)", moDest.nextElement(), moDest.elementTypeName(),
                         code.usedConverter(source.getConverter()), moSource.elementTypeName(), moSource.nextElement(),
                         code.usedType(destination)), "}");
-        
+
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else { %s; }", destination.assignIfPossible("null")) : "";
-        return format(" %s { %s; %s; } %s", source.ifNotNull(), assureInstanceExists, convertArray, mapNull);
+        return format(" %s { %s; %s; } %s", source.ifNotNull(sourceValue), assureInstanceExists, convertArray, mapNull);
     }
-    
+
 }

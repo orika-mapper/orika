@@ -262,7 +262,9 @@ public class MultiOccurrenceToMultiOccurrence implements AggregateSpecification 
                     VariableRef d = makeVariable(currentNode.property, currentNode, "destination");
 
                     boolean getDestinationOnMapping = AbstractSpecification.shouldGetDestinationOnMapping(currentNode.getMap(), code);
-                    code.applyFilters(s, d, out, endWhiles, getDestinationOnMapping);
+                    code.addVariable(out, s);
+                    String destinationValue = code.optionallyMakeDestinationVariableAndGetValue(out, d, getDestinationOnMapping);
+                    code.applyFilters(s, d, out, endWhiles, s.getGlobalUniqueName(), destinationValue);
 
                     d = currentNode.isRoot() ? currentNode.newDestination : currentNode.multiOccurrenceVar;
                     out.append(format("\nmappingContext.beginMapping(%s, %s, %s, %s);\n",

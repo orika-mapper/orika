@@ -44,22 +44,23 @@ public class MapToMap extends AbstractSpecification {
         return fieldMap.getSource().isMap() && fieldMap.getDestination().isMap();
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         MultiOccurrenceVariableRef d = MultiOccurrenceVariableRef.from(destination);
         MultiOccurrenceVariableRef s = MultiOccurrenceVariableRef.from(source);
-        
+
         if (code.isDebugEnabled()) {
-            code.debugField(fieldMap, "mapping from Map<" + source.type().getNestedType(0) + ", " + 
-            source.type().getNestedType(1) + "> to Map<" + destination.type().getNestedType(0) + ", " + 
-            destination.type().getNestedType(1) + ">");
+            code.debugField(fieldMap, "mapping from Map<" + source.type().getNestedType(0) + ", " +
+                    source.type().getNestedType(1) + "> to Map<" + destination.type().getNestedType(0) + ", " +
+                    destination.type().getNestedType(1) + ">");
         }
-        
+
         StringBuilder out = new StringBuilder();
-        
-        out.append(s.ifNotNull());
+
+        out.append(s.ifNotNull(sourceValue));
         out.append("{\n");
-        
+
         MultiOccurrenceVariableRef newDest = new MultiOccurrenceVariableRef(destination.type(), "new_" + destination.name());
         if (d.isAssignable()) {
             out.append(statement(newDest.declare(d.newMap())));
@@ -79,7 +80,7 @@ public class MapToMap extends AbstractSpecification {
          */
 
         append(out,
-                format("for( %s; %s; ) { \n", s.declareIterator(), s.iteratorHasNext()),
+                format("for( %s; %s; ) { \n", s.declareIterator(sourceValue), s.iteratorHasNext()),
                 entry.declare(s.nextElement()),
                 newKey.declare(),
                 newVal.declare(),
@@ -88,14 +89,14 @@ public class MapToMap extends AbstractSpecification {
                 format("%s.put(%s, %s)", newDest, newKey, newVal),
                 "\n",
                 "}");
-        
+
         if (d.isAssignable()) {
             out.append(statement(d.assign(newDest)));
         }
-        
+
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", d.assignIfPossible("null")): "";
         append(out, "}" + mapNull);
-        
+
         return out.toString();
     }
     

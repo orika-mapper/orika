@@ -37,12 +37,13 @@ public class MultiOccurrenceElementToObject extends AbstractSpecification {
                 && (TypeFactory.TYPE_OF_OBJECT.equals(fieldMap.getSource().getType()));
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "mapping multi-occurrence element of type Object to object");
         }
-        
-        return statement(destination.assign(destination.cast(source)));
+
+        return statement(destination.assign(destination.cast(source, sourceValue)));
     }
 }

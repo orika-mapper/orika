@@ -58,28 +58,29 @@ public class ConvertArrayOrCollectionToCollection extends AbstractSpecification 
         }
         return false;
     }
-    
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "converting to Collection using " + source.getConverter());
         }
-        
+
         StringBuilder convertCollection = new StringBuilder();
         MultiOccurrenceVariableRef moSource = MultiOccurrenceVariableRef.from(source);
         MultiOccurrenceVariableRef moDest = MultiOccurrenceVariableRef.from(destination);
-        
+
         String assureInstanceExists = format("if((%s)) { \n %s; \n}", destination.isNull(),
-                destination.assign(code.newObject(source, destination.type())));
-        
+                destination.assign(code.newObject(source, sourceValue, destination.type())));
+
         append(convertCollection,
-                moSource.declareIterator(),
+                moSource.declareIterator(sourceValue),
                 "while(" + moSource.iteratorHasNext() + ") {",
                 format("%s.add(%s.convert((%s)%s, %s, mappingContext))", moDest, code.usedConverter(source.getConverter()),
                         moSource.elementTypeName(), moSource.nextElement(), code.usedType(destination)), "}");
-        
+
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else { %s; }", destination.assignIfPossible("null")) : "";
-        return format(" %s { %s; %s; } %s", source.ifNotNull(), assureInstanceExists, convertCollection, mapNull);
+        return format(" %s { %s; %s; } %s", source.ifNotNull(sourceValue), assureInstanceExists, convertCollection, mapNull);
     }
-    
+
 }

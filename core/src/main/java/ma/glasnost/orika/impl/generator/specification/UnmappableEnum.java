@@ -36,9 +36,10 @@ public class UnmappableEnum extends AbstractSpecification {
         return fieldMap.getBType().isEnum() && !fieldMap.getAType().isEnum() && !fieldMap.getAType().isString();
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
         throw new MappingException("Encountered mapping of enum to object (or vise-versa); sourceType="+
                 source.type() + ", destinationType=" + destination.type());
     }
-    
+
 }

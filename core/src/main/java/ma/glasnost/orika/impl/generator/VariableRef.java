@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Filter;
@@ -52,6 +53,7 @@ import ma.glasnost.orika.property.PropertyResolverStrategy;
  */
 public class VariableRef {
 
+    private static final AtomicLong NEXT_GLOBAL_UNIQUE_ID = new AtomicLong(0L);
     private static final Set<Class<?>> OPTIONAL_CLASSES = Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>());
     static {
         try {
@@ -65,7 +67,8 @@ public class VariableRef {
             // No Guava Optional...
         }
     }
-    
+
+    private final String globalUniqueName = "$"+Long.toHexString(NEXT_GLOBAL_UNIQUE_ID.getAndIncrement());
     protected String name;
     private Property property;
     private VariableRef owner;
@@ -94,7 +97,18 @@ public class VariableRef {
         this.nullPossible = !isPrimitive();
         this.nullPathPossible = isNestedProperty();
     }
-    
+
+    public String getGlobalUniqueName() {
+        return globalUniqueName;
+    }
+
+    public String toRawValue(String value){
+        if (isPrimitive()) {
+            return "(" + "(" + rawType() + ")" + value + ")";
+        }
+        return value;
+    }
+
     public void setConverter(Converter<?, ?> converter) {
         this.converter = converter;
     }
@@ -296,8 +310,12 @@ public class VariableRef {
      * @return
      */
     public String assignIfPossible(VariableRef value) {
+        return assignIfPossible(value, value.toString());
+    }
+
+    public String assignIfPossible(VariableRef value, String castValue) {
         if (setter() != null) {
-            return format(setter(), cast(value));
+            return format(setter(), cast(value, castValue));
         } else {
             return "";
         }
@@ -311,8 +329,11 @@ public class VariableRef {
      * @return
      */
     public String assign(VariableRef value) {
+        return assign(value, value.toString());
+    }
+
+    public String assign(VariableRef value, String expr) {
         if (setter() != null) {
-            String expr = value.toString();
             if (value.type().isPrimitive() && type.isPrimitiveWrapper()) {
                 String wrapperClass = ClassUtil.getWrapperType(rawType()).getCanonicalName();
                 expr = format("(%s) %s.valueOf(%s)", wrapperClass, wrapperClass, expr);
@@ -336,7 +357,11 @@ public class VariableRef {
     }
     
     public String cast(VariableRef ref) {
-        return cast(ref, type());
+        return cast(ref, ref.toString());
+    }
+
+    public String cast(VariableRef ref, String castValue) {
+        return cast(ref, type(), castValue);
     }
     
     /**
@@ -387,14 +412,17 @@ public class VariableRef {
      * @return
      */
     protected static String cast(VariableRef value, Type<?> type) {
-        String castValue = value.toString();
+        return cast(value, type, value.toString());
+    }
+
+    protected static String cast(VariableRef value, Type<?> type, String castValue) {
         String typeName = type.getCanonicalName();
-        
+
         if (type.isPrimitive()) {
             if (value.isWrapper()) {
                 castValue = format("%s.%sValue()", castValue, type);
-            } else if (Character.TYPE == type.getRawType() && value.type().isString()) { 
-                castValue = format("%s.charAt(0)", value);
+            } else if (Character.TYPE == type.getRawType() && value.type().isString()) {
+                castValue = format("%s.charAt(0)", castValue);
             } else if (!value.isPrimitive()) {
                 castValue = format("%s.valueOf(\"\"+%s).%sValue()", type.getWrapperType().getCanonicalName(), castValue, typeName);
             }
@@ -532,8 +560,15 @@ public class VariableRef {
     private static String isNull(Property property, String name) {
         if (property == null) {
             return name + " == null";
+        }
+        return isNull(property, name, getGetter(property, name));
+    }
+
+    private static String isNull(Property property, String name, String value) {
+        if (property == null) {
+            return name + " == null";
         } else {
-            String getterNull = getGetter(property, name) + " == null";
+            String getterNull = value + " == null";
             if (property.isListElement()) {
                 return "(" + unwrap(getGetter(property, name)) + ".size() <= " + property.getName().replaceAll("[\\[\\]]", "") + " || "
                         + getterNull + ")";
@@ -576,9 +611,13 @@ public class VariableRef {
         
         return path.toString();
     }
-    
+
     public String notNull() {
         return notNull(isNullPathPossible());
+    }
+
+    public String notNull(String value) {
+        return notNull(isNullPathPossible(), value);
     }
     
     public String notNull(boolean includePath) {
@@ -588,13 +627,29 @@ public class VariableRef {
             return format("!(%s)", isNull(property, name));
         }
     }
+
+    public String notNull(boolean includePath, String value) {
+        if (includePath) {
+            return notNullIncludingPath();
+        } else {
+            return format("!(%s)", isNull(property, name, value));
+        }
+    }
     
     public String ifNotNull() {
         return ifNotNull(isNullPathPossible());
     }
-    
+
+    public String ifNotNull(String value) {
+        return ifNotNull(isNullPathPossible(), value);
+    }
+
     public String ifNotNull(boolean includePath) {
         return "if ( " + notNull(includePath) + ")";
+    }
+
+    public String ifNotNull(boolean includePath, String value) {
+        return "if ( " + notNull(includePath, value) + ")";
     }
     
     public String ifNull() {

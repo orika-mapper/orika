@@ -31,11 +31,11 @@ import ma.glasnost.orika.metadata.FieldMap;
 public interface Specification extends BaseSpecification {
     
     void setMapperFactory(MapperFactory mapperFactory);
-    
+
     /**
      * Generates code for a boolean equality test between the two variable types,
      * where are potentially unrelated.
-     * 
+     *
      * @param source
      * @param destination
      * @param code
@@ -43,8 +43,7 @@ public interface Specification extends BaseSpecification {
      * whether the two types should be considered 'equal'
      */
     String generateEqualityTestCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code);
-    
-    
+
     /**
      * Generates code to map the provided field map
      * 
@@ -55,5 +54,10 @@ public interface Specification extends BaseSpecification {
      * @return the code snippet which represents mapping from the source to destination
      * property
      */
-    String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code);
+    default String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code){
+        return generateMappingCode(fieldMap, source, source.toString(), destination, code);
+    }
+
+    String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code);
+
 }

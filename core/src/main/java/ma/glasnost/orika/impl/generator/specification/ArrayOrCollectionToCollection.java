@@ -39,28 +39,29 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
         return (fieldMap.getSource().isArray() || fieldMap.getSource().isCollection()) && fieldMap.getDestination().isCollection();
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         StringBuilder out = new StringBuilder();
-        
+
         MultiOccurrenceVariableRef s = MultiOccurrenceVariableRef.from(source);
         MultiOccurrenceVariableRef d = MultiOccurrenceVariableRef.from(destination);
-        
+
         final Class<?> destinationElementClass = d.elementType().getRawType();
-        
+
         if (destinationElementClass == null) {
-        	final String dc = destination.getOwner() == null ? "null" : destination.getOwner().rawType().getName();
+            final String dc = destination.getOwner() == null ? "null" : destination.getOwner().rawType().getName();
             throw new MappingException("cannot determine runtime type of destination collection " + dc + "." + d.name());
         }
-        
+
         // Start check if source property ! = null
-        out.append(s.ifNotNull() + " {\n");
-        
+        out.append(s.ifNotNull(sourceValue) + " {\n");
+
         /*
-         *  TODO: migrate this to create a new destination variable first; 
-         *  fill it, and then assign it to the destination using the setter. 
+         *  TODO: migrate this to create a new destination variable first;
+         *  fill it, and then assign it to the destination using the setter.
          */
-       
+
         MultiOccurrenceVariableRef newDest = new MultiOccurrenceVariableRef(d.type(), "new_" + d.validVariableName());
         if (d.isAssignable()) {
             out.append(statement(newDest.declare(d.newInstance(source.size()))));
@@ -68,18 +69,18 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
             out.append(statement(newDest.declare(""+d)));
             out.append(statement("%s.clear()", newDest));
         }
-        
+
         if (s.isArray()) {
             if (code.isDebugEnabled()) {
                 code.debugField(fieldMap, "mapping " + s.elementTypeName() + "[] to Collection<" + d.elementTypeName() + ">");
             }
-            
+
             if (s.elementType().isPrimitive()) {
                 out.append("\n");
-                out.append(statement("%s.addAll(asList(%s));", newDest, s));
+                out.append(statement("%s.addAll(asList(%s));", newDest, sourceValue));
             } else {
                 out.append("\n");
-                out.append(statement("%s.addAll(mapperFacade.mapAsList(asList(%s), %s.class, mappingContext));", newDest, s, d.elementTypeName()));
+                out.append(statement("%s.addAll(mapperFacade.mapAsList(asList(%s), %s.class, mappingContext));", newDest, sourceValue, d.elementTypeName()));
             }
         } else {
             if (code.isDebugEnabled()) {
@@ -87,20 +88,20 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
             }
             append(out,
                     "\n",
-                    format("%s.addAll(mapperFacade.mapAs%s(%s, %s, %s, mappingContext))", newDest, d.collectionType(), s,
+                    format("%s.addAll(mapperFacade.mapAs%s(%s, %s, %s, mappingContext))", newDest, d.collectionType(), sourceValue,
                             code.usedType(s.elementType()), code.usedType(d.elementType())));
         }
         if (fieldMap.getInverse() != null) {
             final MultiOccurrenceVariableRef inverse = new MultiOccurrenceVariableRef(fieldMap.getInverse(), "orikaCollectionItem");
-            
+
             if (fieldMap.getInverse().isCollection()) {
                 append(out,
-                          format("for (java.util.Iterator orikaIterator = %s.iterator(); orikaIterator.hasNext();) { ", newDest),
-                          format("    %s orikaCollectionItem = (%s) orikaIterator.next();", d.elementTypeName(), d.elementTypeName()),
-                          format("    %s { %s; }", inverse.ifNull(), inverse.assignIfPossible(inverse.newCollection())),
-                          format("    %s.add(%s)", inverse, d.owner()),
-                          "}");
-                
+                        format("for (java.util.Iterator orikaIterator = %s.iterator(); orikaIterator.hasNext();) { ", newDest),
+                        format("    %s orikaCollectionItem = (%s) orikaIterator.next();", d.elementTypeName(), d.elementTypeName()),
+                        format("    %s { %s; }", inverse.ifNull(), inverse.assignIfPossible(inverse.newCollection())),
+                        format("    %s.add(%s)", inverse, d.owner()),
+                        "}");
+
             } else if (fieldMap.getInverse().isArray()) {
                 out.append(" // TODO support array");
             } else {
@@ -109,20 +110,20 @@ public class ArrayOrCollectionToCollection extends AbstractSpecification {
                         format("    %s orikaCollectionItem = (%s) orikaIterator.next();", d.elementTypeName(), d.elementTypeName()),
                         inverse.assign(d.owner()),
                         "}");
-                
+
             }
         }
         // End check if source property ! = null
         if (d.isAssignable()) {
             out.append(statement(d.assign(newDest)));
         }
-        
+
         String assignNull = String.format("%s {\n%s;\n}", d.ifNotNull(), d.assignIfPossible("null"));
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", assignNull): "";
-        
+
         append(out, "}" + mapNull);
-        
+
         return out.toString();
     }
-    
+
 }

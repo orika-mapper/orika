@@ -35,23 +35,24 @@ public class ObjectToObject extends AbstractSpecification {
         return true;
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         if (code.isDebugEnabled()) {
             code.debugField(fieldMap, "mapping object to object");
         }
-        
-        String mapNewObject = destination.assignIfPossible(format("(%s)%s", destination.typeName(), code.callMapper(source, destination.type()), source));
-        String mapExistingObject = code.callMapper(source, destination);
+
+        String mapNewObject = destination.assignIfPossible(format("(%s)%s", destination.typeName(), code.callMapper(source.type(), destination.type(), sourceValue)));
+        String mapExistingObject = code.callMapper(source.type(), destination.type(), sourceValue, destination.toString());
         if (destination.isAssignable()) {
-        	mapExistingObject = destination.assignIfPossible(format("(%s)%s", destination.typeName(), mapExistingObject));
+            mapExistingObject = destination.assignIfPossible(format("(%s)%s", destination.typeName(), mapExistingObject));
         }
         String mapStmt = format(" %s { %s; } else { %s; }", destination.ifNull(), mapNewObject, mapExistingObject);
-        
+
         String ipStmt = "";
         if (fieldMap.getInverse() != null) {
             VariableRef inverse = new VariableRef(fieldMap.getInverse(), destination);
-            
+
             if (inverse.isCollection()) {
                 MultiOccurrenceVariableRef inverseCollection = MultiOccurrenceVariableRef.from(inverse);
                 ipStmt += inverse.ifNull() + inverse.assign(inverseCollection.newCollection()) + ";";
@@ -62,10 +63,10 @@ public class ObjectToObject extends AbstractSpecification {
                 ipStmt += statement(inverse.assign(destination.owner()));
             }
         }
-        
+
         String mapNull = destination.isAssignable() && shouldMapNulls(fieldMap, code) ? format(" else {\n %s { %s; }\n}\n", destination.ifPathNotNull(), destination.assign("null")): "";
         return statement("%s { %s  %s } %s", source.ifNotNull(), mapStmt, ipStmt, mapNull);
-        
+
     }
-    
+
 }

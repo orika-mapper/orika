@@ -45,29 +45,30 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
         return fieldMap.getDestination().isMap() && (fieldMap.getSource().isCollection() || fieldMap.getSource().isArray());
     }
 
-    public String generateMappingCode(FieldMap fieldMap, VariableRef source, VariableRef destination, SourceCodeContext code) {
-        
+    @Override
+    public String generateMappingCode(FieldMap fieldMap, VariableRef source, String sourceValue, VariableRef destination, SourceCodeContext code) {
+
         StringBuilder out = new StringBuilder();
-        
+
         MultiOccurrenceVariableRef d = MultiOccurrenceVariableRef.from(destination);
         MultiOccurrenceVariableRef s = MultiOccurrenceVariableRef.from(source);
         MultiOccurrenceVariableRef newDest = new MultiOccurrenceVariableRef(d.type(), "new_" + d.name());
-        
+
         append(out,
-                s.ifNotNull() + " {");
-        
+                s.ifNotNull(sourceValue) + " {");
+
         if (d.isAssignable()) {
             out.append(statement(newDest.declare(newDest.newInstance(d.newMap()))));
         } else {
             out.append(statement(newDest.declare(d)));
             out.append(statement("%s.clear()", newDest));
         }
-        
+
         VariableRef element = new VariableRef(s.elementType(), "source" + StringUtil.capitalize(s.name()) + "Element");
-        
+
         @SuppressWarnings("unchecked")
         Type<MapEntry<Object, Object>> entryType = MapEntry.concreteEntryType((Type<? extends Map<Object, Object>>) d.type());
-        
+
         VariableRef newEntry = new VariableRef(entryType, "source" + StringUtil.capitalize(s.name()) + "Entry");
         VariableRef newKey = new MapEntryRef(newEntry.type(), newEntry.name(), EntryPart.KEY);
         VariableRef newVal = new MapEntryRef(newEntry.type(), newEntry.name(), EntryPart.VALUE);
@@ -80,8 +81,8 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
                 code.debugField(fieldMap, "mapping " + s.elementTypeName() + "[] to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
             }
             append(out,
-                    format("for( int entryIndex = 0, entryLen = %s.length; entryIndex < entryLen; ++entryIndex ) {\n", s),
-                    element.declare("%s[entryIndex]", s),
+                    format("for( int entryIndex = 0, entryLen = %s.length; entryIndex < entryLen; ++entryIndex ) {\n", sourceValue),
+                    element.declare("%s[entryIndex]", sourceValue),
                     newEntry.declare("mapperFacade.map(%s, %s, %s, mappingContext)", element, code.usedType(element), code.usedType(newEntry)),
                     "\n",
                     format("%s.put(%s, %s)", newDest, newKey, newVal),
@@ -91,23 +92,23 @@ public class ArrayOrCollectionToMap extends AbstractSpecification {
                 code.debugField(fieldMap, "mapping Collection<" + s.elementTypeName() + "> to Map<" + d.type().getNestedType(0) + ", " + d.type().getNestedType(1) + ">");
             }
             append(out,
-                    format("for( java.util.Iterator entryIter = %s.iterator(); entryIter.hasNext(); ) {\n", s),
+                    format("for( java.util.Iterator entryIter = %s.iterator(); entryIter.hasNext(); ) {\n", sourceValue),
                     element.declare("entryIter.next()"),
                     newEntry.declare("mapperFacade.map(%s, %s, %s, mappingContext)", element, code.usedType(element), code.usedType(newEntry)),
                     "\n",
                     format("%s.put(%s, %s)", newDest, newKey, newVal),
                     "}");
         }
-        
+
         if (d.isAssignable()) {
             out.append(statement(d.assign(newDest)));
         }
-        
+
         String mapNull = shouldMapNulls(fieldMap, code) ? format(" else {\n %s;\n}", d.assignIfPossible("null")): "";
-        
+
         append(out, "}" + mapNull);
-        
+
         return out.toString();
     }
-    
+
 }
