@@ -271,7 +271,7 @@ public class ClassMapBuilder<A, B> implements MappedTypePair<A, B> {
      *            the (destination) fieldName from type A
      * @return
      */
-    public ClassMapBuilder<A, B> fieldBToA(String fieldNameB, String fieldNameA) {
+    public ClassMapBuilder<A, B> fieldBToA(String fieldNameA, String fieldNameB) {
         return fieldMap(fieldNameA, fieldNameB).bToA().add();
     }
     
