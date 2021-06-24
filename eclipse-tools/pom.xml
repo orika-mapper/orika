@@ -50,7 +50,11 @@
                     </exclusions>
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.equinox.common</artifactId>
+			<version>3.9.0</version>
+		</dependency>
 
     </dependencies>
 
