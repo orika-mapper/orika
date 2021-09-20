@@ -2,16 +2,15 @@ sudo: false
 language: java
 jdk:
   - openjdk8
-  - openjdk9
   - openjdk11
+  - openjdk16
 branches:
   only:
     - master
     
 notifications:
   recipients:
-    - elaatifi@gmail.com
-    - matt.deboer@gmail.com
+    - a.gliznetsov@gmail.com
   email:
     on_success: always
     on_failure: always
