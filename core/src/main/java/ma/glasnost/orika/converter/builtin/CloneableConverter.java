@@ -41,7 +41,10 @@ import java.util.WeakHashMap;
  * 
  * @author matt.deboer@gmail.com
  *
+ * @deprecated This class does not work starting from Java 17
+ *
  */
+@Deprecated
 public class CloneableConverter extends CustomConverter<Object, Object> {
     
     private final Set<Type<Cloneable>> clonedTypes = new HashSet<>();

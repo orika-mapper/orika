@@ -7,13 +7,6 @@ jdk:
 branches:
   only:
     - master
-    
-notifications:
-  recipients:
-    - a.gliznetsov@gmail.com
-  email:
-    on_success: always
-    on_failure: always
 cache:
   directories:
     - $HOME/.m2

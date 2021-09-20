@@ -5,13 +5,8 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javassist.ClassClassPath;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.LoaderClassPath;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.generated.GeneratedPackageClass;
 import ma.glasnost.orika.test.MappingUtil;
 
 public class CheckedExceptionTest {
@@ -48,19 +43,4 @@ public class CheckedExceptionTest {
 		}
 	}
 
-	@Test
-	public void name() throws Exception {
-		ClassPool classPool = new ClassPool();
-		classPool.insertClassPath(new ClassClassPath(this.getClass()));
-
-		CtClass byteCodeClass = classPool.makeClass("ma.glasnost.orika.generated.MyClass");
-
-		//Package.getPackage("ma.glasnost.orika.generated").
-		//this code causes Illegal reflective access in Java 11
-//		Class<?> compiledClass = byteCodeClass.toClass(
-//				Thread.currentThread().getContextClassLoader(),
-//				this.getClass().getProtectionDomain());
-
-		Object compiledClass = byteCodeClass.toClass(GeneratedPackageClass.class);
-	}
 }
