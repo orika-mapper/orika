@@ -318,18 +318,6 @@
 
     <modules>
         <module>core</module>
-        <module>tests</module>
     </modules>
 
-    <profiles>
-        <profile>
-            <id>include-jdk8-test</id>
-            <activation>
-                <jdk>[1.8</jdk>
-            </activation>
-            <modules>
-                <module>tests-jdk8</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
