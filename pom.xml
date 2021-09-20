@@ -59,7 +59,7 @@
         <springframework.version>5.1.5.RELEASE</springframework.version>
         <hibernate.version>5.4.1.Final</hibernate.version>
         <junit.version>4.12</junit.version>
-        <easymock.version>4.0.2</easymock.version>
+        <easymock.version>4.3</easymock.version>
         <h2.version>1.4.198</h2.version>
         <slf4j.version>1.7.26</slf4j.version>
         <paranamer.version>2.8</paranamer.version>
