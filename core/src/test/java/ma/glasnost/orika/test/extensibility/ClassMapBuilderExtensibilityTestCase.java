@@ -1,0 +1,69 @@
+/*
+ * Orika - simpler, better and faster Java bean mapping
+ *
+ * Copyright (C) 2011-2013 Orika authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ma.glasnost.orika.test.extensibility;
+
+import ma.glasnost.orika.DefaultFieldMapper;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.metadata.ClassMapBuilder;
+import ma.glasnost.orika.metadata.ClassMapBuilderFactory;
+import ma.glasnost.orika.metadata.Type;
+import ma.glasnost.orika.property.PropertyResolverStrategy;
+
+/**
+ * This test case demonstrates how one could extend ClassMapBuilder to define
+ * your own method for matching fields up between types.<br>
+ * This example uses a scoring mechanism to rank how "close" two fields are to
+ * each other based on their names, and starts by mapping the closest matches
+ * first.
+ * 
+ * 
+ * @author matt.deboer@gmail.com
+ * 
+ */
+public class ClassMapBuilderExtensibilityTestCase {
+    
+    public static class ExtendedClassMapBuilder<A, B> extends ClassMapBuilder<A, B> {
+        
+        public static class Factory extends ClassMapBuilderFactory {
+
+            protected <A, B> ClassMapBuilder<A, B> newClassMapBuilder(Type<A> aType, Type<B> bType, MapperFactory mapperFactory,
+                    PropertyResolverStrategy propertyResolver, DefaultFieldMapper[] defaults) {
+                return new ExtendedClassMapBuilder<>(aType, bType, mapperFactory, propertyResolver, defaults);
+            }
+        }
+        
+        protected ExtendedClassMapBuilder(Type<A> aType, Type<B> bType, MapperFactory mapperFactory,
+                PropertyResolverStrategy propertyResolver, DefaultFieldMapper[] defaults) {
+            super(aType, bType, mapperFactory, propertyResolver, defaults);
+        }
+       
+        /* (non-Javadoc)
+         * @see ma.glasnost.orika.metadata.ClassMapBuilder#byDefault(ma.glasnost.orika.DefaultFieldMapper[])
+         */
+        @Override
+        public ClassMapBuilder<A, B> byDefault(DefaultFieldMapper... withDefaults) {
+            return super.byDefault(withDefaults);
+            
+            
+            
+        }
+        
+        
+    }
+    
+}
