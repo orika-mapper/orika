@@ -3,7 +3,6 @@ package ma.glasnost.orika.test.community;
 import java.util.List;
 
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 
 import org.junit.Test;
 
@@ -71,7 +70,6 @@ public class Issue114TestCase {
         
         DefaultMapperFactory mapperFactory = 
                 new DefaultMapperFactory.Builder()
-                .compilerStrategy(new EclipseJdtCompilerStrategy())
                 .build();
         
         mapperFactory.classMap(Class1.class, Class1Binding.class)

@@ -24,7 +24,6 @@ import java.util.Map;
 
 import ma.glasnost.orika.BoundMapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,7 +41,7 @@ public class Issue112TestCase {
     @Test
     public void test() {
         
-        DefaultMapperFactory mapperFactory=  new DefaultMapperFactory.Builder().compilerStrategy(new EclipseJdtCompilerStrategy()).build();
+        DefaultMapperFactory mapperFactory=  new DefaultMapperFactory.Builder().build();
         mapperFactory.classMap(Class$1.class, Class$1Binding.class)
                 .field("list{name}","list{key}")
                 .field("list{strings}", "list{value}")

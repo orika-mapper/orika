@@ -5,7 +5,7 @@ import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.OrikaSystemProperties;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
+import ma.glasnost.orika.impl.generator.JavassistCompilerStrategy;
 
 public class DefaultPackageTestCase {
     public static class Label {
@@ -36,7 +36,7 @@ public class DefaultPackageTestCase {
     public void test() {
 
         System.setProperty(OrikaSystemProperties.COMPILER_STRATEGY,
-                EclipseJdtCompilerStrategy.class.getName());
+                JavassistCompilerStrategy.class.getName());
 
         System.setProperty(OrikaSystemProperties.WRITE_SOURCE_FILES, "true");
         System.setProperty(OrikaSystemProperties.WRITE_CLASS_FILES, "true");

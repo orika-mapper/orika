@@ -22,7 +22,6 @@ import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.Type;
 
 import org.junit.Assert;
@@ -73,7 +72,6 @@ public class Issue148TestCase {
     public static void init() {
         
         DefaultMapperFactory.Builder factoryBuilder = new DefaultMapperFactory.Builder();
-        factoryBuilder.compilerStrategy(new EclipseJdtCompilerStrategy());
         MapperFactory factory = factoryBuilder.build();
         
         factory.getConverterFactory().registerConverter(new Converter.Object2String());

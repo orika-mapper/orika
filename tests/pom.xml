@@ -30,19 +30,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ma.glasnost.orika</groupId>
-			<artifactId>orika-eclipse-tools</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>compile</scope>

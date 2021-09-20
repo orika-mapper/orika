@@ -23,9 +23,6 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 
 public abstract class AbstractMapperTest {
     protected MapperFactory createMapperFactory() {
-        // MapperFactory mapperFactory = new
-        // DefaultMapperFactory.Builder().compilerStrategy(new
-        // EclipseJdtCompilerStrategy()).build();
         MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
         return mapperFactory;
     }

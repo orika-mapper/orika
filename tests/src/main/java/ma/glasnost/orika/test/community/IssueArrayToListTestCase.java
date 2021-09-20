@@ -33,10 +33,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class IssueArrayToListTestCase {
 
-    static {
-        //System.setProperty(OrikaSystemProperties.COMPILER_STRATEGY, EclipseJdtCompilerStrategy.class.getName());
-    }
-
     public static class A {
         String[] strings;
 

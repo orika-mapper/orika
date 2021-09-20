@@ -20,7 +20,6 @@ package ma.glasnost.orika.test.community.issue91;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,7 +29,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class VectorTestCase {
-    private final MapperFactory factory = new DefaultMapperFactory.Builder().compilerStrategy(new EclipseJdtCompilerStrategy()).build();
+    private final MapperFactory factory = new DefaultMapperFactory.Builder().build();
     
     @Test
     public void test() {

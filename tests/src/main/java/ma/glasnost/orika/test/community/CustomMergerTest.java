@@ -23,7 +23,6 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.impl.UtilityResolver;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import ma.glasnost.orika.metadata.TypeFactory;
@@ -95,7 +94,6 @@ public class CustomMergerTest {
     
     private static MapperFacade createMapperFacade() {
         DefaultMapperFactory.Builder builder = new DefaultMapperFactory.Builder();
-        builder.compilerStrategy(new EclipseJdtCompilerStrategy());
         MapperFactory factory = builder.build();
         
         factory.registerMapper(new MergingMapper());

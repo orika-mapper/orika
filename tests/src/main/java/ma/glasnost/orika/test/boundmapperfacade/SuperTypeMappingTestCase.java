@@ -22,7 +22,6 @@ import ma.glasnost.orika.BoundMapperFacade;
 import ma.glasnost.orika.DefaultFieldMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompiler;
 import ma.glasnost.orika.test.MappingUtil;
 import ma.glasnost.orika.test.MavenProjectUtil;
 import ma.glasnost.orika.test.unenhance.SuperTypeTestCaseClasses.Author;
@@ -230,85 +229,5 @@ public class SuperTypeMappingTestCase {
             this.time = time;
         }
     }
-    
-    /**
-     * This test is a bit complicated: it verifies that super-type lookup occurs
-     * properly if presented with a class that is not accessible from the
-     * current class loader, but which extends some super-type (or implements an
-     * interface) which is accessible.<br>
-     * This type of scenario might occur in web-module to ejb jar
-     * interactions...
-     * 
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void testSuperTypeForInaccessibleClassWithAccessibleSupertype() throws Exception {
-        
-        MapperFactory factory = MappingUtil.getMapperFactory();
-        DefaultFieldMapper myHint =
-        /**
-         * This sample hint converts "myProperty" to "property", and vis-versa.
-         */
-                (fromProperty, fromPropertyType) -> {
-                    if (fromProperty.startsWith("my")) {
-                        return fromProperty.substring(2, 3).toLowerCase() + fromProperty.substring(3);
-                    } else {
-                        return "my" + fromProperty.substring(0, 1).toUpperCase() + fromProperty.substring(1);
-                    }
-                };
-        factory.registerDefaultFieldMapper(myHint);
 
-        
-        BoundMapperFacade<Library, LibraryMyDTO> mapper = factory.getMapperFacade(Library.class, LibraryMyDTO.class);
-        
-        // -----------------------------------------------------------------------------
-        File projectRoot = MavenProjectUtil.findProjectRoot();
-        
-        ClassLoader threadContextLoader = Thread.currentThread().getContextClassLoader();
-        
-        EclipseJdtCompiler complier = new EclipseJdtCompiler(threadContextLoader);
-		ClassLoader childLoader = complier.compile(new File(projectRoot, "src/main/java-hidden"),threadContextLoader);
-        
-        @SuppressWarnings("unchecked")
-        Class<? extends Author> hiddenAuthorType = (Class<? extends Author>) childLoader.loadClass("types.AuthorHidden");
-        @SuppressWarnings("unchecked")
-        Class<? extends Book> hiddenBookType = (Class<? extends Book>) childLoader.loadClass("types.BookHidden");
-        @SuppressWarnings("unchecked")
-        Class<? extends Library> hiddenLibraryType = (Class<? extends Library>) childLoader.loadClass("types.LibraryHidden");
-        
-        try {
-            threadContextLoader.loadClass("types.LibraryHidden");
-            Assert.fail("types.LibraryHidden should not be accessible to the thread context class loader");
-        } catch (ClassNotFoundException e0) {
-            try {
-                threadContextLoader.loadClass("types.AuthorHidden");
-                Assert.fail("types.AuthorHidden should not be accessible to the thread context class loader");
-            } catch (ClassNotFoundException e1) {
-                try {
-                    threadContextLoader.loadClass("types.BookHidden");
-                    Assert.fail("types.BookHidden should not be accessible to the thread context class loader");
-                } catch (ClassNotFoundException e2) {
-                    /* good: all of these types should be inaccessible */
-                }
-            }
-        }
-        // Now, these types are hidden from the current class-loader, but they
-        // implement types
-        // that are accessible to this loader
-        // -----------------------------------------------------------------------------
-        
-        Book book = createBook(hiddenBookType);
-        book.setAuthor(createAuthor(hiddenAuthorType));
-        Library lib = createLibrary(hiddenLibraryType);
-        lib.getBooks().add(book);
-        
-        LibraryMyDTO mappedLib = mapper.map(lib);
-        
-        Assert.assertEquals(lib.getTitle(), mappedLib.getMyTitle());
-        Assert.assertEquals(book.getTitle(), mappedLib.getMyBooks().get(0).getMyTitle());
-        Assert.assertEquals(book.getAuthor().getName(), mappedLib.getMyBooks().get(0).getMyAuthor().getMyName());
-        
-    }
-    
 }

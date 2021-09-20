@@ -3,7 +3,6 @@ package ma.glasnost.orika.test.objectfactory;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.TypeFactory;
 import org.junit.Test;
 
@@ -21,8 +20,7 @@ public class MultipleObjectFactoryTest {
 
 	@Test
 	public void orikaTest() {
-		MapperFactory factory = new DefaultMapperFactory.Builder().compilerStrategy(new EclipseJdtCompilerStrategy())
-				.build();
+		MapperFactory factory = new DefaultMapperFactory.Builder().build();
 
 		factory.registerObjectFactory(new CustomFactory<>(Sub1.class), TypeFactory.valueOf(Sub1.class));
 		factory.registerObjectFactory(new CustomFactory<>(Sub2.class), TypeFactory.valueOf(Sub2.class));

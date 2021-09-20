@@ -27,7 +27,6 @@ import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import ma.glasnost.orika.OrikaSystemProperties;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.test.DynamicSuite;
 import ma.glasnost.orika.test.DynamicSuite.Scenario;
 import ma.glasnost.orika.test.DynamicSuite.TestCasePattern;
@@ -50,9 +49,8 @@ import ma.glasnost.orika.test.DynamicSuite.TestCasePattern;
 public class TestCompilerStrategyWritingFiles {
     
     @BeforeClass
-    public static void eclipseJdt() {
-    	System.setProperty(OrikaSystemProperties.COMPILER_STRATEGY, EclipseJdtCompilerStrategy.class.getName());
-    	System.setProperty(OrikaSystemProperties.WRITE_SOURCE_FILES_TO_PATH, 
+    public static void writeDebugFiles() {
+    	System.setProperty(OrikaSystemProperties.WRITE_SOURCE_FILES_TO_PATH,
     			System.getProperty("user.home")+"/.orikaGenerated/src/");
     	System.setProperty(OrikaSystemProperties.WRITE_CLASS_FILES_TO_PATH, 
     			System.getProperty("user.home")+"/.orikaGenerated/bin/");

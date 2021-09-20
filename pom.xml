@@ -170,51 +170,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Dependencies for optional eclipse jdt/formatter -->
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.core.commands</artifactId>
-			    <version>3.9.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.osgi</artifactId>
-			    <version>3.13.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.equinox.common</artifactId>
-			    <version>3.10.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.core.jobs</artifactId>
-			    <version>3.10.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.equinox.registry</artifactId>
-			    <version>3.8.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.equinox.preferences</artifactId>
-			    <version>3.7.200</version>
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.eclipse.platform</groupId>
-			    <artifactId>org.eclipse.core.contenttype</artifactId>
-			    <version>3.7.200</version>
-			</dependency>
-
-            <!-- END Eclipse Test dependencies -->
-
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
@@ -362,7 +317,6 @@
     </reporting>
 
     <modules>
-        <module>eclipse-tools</module>
         <module>core</module>
         <module>tests</module>
     </modules>

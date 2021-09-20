@@ -3,7 +3,6 @@ package ma.glasnost.orika.test.community;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.CaseInsensitiveClassMapBuilder;
 import org.junit.Test;
 
@@ -127,7 +126,6 @@ public class Issue141TestCase {
 
 		MapperFactory mapperFactory = new DefaultMapperFactory.Builder()
 				.classMapBuilderFactory(new CaseInsensitiveClassMapBuilder.Factory())
-				.compilerStrategy(new EclipseJdtCompilerStrategy())
 				.build();
 		mapperFactory.classMap(Clazz.class, Clazz2.class)
 				.field("subClass.strings[0]", "string").register();
@@ -142,7 +140,6 @@ public class Issue141TestCase {
 	public void test2() throws Throwable {
 
 		MapperFactory mapperFactory = new DefaultMapperFactory.Builder()
-			.compilerStrategy(new EclipseJdtCompilerStrategy())
 			.useAutoMapping(false)
 			.mapNulls(false)
 			.build();

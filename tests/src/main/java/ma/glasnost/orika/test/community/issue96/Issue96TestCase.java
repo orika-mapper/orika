@@ -21,7 +21,6 @@ package ma.glasnost.orika.test.community.issue96;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 
 import org.junit.Before;
@@ -32,7 +31,7 @@ public class Issue96TestCase {
 
 	@Before
 	public void setUp() {
-		MapperFactory mapperFactory = new DefaultMapperFactory.Builder().compilerStrategy(new EclipseJdtCompilerStrategy()).build();
+		MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 		ClassMapBuilder<Customer, CustomerData> builder = mapperFactory.classMap(Customer.class, CustomerData.class);
 		builder.field("name", "name");
 		builder.field("address.city", "city");

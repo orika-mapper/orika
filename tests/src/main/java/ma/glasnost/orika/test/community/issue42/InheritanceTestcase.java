@@ -23,7 +23,6 @@ import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class InheritanceTestcase {
     @Test
     public void testInheritance() {
         
-        MapperFactory mapperFactory = new DefaultMapperFactory.Builder().compilerStrategy(new EclipseJdtCompilerStrategy()).build();
+        MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
         
         mapperFactory.registerClassMap(mapperFactory.classMap(BaseEntity.class, BaseEntityDto.class).byDefault().toClassMap());
         

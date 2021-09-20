@@ -17,7 +17,6 @@
  */
 package ma.glasnost.orika.test.perf;
 
-import ma.glasnost.orika.impl.generator.EclipseJdtCompiler;
 import ma.glasnost.orika.test.MavenProjectUtil;
 import org.junit.Rule;
 import org.junit.Test;
@@ -64,8 +63,6 @@ public class MultiLayeredClassloader_IDEOnly {
         final ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         File tempClasses = temporaryFolder.getRoot();
         
-        EclipseJdtCompiler complier = new EclipseJdtCompiler(tccl);
-        complier.compile(new File(projectRoot, "src/main/java-hidden"),tempClasses);
         ClassLoader childLoader = new URLClassLoader(new URL[]{tempClasses.toURI().toURL()},
         		copyThreadContextClassLoader());
         

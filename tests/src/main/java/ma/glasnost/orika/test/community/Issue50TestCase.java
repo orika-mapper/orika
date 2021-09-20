@@ -20,7 +20,6 @@ package ma.glasnost.orika.test.community;
 import org.junit.Assert;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 
 import org.junit.Test;
 
@@ -71,7 +70,6 @@ public class Issue50TestCase {
 
 		MapperFactory factory = 
 				new DefaultMapperFactory.Builder()
-					.compilerStrategy(new EclipseJdtCompilerStrategy())
 					.build();
 
 		
@@ -106,7 +104,6 @@ public class Issue50TestCase {
 
 		MapperFactory factory = 
 				new DefaultMapperFactory.Builder()
-					.compilerStrategy(new EclipseJdtCompilerStrategy())
 					.build();
 
 		

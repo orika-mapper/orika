@@ -22,7 +22,6 @@ import ma.glasnost.orika.DefaultFieldMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import ma.glasnost.orika.metadata.ClassMapBuilderFactory;
 import ma.glasnost.orika.metadata.Type;
@@ -49,8 +48,7 @@ public class Issue82TestCase {
         DefaultMapperFactory.Builder builder = new DefaultMapperFactory.Builder();
         builder.unenhanceStrategy(new HibernateUnenhanceStrategy());
         builder.classMapBuilderFactory(new MyClassMapBuilderFactory());
-        MapperFactory mapperFactory = builder
-                .compilerStrategy(new EclipseJdtCompilerStrategy()).build();
+        MapperFactory mapperFactory = builder.build();
         mapperFacade = mapperFactory.getMapperFacade();
     }
     

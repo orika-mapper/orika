@@ -24,7 +24,6 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.OrikaSystemProperties;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.impl.UtilityResolver;
-import ma.glasnost.orika.impl.generator.EclipseJdtCompilerStrategy;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeFactory;
 import ma.glasnost.orika.test.community.issue25.BaseManufacturingFacilityTest;
@@ -66,8 +65,6 @@ public class Issue25TestCase extends BaseManufacturingFacilityTest{
 
     @Before
     public void setUp() throws Exception {
-    	System.setProperty(OrikaSystemProperties.COMPILER_STRATEGY,EclipseJdtCompilerStrategy.class.getName());
-        
         mapper = new CustomOrikaMapper();
     }
 
