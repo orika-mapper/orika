@@ -3,6 +3,7 @@ package ma.glasnost.orika.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -135,5 +136,39 @@ public class ClassHelper {
       } else {
          return null;
       }
+   }
+
+
+   public static Class<?> getPackageNeighbour(ma.glasnost.orika.metadata.Type<?> aType, ma.glasnost.orika.metadata.Type<?> bType) {
+      boolean aIsPublic = Modifier.isPublic(aType.getRawType().getModifiers());
+      boolean bIsPublic = Modifier.isPublic(bType.getRawType().getModifiers());
+
+      if (aIsPublic) {
+         if (bIsPublic) {
+            // both public, no package needed
+            return null;
+         } else {
+            // A public, B not --> use package of B
+            return bType.getRawType();
+         }
+      } else {
+         if (bIsPublic) {
+            // A not public, B is --> use package of A
+            return aType.getRawType();
+         } else {
+            // both package private --> make sure they're in the same package
+            String aPackage = getPackageName(aType);
+            if (aPackage.equals(getPackageName(bType))) {
+               return aType.getRawType();
+            } else {
+               throw new RuntimeException(aType + " and " + bType + " are both package private but are in different packages");
+            }
+         }
+      }
+   }
+
+   private static String getPackageName(ma.glasnost.orika.metadata.Type<?> type) {
+      Package typePackage = type.getRawType().getPackage();
+      return type == null ? "" : typePackage.getName();
    }
 }

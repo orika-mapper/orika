@@ -1395,7 +1395,7 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
             for (final MapperKey parentMapperKey : classMap.getUsedMappers()) {
                 ClassMap<Object, Object> usedClassMap = classMapsDictionary.get(parentMapperKey);
                 if (usedClassMap == null) {
-                    throw exceptionUtil.newMappingException("Cannot find class mapping using mapper : " + classMap.getMapperClassName());
+                    throw exceptionUtil.newMappingException("Cannot find class mapping using mapper : " + classMap.getMapperSimpleClassName());
                 }
                 usedClassMapSet.add(usedClassMap);
             }
@@ -1501,7 +1501,7 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
     private void collectUsedMappers(ClassMap<?, ?> classMap, Set<Mapper<Object, Object>> parentMappers, MapperKey parentMapperKey, MappingContext context) {
         Mapper<Object, Object> parentMapper = lookupMapper(parentMapperKey, context);
         if (parentMapper == null) {
-            throw exceptionUtil.newMappingException("Cannot find used mappers for : " + classMap.getMapperClassName());
+            throw exceptionUtil.newMappingException("Cannot find used mappers for : " + classMap.getMapperSimpleClassName());
         }
         if (parentMapper instanceof MultipleMapperWrapper) {
             MultipleMapperWrapper multiMapperWrapper = (MultipleMapperWrapper) parentMapper;

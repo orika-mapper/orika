@@ -207,9 +207,6 @@ public class JavassistCompilerStrategy extends CompilerStrategy {
         try {
             writeSourceFile(sourceCode);
             
-            // TODO: do we really need this check here?
-            // assureTypeIsAccessible(this.getClass());
-            
             Boolean existing = superClasses.put(sourceCode.getSuperClass(), true);
             if (existing == null || !existing) {
                 classPool.insertClassPath(new ClassClassPath(sourceCode.getSuperClass()));
@@ -242,8 +239,12 @@ public class JavassistCompilerStrategy extends CompilerStrategy {
                 }
                 
             }
-            compiledClass = byteCodeClass.toClass(Thread.currentThread().getContextClassLoader(), this.getClass().getProtectionDomain());
-            
+
+            //this code causes Illegal reflective access in Java 11
+            //compiledClass = byteCodeClass.toClass(Thread.currentThread().getContextClassLoader(), this.getClass().getProtectionDomain());
+
+            compiledClass = byteCodeClass.toClass(sourceCode.getPackageNeighbour());
+
             writeClassFile(sourceCode, byteCodeClass);
             
         } catch (NotFoundException e) {

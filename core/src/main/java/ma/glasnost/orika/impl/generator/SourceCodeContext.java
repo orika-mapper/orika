@@ -26,6 +26,7 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.Properties;
 import ma.glasnost.orika.converter.ConverterFactory;
+import ma.glasnost.orika.generated.GeneratedPackageClass;
 import ma.glasnost.orika.impl.AggregateFilter;
 import ma.glasnost.orika.impl.GeneratedObjectBase;
 import ma.glasnost.orika.impl.generator.CompilerStrategy.SourceCodeGenerationException;
@@ -75,6 +76,7 @@ public class SourceCodeContext {
     private final List<String> methods;
     private final List<String> fields;
     private final Class<?> superClass;
+    private final Class<?> packageNeighbour;
     
     private final UsedTypesContext usedTypes;
     private final UsedConvertersContext usedConverters;
@@ -98,7 +100,8 @@ public class SourceCodeContext {
      * @param logDetails
      */
     @SuppressWarnings("unchecked")
-    public SourceCodeContext(final String baseClassName, Class<?> superClass, MappingContext mappingContext, StringBuilder logDetails) {
+    public SourceCodeContext(final String baseClassName, Class<?> packageNeighbour, Class<?> superClass,
+                             MappingContext mappingContext, StringBuilder logDetails) {
         
         this.mapperFactory = (MapperFactory) mappingContext.getProperty(Properties.MAPPER_FACTORY);
         this.codeGenerationStrategy = (CodeGenerationStrategy) mappingContext.getProperty(Properties.CODE_GENERATION_STRATEGY);
@@ -107,17 +110,17 @@ public class SourceCodeContext {
         this.filters = (Collection<Filter<Object, Object>>) mappingContext.getProperty(Properties.FILTERS);
         this.shouldCaptureFieldContext = (Boolean) mappingContext.getProperty(Properties.CAPTURE_FIELD_CONTEXT);
         
-        String safeBaseClassName = baseClassName.replace("[]", "$Array");
+        this.classSimpleName = baseClassName.replace("[]", "$Array");
         this.sourceBuilder = new StringBuilder();
         this.superClass = superClass;
         
-        int namePos = safeBaseClassName.lastIndexOf(".");
-        if (namePos > 0) {
-            this.packageName = safeBaseClassName.substring(0, namePos);
-            this.classSimpleName = safeBaseClassName.substring(namePos + 1);
+        if (packageNeighbour != null) {
+            int namePos = packageNeighbour.getName().lastIndexOf(".");
+            this.packageName = packageNeighbour.getName().substring(0, namePos);
+            this.packageNeighbour = packageNeighbour;
         } else {
             this.packageName = "ma.glasnost.orika.generated";
-            this.classSimpleName = safeBaseClassName;
+            this.packageNeighbour = GeneratedPackageClass.class;
         }
         
         this.classSimpleName = makeUniqueClassName(this.classSimpleName);
@@ -138,7 +141,7 @@ public class SourceCodeContext {
         
         this.aggregateFieldMaps = new LinkedHashMap<>();
     }
-    
+
     private String makeUniqueClassName(String name) {
         return name + System.nanoTime() + "$" + UNIQUE_CLASS_INDEX.getAndIncrement();
     }
@@ -185,7 +188,11 @@ public class SourceCodeContext {
     public String getPackageName() {
         return packageName;
     }
-    
+
+    public Class<?> getPackageNeighbour() {
+        return packageNeighbour;
+    }
+
     public String getClassName() {
         return className;
     }

@@ -19,6 +19,7 @@ package ma.glasnost.orika.metadata;
 
 import java.io.Externalizable;
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
@@ -397,5 +398,5 @@ abstract class TypeUtil {
             throw new IllegalArgumentException("'" + name + "' is non-existent or inaccessible");
         }
     }
-    
+
 }

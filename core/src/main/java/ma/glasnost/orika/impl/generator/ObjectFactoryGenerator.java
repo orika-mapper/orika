@@ -28,6 +28,8 @@ import ma.glasnost.orika.metadata.FieldMap;
 import ma.glasnost.orika.metadata.MapperKey;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeFactory;
+import ma.glasnost.orika.util.ClassHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +76,6 @@ public class ObjectFactoryGenerator {
     public GeneratedObjectFactory build(Type<?> type, Type<?> sourceType, MappingContext context) {
         
         String className = type.getSimpleName() + "_" + sourceType.getSimpleName() + "_ObjectFactory" + nameSuffix;
-        className = prependPackageName(getPackageName(type), className);
         try {
             StringBuilder logDetails;
             if (LOGGER.isDebugEnabled()) {
@@ -83,8 +84,11 @@ public class ObjectFactoryGenerator {
             } else {
                 logDetails = null;
             }
-            
-            final SourceCodeContext factoryCode = new SourceCodeContext(className, GeneratedObjectFactory.class, context, logDetails);
+
+            Class<?> packageNeighbour = ClassHelper.getPackageNeighbour(type, sourceType);
+            final SourceCodeContext factoryCode = new SourceCodeContext(className,
+                    packageNeighbour,
+                    GeneratedObjectFactory.class, context, logDetails);
             
             UsedTypesContext usedTypes = new UsedTypesContext();
             UsedConvertersContext usedConverters = new UsedConvertersContext();
@@ -113,9 +117,6 @@ public class ObjectFactoryGenerator {
     private static String getPackageName(Type<?> type) {
         Package typePackage = type.getRawType().getPackage();
         return typePackage == null ? "" : typePackage.getName();
-    }
-    private static String prependPackageName(String packageName, String className) {
-        return packageName.isEmpty() || packageName.startsWith("java.") ? className : packageName + "." + className;
     }
 
     private void addCreateMethod(SourceCodeContext code, UsedTypesContext usedTypes, UsedConvertersContext usedConverters,
