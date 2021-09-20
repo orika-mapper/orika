@@ -59,7 +59,7 @@ public class JaninoCompilerStrategy extends CompilerStrategy {
             ClassFile[] classes = unitCompile.compileUnit(false, false, false);
             return classLoader.findClass(classes[0].getThisClassName());
         } catch (Exception e) {
-            LOG.error("Can not compile {0}", sourceCode.getClassName(), e);
+            LOG.error("Can not compile " + sourceCode.getClassName(), e);
             throw new MappingException("Can not compile the generated mapper", e);
         }
         

@@ -318,6 +318,7 @@
 
     <modules>
         <module>core</module>
+        <module>orika-janino</module>
     </modules>
 
 </project>

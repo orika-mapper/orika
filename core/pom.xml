@@ -48,12 +48,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.codehaus.janino</groupId>
-			<artifactId>janino</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 
 		<!--	tests dependencies	-->
 
