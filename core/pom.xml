@@ -38,11 +38,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.carrotsearch</groupId>
-			<artifactId>java-sizeof</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<optional>true</optional>

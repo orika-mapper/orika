@@ -1,7 +1,5 @@
 package ma.glasnost.orika;
 
-import com.carrotsearch.sizeof.RamUsageEstimator;
-
 import ma.glasnost.orika.converter.ConverterFactory;
 
 /**
@@ -44,7 +42,7 @@ public final class StateReporter {
      * @return
      */
     public static String humanReadableSizeInMemory(Object...objects) {
-    	long size = RamUsageEstimator.sizeOfAll(objects);
+    	long size = 0;
     	return String.format("%,.1f kB", size/1000.0);
     }
     
