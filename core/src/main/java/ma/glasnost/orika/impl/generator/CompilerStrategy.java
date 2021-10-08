@@ -25,6 +25,8 @@ import java.io.IOException;
 
 /**
  * Defines a standard compiler profile for use in generating mapping objects.
+ *
+ * 定义用于生成映射对象的标准编译器配置文件。
  * 
  * @author matt.deboer@gmail.com
  *

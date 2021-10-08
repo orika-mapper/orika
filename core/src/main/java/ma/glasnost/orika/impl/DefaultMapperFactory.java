@@ -113,7 +113,12 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
     protected final List<DefaultFieldMapper> defaultFieldMappers;
     protected final UnenhanceStrategy unenhanceStrategy;
     protected final UnenhanceStrategy userUnenahanceStrategy;
+
+    /**
+     * 转换器工厂, 转换器的注册及获取.
+     */
     protected final ConverterFactory converterFactory;
+
     protected final CompilerStrategy compilerStrategy;
     protected final PropertyResolverStrategy propertyResolverStrategy;
     protected final Map<java.lang.reflect.Type, Type<?>> concreteTypeRegistry;
@@ -137,10 +142,16 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
      * @param builder
      */
     protected DefaultMapperFactory(MapperFactoryBuilder<?, ?> builder) {
-        
+        // 对转换器工厂赋值, 使用了个代理类
         this.converterFactory = new ConverterFactoryFacade(builder.converterFactory);
+
+        // todo 编译策略, 有点不太理解为什么需要编译
         this.compilerStrategy = builder.compilerStrategy;
+
+        // 映射类注册容器
         this.classMapRegistry = new ConcurrentHashMap<>();
+
+        //
         this.mappersRegistry = new SortedCollection<>(Ordering.MAPPER);
         this.filtersRegistry = new SortedCollection<>(Ordering.FILTER);
         this.explicitAToBRegistry = new ConcurrentHashMap<>();
@@ -1751,6 +1762,9 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
      * ConverterFactoryFacade is a nested intercepter class for ConverterFactory
      * that listens for registry of new converters and calls the appropriate
      * change event on MapperFacade if the factory has already started building.
+     *
+     * ConverterFactoryFacade是ConverterFactory的嵌套拦截器类，
+     * 它侦听新转换器的注册并在工厂已经开始构建时调用MapperFacade上的适当更改事件。
      * 
      */
     private class ConverterFactoryFacade implements ConverterFactory {
@@ -1774,6 +1788,7 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
         
         public <S, D> void registerConverter(Converter<S, D> converter) {
             delegate.registerConverter(converter);
+            // todo
             if (isBuilding || isBuilt) {
                 mapperFacade.factoryModified(DefaultMapperFactory.this);
             }
@@ -1781,6 +1796,7 @@ public class DefaultMapperFactory implements MapperFactory, Reportable {
         
         public <S, D> void registerConverter(String converterId, Converter<S, D> converter) {
             delegate.registerConverter(converterId, converter);
+            // todo
             if (isBuilding || isBuilt) {
                 mapperFacade.factoryModified(DefaultMapperFactory.this);
             }

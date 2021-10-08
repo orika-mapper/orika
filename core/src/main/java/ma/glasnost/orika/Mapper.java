@@ -23,6 +23,8 @@ package ma.glasnost.orika;
  * Defines a contract between internal parts of Orika such as
  * <code>MapperFacade</code>, <code>MapperGenerator</code>,
  * <code>MapperFactory</code> and generated mappers.
+ *
+ * 类型映射定义
  * 
  * @author S.M. El Aatifi
  * 

@@ -26,6 +26,7 @@ import ma.glasnost.orika.metadata.Type;
 
 /**
  * Ordering
+ * 排序工具类
  * 
  * @param <T>
  */
@@ -81,6 +82,7 @@ public abstract class Ordering<T> {
     
     /**
      * An ordering specific to Mappers
+     * 排序实例, 对mapper(这个mapper是orika自定义的类型映射)的排序
      */
     public static final Ordering<Mapper<Object, Object>> MAPPER = new Ordering<Mapper<Object, Object>>() {
         public OrderingRelation order(Mapper<Object, Object> mapper1, Mapper<Object, Object> mapper2) {

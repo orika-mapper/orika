@@ -22,6 +22,9 @@ import ma.glasnost.orika.metadata.Type;
 /**
  * MappedTypePair represents any pair of mapped types, which are distinguished
  * from each other as 'A type' and 'B type'
+ *
+ * MappedTypePair表示任意一对不同的映射类型
+ * A型和B型
  * 
  * @author matt.deboer@gmail.com
  *
