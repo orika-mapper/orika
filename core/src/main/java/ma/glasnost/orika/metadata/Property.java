@@ -18,7 +18,6 @@
 
 package ma.glasnost.orika.metadata;
 
-import ma.glasnost.orika.MapEntry;
 import ma.glasnost.orika.property.PropertyResolver;
 
 import java.lang.reflect.Method;
@@ -65,43 +64,11 @@ public class Property {
         this.getter = getter;
         this.setter = setter;
         this.type = type;
-        this.elementType = defaultElementType(type, elementType);
+        this.elementType = ElementTypeClass.defaultElementType(type, elementType);
         
         this.container = container;
     }
-    
-    private static Type<?> defaultElementType(final Type<?> type, final Type<?> elementType) {
-        
-        if (elementType != null) {
-            return elementType;
-        }
-        
-        if (type.getActualTypeArguments().length > 0 && elementType == null) {
-            return (Type<?>) type.getActualTypeArguments()[0];
-        } else if (type.isCollection()) {
-            Type<?> collectionElementType = elementType;
-            Type<?> collection = type.findAncestor(Collection.class);
-            if (collection != null) {
-                collectionElementType = (Type<?>) collection.getActualTypeArguments()[0];
-            }
-            return collectionElementType;
-            
-        } else if (type.isMap()) {
-            
-            Type<?> mapElementType = elementType;
-            Type<?> map = type.findAncestor(Map.class);
-            if (map != null) {
-                @SuppressWarnings("unchecked")
-                Type<? extends Map<Object, Object>> mapType = (Type<? extends Map<Object, Object>>) map;
-                mapElementType = MapEntry.entryType(mapType);
-            }
-            return mapElementType;
-            
-        } else {
-            return elementType;
-        }
-    }
-    
+
     /**
      * @return a copy of this property instance
      */

@@ -42,7 +42,7 @@ public class StringUtil {
      * <p>Uncapitalizes a String, changing the first character to lower case as per {@link
      * Character#toLowerCase(char)}. No other characters are changed.</p>
      *
-     * <p>For a word based algorithm, see {@link org.apache.commons.lang3.text.WordUtils#uncapitalize(String)}.
+     * <p>For a word based algorithm, see {@link //org.apache.commons.lang3.text.WordUtils#uncapitalize(String)}.
      * A {@code null} input String returns {@code null}.</p>
      *
      * <pre>
@@ -55,7 +55,7 @@ public class StringUtil {
      *
      * @param str the String to uncapitalize, may be null
      * @return the uncapitalized String, {@code null} if null String input
-     * @see org.apache.commons.lang3.text.WordUtils#uncapitalize(String)
+     * @see //org.apache.commons.lang3.text.WordUtils#uncapitalize(String)
      * @see #capitalize(String)
      * @since 2.0
      */

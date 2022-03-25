@@ -88,11 +88,7 @@ public abstract class GeneratedObjectBase {
         }
         return ts;
     }
-    
-    protected static List<Object> asList(Object[] iterable) {
-        return new ArrayList<>(Arrays.asList(iterable));
-    }
-    
+
     protected static List<Object> asList(byte[] iterable) {
         ArrayList<Object> ts = new ArrayList<>();
         for (Object i : iterable) {

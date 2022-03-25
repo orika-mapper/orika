@@ -43,7 +43,7 @@ public class MappingContext {
     protected List<Map<MapperKey, ClassMap<?, ?>>> mappersSeen;
     protected Map<Object, Object> properties;
     protected Map<Object, Object> globalProperties;
-    protected boolean isNew = true;
+    protected boolean isNewConcreteClass = true;
     protected boolean containsCycle = true;
     protected int depth;
     protected Type<?> resolvedSourceType;
@@ -139,7 +139,7 @@ public class MappingContext {
      */
     @SuppressWarnings("unchecked")
     public <S, D> Type<? extends D> getConcreteClass(Type<S> sourceType, Type<D> destinationType) {
-        if (isNew) {
+        if (isNewConcreteClass) {
             return null;
         }
         final Type<?> type = mapping.get(sourceType);
@@ -158,7 +158,7 @@ public class MappingContext {
      */
     public void registerConcreteClass(Type<?> subjectClass, Type<?> concreteClass) {
         mapping.put(subjectClass, concreteClass);
-        isNew = false;
+        isNewConcreteClass = false;
     }
     
     /**
@@ -181,7 +181,7 @@ public class MappingContext {
             }
             localCache.put(source, destination);
             
-            isNew = false;
+            isNewConcreteClass = false;
         }
     }
     
@@ -197,7 +197,7 @@ public class MappingContext {
     @SuppressWarnings("unchecked")
     public <D> D getMappedObject(Object source, Type<?> destinationType) {
         
-        if (isNew || !containsCycle) {
+        if (isNewConcreteClass || !containsCycle) {
             return null;
         }
         Map<Object, Object> localCache = (Map<Object, Object>) typeCache.get(destinationType.getUniqueIndex());
@@ -261,7 +261,8 @@ public class MappingContext {
      *            the destination object being mapped into
      * @deprecated This variant exists for backwards compatibility only; if
      *             overriding, override
-     *             {@link #beginMapping(Type, Object, Type, String, Object)}
+     *             {@link #
+     *             //beginMapping(Type, Object, Type, String, Object)}
      *             instead.
      */
     @Deprecated
@@ -466,7 +467,7 @@ public class MappingContext {
         resolvedSourceType = null;
         resolvedDestinationType = null;
         resolvedStrategy = null;
-        isNew = true;
+        isNewConcreteClass = true;
         depth = 0;
     }
     

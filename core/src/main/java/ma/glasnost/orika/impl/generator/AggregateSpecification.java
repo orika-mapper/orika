@@ -32,7 +32,7 @@ import ma.glasnost.orika.metadata.FieldMap;
  */
 public interface AggregateSpecification extends BaseSpecification {
     
-    void setMapperFactory(MapperFactory mapperFactory);
+
     
     /**
      * @param fieldMappings

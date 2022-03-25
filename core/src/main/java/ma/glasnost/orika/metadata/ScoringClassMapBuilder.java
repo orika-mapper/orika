@@ -254,39 +254,8 @@ public class ScoringClassMapBuilder<A, B> extends ClassMapBuilder<A, B> {
          * For our custom 'byDefault' method, we're going to try and match
          * fields by their Levenshtein distance
          */
-        PriorityQueue<FieldMatchScore> matchScores = new PriorityQueue<>();
-        
-        Map<String, Property> propertiesForA = getPropertyExpressions(getAType());
-        Map<String, Property> propertiesForB = getPropertyExpressions(getBType());
-        
-        for (final Entry<String, Property> propertyA : propertiesForA.entrySet()) {
-            if (!propertyA.getValue().getName().equals("class")) {
-                for (final Entry<String, Property> propertyB : propertiesForB.entrySet()) {
-                    if (!propertyB.getValue().getName().equals("class")) {
-                        FieldMatchScore matchScore = new FieldMatchScore(propertyA.getValue(), propertyB.getValue(), matchingWeights);
-                        matchScores.add(matchScore);
-                    }
-                }
-            }
-        }
-        
-        Set<String> unmatchedFields = new LinkedHashSet<>(this.getPropertiesForTypeA());
-        unmatchedFields.remove("class");
-        
-        for (FieldMatchScore score : matchScores) {
-            
-            if (!this.getMappedPropertiesForTypeA().contains(score.propertyA.getExpression())
-                    && !this.getMappedPropertiesForTypeB().contains(score.propertyB.getExpression())) {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("\n" + score);
-                }
-                if (score.meetsMinimumScore()) {
-                    fieldMap(score.propertyA.getExpression(), score.propertyB.getExpression()).direction(direction).add();
-                    unmatchedFields.remove(score.propertyA.getExpression());
-                }
-            }
-        }
-        
+        Set<String> unmatchedFields = getUnmatchedFields(direction);
+
         /*
          * Apply any default field mappers to the unmapped fields
          */
@@ -304,7 +273,44 @@ public class ScoringClassMapBuilder<A, B> extends ClassMapBuilder<A, B> {
         
         return this;
     }
-    
+
+    private Set<String> getUnmatchedFields(MappingDirection direction) {
+        PriorityQueue<FieldMatchScore> matchScores = new PriorityQueue<>();
+        
+
+        Map<String, Property> propertiesForA = getPropertyExpressions(getAType());
+        Map<String, Property> propertiesForB = getPropertyExpressions(getBType());
+
+        for (final Entry<String, Property> propertyA : propertiesForA.entrySet()) {
+            if (!propertyA.getValue().getName().equals("class")) {
+                for (final Entry<String, Property> propertyB : propertiesForB.entrySet()) {
+                    if (!propertyB.getValue().getName().equals("class")) {
+                        FieldMatchScore matchScore = new FieldMatchScore(propertyA.getValue(), propertyB.getValue(), matchingWeights);
+                        matchScores.add(matchScore);
+                    }
+                }
+            }
+        }
+
+        Set<String> unmatchedFields = new LinkedHashSet<>(this.getPropertiesForTypeA());
+        unmatchedFields.remove("class");
+
+        for (FieldMatchScore score : matchScores) {
+            
+            if (!this.getMappedPropertiesForTypeA().contains(score.propertyA.getExpression())
+                    && !this.getMappedPropertiesForTypeB().contains(score.propertyB.getExpression())) {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("\n" + score);
+                }
+                if (score.meetsMinimumScore()) {
+                    fieldMap(score.propertyA.getExpression(), score.propertyB.getExpression()).direction(direction).add();
+                    unmatchedFields.remove(score.propertyA.getExpression());
+                }
+            }
+        }
+        return unmatchedFields;
+    }
+
     /**
      * @author mattdeboer
      *

@@ -1,5 +1,5 @@
 package ma.glasnost.orika.impl.generator;
-
+import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.metadata.FieldMap;
 
 /**
@@ -16,4 +16,7 @@ public interface BaseSpecification {
      * @return true if this specification applies to the given MappedTypePair
      */
     boolean appliesTo(FieldMap fieldMap);
+
+
+   void setMapperFactory(MapperFactory mapperFactory);
 }
