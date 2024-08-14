@@ -234,7 +234,7 @@ public class JavassistCompilerStrategy extends CompilerStrategy {
                     byteCodeClass.addMethod(CtNewMethod.make(methodDef, byteCodeClass));
                 } catch (CannotCompileException e) {
                     LOG.error(
-                            "An exception occured while compiling the following method:\n\n " + methodDef + "\n\n for "
+                            "An exception occurred while compiling the following method:\n\n " + methodDef + "\n\n for "
                                     + sourceCode.getClassName() + "\n", e);
                     throw e;
                 }
