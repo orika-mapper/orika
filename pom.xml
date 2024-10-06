@@ -261,11 +261,6 @@
                     <additionalJOption>-Xdoclint:none</additionalJOption>
                 </configuration>
             </plugin>
-            <plugin> <!-- for flaky testing -->
-                <groupId>edu.illinois</groupId>
-                <artifactId>nondex-maven-plugin</artifactId>
-                <version>2.1.7</version>
-            </plugin>
         </plugins>
 
     </build>
