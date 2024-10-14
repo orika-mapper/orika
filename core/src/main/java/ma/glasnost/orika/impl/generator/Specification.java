@@ -30,7 +30,7 @@ import ma.glasnost.orika.metadata.FieldMap;
  */
 public interface Specification extends BaseSpecification {
     
-    void setMapperFactory(MapperFactory mapperFactory);
+
     
     /**
      * Generates code for a boolean equality test between the two variable types,

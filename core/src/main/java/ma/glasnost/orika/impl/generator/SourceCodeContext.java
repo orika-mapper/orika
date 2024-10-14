@@ -26,7 +26,7 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.Properties;
 import ma.glasnost.orika.converter.ConverterFactory;
-import ma.glasnost.orika.generated.GeneratedPackageClass;
+import ma.glasnost.orika.impl.generated.GeneratedPackageClass;
 import ma.glasnost.orika.impl.AggregateFilter;
 import ma.glasnost.orika.impl.GeneratedObjectBase;
 import ma.glasnost.orika.impl.generator.CompilerStrategy.SourceCodeGenerationException;

@@ -20,6 +20,12 @@ package ma.glasnost.orika.impl;
 
 import ma.glasnost.orika.ObjectFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public abstract class GeneratedObjectFactory extends GeneratedObjectBase implements ObjectFactory<Object> {
-   
+    protected static List<Object> asList(Object[] iterable) {
+        return new ArrayList<>(Arrays.asList(iterable));
+    }
 }

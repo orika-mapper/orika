@@ -447,7 +447,8 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
          * because callers will have already read value field and need
          * to use that read (not another done here) and so directly
          * test if value points to node.
-         * @param n a possibly null reference to a node
+         * @param
+         * //n a possibly null reference to a node
          * @return true if this node is a marker node
          */
         boolean isMarker() {

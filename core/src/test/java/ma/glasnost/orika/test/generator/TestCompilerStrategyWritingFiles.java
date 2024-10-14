@@ -73,12 +73,12 @@ public class TestCompilerStrategyWritingFiles {
     	File generatedBinFiles = null;
     	try {
     		Assert.assertTrue(generatedSrc.exists());
-    		generatedSrcFiles = new File(generatedSrc,"ma/glasnost/orika/generated/");
+    		generatedSrcFiles = new File(generatedSrc, "ma/glasnost/orika/impl/generated/");
         	Assert.assertTrue(generatedSrcFiles.isDirectory());
         	Assert.assertTrue(generatedSrcFiles.listFiles().length > 0);
         	
         	Assert.assertTrue(generatedBin.exists());
-        	generatedBinFiles = new File(generatedBin,"ma/glasnost/orika/generated/");
+        	generatedBinFiles = new File(generatedBin, "ma/glasnost/orika/impl/generated/");
         	Assert.assertTrue(generatedBinFiles.isDirectory());
         	Assert.assertTrue(generatedBinFiles.listFiles().length > 0);
     	
