@@ -79,11 +79,19 @@ public class ScoringClassMapBuilderTest {
     }
     
     @Test
-    public void testClassMapBuilderExtension() {
-        
+    public void testClassMapBuilderExtension() { 
+
         MapperFactory factory = new DefaultMapperFactory.Builder().classMapBuilderFactory(new ScoringClassMapBuilder.Factory()).build();
         
-        ClassMap<Source, Destination> map = factory.classMap(Source.class, Destination.class).byDefault().toClassMap();
+        ClassMap<Source, Destination> map = factory.classMap(Source.class, Destination.class)
+            .field("firstName", "name.first")
+            .field("lastName", "name.last")
+            .field("postalAddress.street", "streetAddress")
+            .field("postalAddress.country.alphaCode", "countryCode")
+            .field("age", "currentAge")
+            .field("stateOfBirth", "birthState")
+            .byDefault()
+            .toClassMap();
         Map<String, String> mapping = new HashMap<>();
         for (FieldMap f : map.getFieldsMapping()) {
             mapping.put(f.getSource().getExpression(), f.getDestination().getExpression());
