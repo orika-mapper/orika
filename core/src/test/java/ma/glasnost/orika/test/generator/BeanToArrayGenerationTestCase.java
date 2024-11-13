@@ -95,6 +95,8 @@ public class BeanToArrayGenerationTestCase {
                 .field("grade.percentage", "2")
                 .field("name.first", "3")
                 .field("name.last", "4")
+                .field("id", "5")
+                .field("email", "6")
                 .byDefault()
                 .register();
         
